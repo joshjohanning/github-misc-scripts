@@ -16,7 +16,7 @@ Obtain the enterprise ID used for other GraphQL calls. Use the URL slug not the 
 
 ### create-organization.json
 
-Creates the organization - you just need to pass in the enterprise ID (obtained above) along with billing email, admin logins, and organization name.
+Creates the organization - you just need to pass in the enterprise ID (obtained [above](https://github.com/joshjohanning/github-misc-scripts/tree/main/graphql#list-enterprise-idjson)) along with billing email, admin logins, and organization name.
 
 [Documentation](https://docs.github.com/en/graphql/reference/mutations#createenterpriseorganization)
 
@@ -24,6 +24,10 @@ Creates the organization - you just need to pass in the enterprise ID (obtained 
 
 Script to download a file from the latest version of a GitHub Package
 
+[Documentation](https://docs.github.com/en/graphql/reference/objects#package)
+
 ## download-specific-version-from-github-packages
 
 Script to download a file from a specific version of a GitHub Package
+
+[Documentation](https://docs.github.com/en/graphql/reference/objects#package)
