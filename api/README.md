@@ -19,3 +19,9 @@ Download a file from a non-public repository
 Download a workflow artifact (e.g.: downloading the artifact from the build workflow for the deploy workflow to use)
 
 [Documentation](https://docs.github.com/en/rest/reference/actions#download-an-artifact)
+
+## create-repo.sh
+
+Create an internal repo in an organization
+
+[Documentation](https://docs.github.com/en/rest/reference/repos#create-an-organization-repository)
