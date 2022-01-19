@@ -1,20 +1,18 @@
 # graphql
 
-Some of the queries are provided as `.json` files. To use `post_gql.sh` to call GraphQL query, use this as an example:
+Some of the queries are provided as `.json` files, such as `list-enterprise-id.json` and `create-organization.json`. To use `post_gql.sh` to call GraphQL query, use this as an example:
 
 ```bash
-./post_gql.sh --file list-enterprise-id.json --pat <github-token>
+./post_gql.sh --file list-enterprise-id.json --pat xxx
 ```
 
-## Notes
-
-### list-enterprise-id.json
+## list-enterprise-id.sh
 
 Obtain the enterprise ID used for other GraphQL calls. Use the URL slug not the friendly name of the Enterprise.
 
 [Documentation](https://docs.github.com/en/graphql/reference/queries#enterprise)
 
-### create-organization.json
+## create-organization.sh
 
 Creates the organization - you just need to pass in the enterprise ID (obtained [above](https://github.com/joshjohanning/github-misc-scripts/tree/main/graphql#list-enterprise-idjson)) along with billing email, admin logins, and organization name.
 
