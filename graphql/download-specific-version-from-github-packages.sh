@@ -8,7 +8,7 @@ link=$(curl 'https://api.github.com/graphql' \
  -s \
  -X POST \
  -H 'content-type: application/json' \
- -H "Authorization: Bearer xxx" \
+ -H "Authorization: Bearer ${PAT}" \
  --data '{"query":"{ repository(owner: \"joshjohanning\", name: \"Wolfringo-github-packages\") { packages(first: 10, packageType: NUGET, names: \"Wolfringo.Commands\") { edges { node { id name packageType version(version: \"1.1.2\") { id version files(first: 10) { nodes { name updatedAt size url } } } } } } }}","variables":{}}' \
  | jq -r '.data.repository.packages.edges[].node.version.files.nodes[].url')
 
