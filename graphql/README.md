@@ -18,7 +18,7 @@ Creates the organization - you just need to pass in the enterprise ID (obtained 
 
 [Documentation](https://docs.github.com/en/graphql/reference/mutations#createenterpriseorganization)
 
-## download-latest-package-from-github-packages.sh
+## download-latest-version-from-github-packages.sh
 
 Script to download a file from the latest version of a GitHub Package
 
