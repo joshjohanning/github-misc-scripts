@@ -1,11 +1,12 @@
 ##############################################################
-# Migrate work items to GitHub Issues
+# Migrate Azure DevOps work items to GitHub Issues
 ##############################################################
 
 # Prerequisites:
-# 1. create a label for EACH work item type that is being migrated (as lower case) 
+# 1. Install az devops and github cli
+# 2. create a label for EACH work item type that is being migrated (as lower case) 
 #      - ie: "user story", "bug", "task", "feature"
-# 2. add a tag to eaach work item you want to migrate - ie: "migrate"
+# 3. add a tag to eaach work item you want to migrate - ie: "migrate"
 #      - You can modify the WIQL if you want to use a different way to migrate work items, such as UNDER [Area Path]
 
 # How to run:
