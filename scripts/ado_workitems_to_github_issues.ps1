@@ -16,15 +16,14 @@
 # 1. Title
 # 2. Description (or repro steps + system info for a bug
 # 3. State (if the work item is done / closed, it will be closed in GitHub)
-# 4. It will try to assign the work item to the correct user in GitHub - based on ADO email (-gh_update_assigned_to and -gh_assigned_to_user_suffix options)
+# 4. It will try to assign the work item to the correct user in GitHub - based on ADO email (-gh_update_assigned_to and -gh_assigned_to_user_suffix options) - they of course have to be in GitHub already
 # 5. Migrate acceptance criteria as part of issue body (if present)
 # 6. It also migrates the entire work item as JSON as a comment
 #
 
 # 
 # To Do:
-# 1. Migrate acceptance criteria as part of issue body
-# 2. Create a comment on the Azure DevOps work item that says "Migrated to GitHub Issue #"
+# 1. Create a comment on the Azure DevOps work item that says "Migrated to GitHub Issue #"
 #
 
 #
