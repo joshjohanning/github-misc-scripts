@@ -110,7 +110,6 @@ ForEach($workitem in $query) {
         $gh_assignee=$ado_assignee.Split("@")[0]
         $gh_assignee=$gh_assignee.Replace(".", "-") + $gh_assigned_to_user_suffix
         write-host "trying to assign to: $gh_assignee"
-        $gh_assignee="joshjohanning"
         $assigned=gh issue edit $issue_url --add-assignee "$gh_assignee"
     }
 }
