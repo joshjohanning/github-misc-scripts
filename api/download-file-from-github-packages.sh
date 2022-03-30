@@ -4,5 +4,5 @@
 curl 'https://maven.pkg.github.com/joshjohanning-org/sherlock-heroku-poc-mvn-package/com/sherlock/herokupoc/1.0.0-202201071559/herokupoc-1.0.0-202201071559.jar' \
     -H "Authorization: Bearer ${PAT}" \
     -L \
-    -o herokupoc-1.0.0-202201071559.jar \
+    -O \
     -v
