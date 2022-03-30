@@ -1,5 +1,11 @@
 # api
 
+## create-repo.sh
+
+Create an internal repo in an organization
+
+[Documentation](https://docs.github.com/en/rest/reference/repos#create-an-organization-repository)
+
 ## download-file-from-github-packages.sh
 
 This appears to be an undocumented API to download a file from GitHub Packages - use this as a reference to form your own url.
@@ -26,8 +32,8 @@ Download a workflow artifact (e.g.: downloading the artifact from the build work
 
 [Documentation](https://docs.github.com/en/rest/reference/actions#download-an-artifact)
 
-## create-repo.sh
+## enable-actions-on-repository.sh
 
-Create an internal repo in an organization
+Enables actions on a repository - similar to [gh cli example](./../api/enable-actions-on-repository.sh), but using `curl`
 
-[Documentation](https://docs.github.com/en/rest/reference/repos#create-an-organization-repository)
+[Documentation](https://docs.github.com/en/rest/reference/actions#set-github-actions-permissions-for-a-repository)
