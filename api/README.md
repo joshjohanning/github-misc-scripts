@@ -8,6 +8,12 @@ In the UI, you can download a file as well but you'll notice that the download s
 
 [GraphQL](https://github.com/joshjohanning/github-misc-scripts/tree/main/graphql#download-latest-package-from-github-packagessh) also works, but this may be easier.
 
+## download-file-from-github-releases.sh
+
+Download a file from a GitHub release - if it's a public repo, you wouldn't have to use a bearer token to authenticate
+
+[Documentation](https://docs.github.com/en/rest/reference/releases)
+
 ## download-file-from-private-repo.sh
 
 Download a file from a non-public repository
