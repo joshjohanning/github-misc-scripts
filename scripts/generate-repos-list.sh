@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage: ./generate-repos.sh octohol > csv.csv
+# Usage: ./generate-repos.sh <org> > csv.csv
 
 # Credits to @tspascoal from this repo: https://github.com/tspascoal/dependabot-alerts-helper
 

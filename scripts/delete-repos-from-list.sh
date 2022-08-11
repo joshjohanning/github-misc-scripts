@@ -4,7 +4,7 @@
 # Need to run this to get the repo delete scope: gh auth refresh -h github.com -s delete_repo
 
 # Usage: 
-# Step 1: Run ./generate-repos.sh joshjohanning-org > repos.csv 
+# Step 1: Run ./generate-repos.sh <org> > repos.csv 
 #    (or create a list of repos in a csv file, 1 per line, with a trailing empty line at the end of the file)
 # Step 2: ./delete-repos-from-list.sh repos.csv
 
