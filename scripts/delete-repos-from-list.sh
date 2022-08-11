@@ -6,7 +6,7 @@
 # Usage: 
 # Step 1: Run ./generate-repos.sh joshjohanning-org > repos.csv 
 #    (or create a list of repos in a csv file, 1 per line, with a trailing empty line at the end of the file)
-# Step 2: ./clean-up-repos.sh repos.csv
+# Step 2: ./delete-repos-from-list.sh repos.csv
 
 if [ $# -lt "1" ]; then
     echo "Usage: $0 <reposfilename>"

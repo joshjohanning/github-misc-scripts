@@ -3,7 +3,7 @@
 
 # Usage: 
 # Step 1: Create a list of users in a csv file, 1 per line, with a trailing empty line at the end of the file
-# Step 2: ./send-team-invites.sh users.csv joshjohanning-org test-team
+# Step 2: ./add-users-to-team-from-list.sh users.csv joshjohanning-org test-team
 
 if [ $# -lt "2" ]; then
     echo "Usage: $0 <users-file-name> <org> <team-slug>"
