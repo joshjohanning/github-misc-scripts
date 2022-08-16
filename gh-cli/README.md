@@ -26,6 +26,18 @@ $ echo ${{ secrets.GITHUB_TOKEN }} | gh auth login --with-token
 
 See the [docs](https://cli.github.com/manual/gh_auth_login) for further information.
 
+## add-user-to-team.sh
+
+Adds (invites) a user to an organization team
+
+## change-repo-visibility.sh
+
+Change a repository visibility to internal, for example.
+
+## create-repo-from-template.sh
+
+Create a new repo from a repo template - note that it only creates as public or private, if you want internal you have to do a subsequent call (see `change-repo-visibility.sh`)
+
 ## delete-release.sh
 
 Deletes a release from a repository - need the [ID](#get-releasessh) of the release
@@ -69,3 +81,7 @@ Gets a list of topics for a repository
 ## sso-credential-authorizations.sh
 
 Retrieves a list of users who have SSO-enabled personal access tokens in an organization.
+
+## rename-repo.sh
+
+Renaming a repo
