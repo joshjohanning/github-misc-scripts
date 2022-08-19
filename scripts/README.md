@@ -31,6 +31,10 @@ Credits to @tspascoal from this repo: https://github.com/tspascoal/dependabot-al
 
 1. Run: `./generate-repos.sh <org> > repos.csv`
 
+## update-repo-visibility-from-server-to-cloud.ps1
+
+Compares the repo visibility of a repo in GitHub Enterprise Server and update the visibility in GitHub Enterprise Cloud. This is useful since migrated repos are always brought into cloud as private.
+
 ## verify-team-membership.sh
 
 Simple script to verify that a user is a member of a team
