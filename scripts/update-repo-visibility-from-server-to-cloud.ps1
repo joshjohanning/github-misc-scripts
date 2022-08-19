@@ -3,7 +3,7 @@
 #
 # Requires: gh cli
 #
-# Update the GH_ENTERPRISE_TOKEN, GH_TOKEN, sourceOrg, targetOrg, and GH_HOST variables
+# Update the GH_ENTERPRISE_TOKEN, GH_TOKEN, sourceOrg, targetOrg, repoNames, and GH_HOST variables
 # 
 
 ## start updating the repo visibility ##
