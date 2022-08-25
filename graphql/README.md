@@ -6,6 +6,10 @@ Some of the queries are provided as `.json` files, such as `list-enterprise-id.j
 ./post_gql.sh --file list-enterprise-id.json --pat xxx
 ```
 
+See the [how to do pagination](how-to-do-pagination.md) page for more information on how to do pagination.
+
+Also great resource [here](https://github.com/github/platform-samples/tree/master/graphql/queries) for additional GraphQL queries.
+
 ## create-organization.sh
 
 Creates the organization - you just need to pass in the enterprise ID (obtained [above](https://github.com/joshjohanning/github-misc-scripts/tree/main/graphql#list-enterprise-idjson)) along with billing email, admin logins, and organization name.
