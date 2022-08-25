@@ -46,6 +46,12 @@ Deletes a release from a repository - need the [ID](#get-releasessh) of the rele
 
 Deletes a repo - also works if the repository is locked from a failed migration, etc.
 
+May need to run this first in order for the gh cli to be able to have delete repo permissions:
+
+```
+gh auth refresh -h github.com -s delete_repo
+```
+
 ## enable-actions-on-repository.sh
 
 Enable actions on repository - similar to [API example](./../api/enable-actions-on-repository.sh), but using `gh cli`
