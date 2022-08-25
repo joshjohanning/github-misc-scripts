@@ -48,6 +48,12 @@ Gets a repository ID
 
 [Documentation](https://docs.github.com/en/graphql/reference/queries#repository)
 
+## get-saml-identities-in-org.sh
+
+Retrieves the SAML linked identity of a user in a GitHub organization.
+
+[Documentation](https://docs.github.com/en/graphql/reference/objects#externalidentitysamlattributes)
+
 ## transfer-issue.sh
 
 Mutation to transfer an issue to a new repository

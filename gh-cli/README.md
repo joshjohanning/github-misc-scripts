@@ -84,6 +84,16 @@ Gets details about a repo
 
 Gets a list of topics for a repository
 
+## get-saml-identities-in-org.sh
+
+Retrieves the SAML linked identity of a user in a GitHub organization.
+
+May need to run this first in order for the gh cli to be able to retrieve the SAML information for organizations:
+
+```
+gh auth refresh -h github.com -s admin:org
+```
+
 ## sso-credential-authorizations.sh
 
 Retrieves a list of users who have SSO-enabled personal access tokens in an organization.
