@@ -22,6 +22,9 @@ $ gh auth login --with-token < mytoken.txt
 
 # authenticate from standard input
 $ echo ${{ secrets.GITHUB_TOKEN }} | gh auth login --with-token
+
+# authenticate from environment variable
+$ export GH_TOKEN=${{ secrets.GITHUB_TOKEN }}
 ```
 
 See the [docs](https://cli.github.com/manual/gh_auth_login) for further information.
