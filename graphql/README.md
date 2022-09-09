@@ -52,11 +52,21 @@ Gets a repository ID
 
 [Documentation](https://docs.github.com/en/graphql/reference/queries#repository)
 
+## get-saml-identities-in-enterprise.sh
+
+Retrieves the SAML linked identity of a user in a GitHub organization.
+
+PAT scope required: `admin:enterprise`
+
+[Documentation](https://docs.github.com/en/graphql/reference/objects#enterpriseidentityprovider)
+
 ## get-saml-identities-in-org.sh
 
 Retrieves the SAML linked identity of a user in a GitHub organization.
 
-[Documentation](https://docs.github.com/en/graphql/reference/objects#externalidentitysamlattributes)
+PAT scope required: `admin:org`
+
+[Documentation](https://docs.github.com/en/graphql/reference/objects#organizationidentityprovider)
 
 ## transfer-issue.sh
 
