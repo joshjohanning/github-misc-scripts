@@ -71,6 +71,10 @@ Gets the commits of since a certain date - date should be in [ISO 8601](https://
 
 Gets a list of members on a team
 
+## get-enterprise-id.sh
+
+Get the enterprise ID used for other GraphQL calls. Use the URL slug of the Enterprise as the input.
+
 ## get-org-team.sh
 
 Gets a team
