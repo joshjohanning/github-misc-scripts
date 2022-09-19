@@ -35,7 +35,11 @@ Adds (invites) a user to an organization team
 
 ## change-repo-visibility.sh
 
-Change a repository visibility to internal, for example.
+Change a repository visibility to internal, for example
+
+## create-enterprise-organization.sh
+
+Creates an enterprise organization - you just need to pass in the enterprise ID (obtained [via](./get-enterprise-id.sh)) along with billing email, admin logins, and organization name
 
 ## create-repo-from-template.sh
 
