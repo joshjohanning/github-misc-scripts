@@ -31,6 +31,19 @@ Credits to @tspascoal from this repo: https://github.com/tspascoal/dependabot-al
 
 1. Run: `./generate-repos.sh <org> > repos.csv`
 
+## generate-users-from-team.sh
+
+Generates a list of users from a team in the organization - has many uses, but the exported users can be used in the `remove-users-from-org.sh` script.
+
+1. Run: `./generate-users-from-team <org> <team> > users.csv`
+
+## remove-users-from-org.sh
+
+Removes a list of users from the organization.
+
+1. Create a list of users in a csv file, 1 per line, with a trailing empty line at the end of the file (or use `./generate-users-from-team <org> <team>`)
+2. Run: `./remove-users-from-org.sh <file> <org>`
+
 ## update-repo-visibility-from-server-to-cloud.ps1
 
 Compares the repo visibility of a repo in GitHub Enterprise Server and update the visibility in GitHub Enterprise Cloud. This is useful since migrated repos are always brought into cloud as private.
