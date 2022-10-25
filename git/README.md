@@ -1,5 +1,13 @@
 # git
 
+## bfg-to-remove-large-files.sh
+
+Use the [bfg](https://rtyley.github.io/bfg-repo-cleaner/) tool to strip out large, orphaned files from a git repo
+
+## bfg-to-remove-secrets.sh
+
+Use the [bfg](https://rtyley.github.io/bfg-repo-cleaner/) tool to strip out secrets from commits
+
 ## checkout-tag.sh
 
 Checkout a tag to a local branch - also, find the latest tag to checkout automatically
@@ -19,6 +27,14 @@ Delete a tag either from the remote only, or locally and (force) push
 ## diffs-for-single-file.sh
 
 Perform a diff (like in `git log -p`), but only for a single file
+
+## find-large-files.sh
+
+Find large files in a git repo
+
+## get-full-sha-from-short-sha.sh
+
+Get the full SHA from a short SHA
 
 ## git-merge-base.sh
 
