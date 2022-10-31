@@ -28,6 +28,10 @@ Delete a tag either from the remote only, or locally and (force) push
 
 Perform a diff (like in `git log -p`), but only for a single file
 
+## extract-commit-authors-from-repo.sh
+
+Extracts the authors of all commits in a repo and the number of commits they made
+
 ## find-large-files.sh
 
 Find large files in a git repo
