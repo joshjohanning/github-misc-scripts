@@ -17,12 +17,19 @@ fi
 
 filename="$1"
 org="$2"
+current_user=$(gh api /user -q '.login')
 
 while read -r repofull ; 
 do
     IFS='/' read -ra data <<< "$repofull"
 
     user=${data[0]}
+
+    # if $user is logged in user, skip
+    if [ "$user" == "$current_user" ]; then
+        echo "Skipping current user $user"
+        continue
+    fi
 
     echo $"Removing $user from $org"
     gh api --method DELETE /orgs/$org/memberships/$user
