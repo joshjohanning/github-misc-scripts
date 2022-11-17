@@ -92,6 +92,10 @@ Adding `-H X-Github-Next-Global-ID:1` per the documentation here to get the new 
 - https://github.blog/changelog/2022-11-10-graphql-legacy-global-id-deprecation-message/
 - https://docs.github.com/en/graphql/guides/migrating-graphql-global-node-ids
 
+## get-enterprise-organizations.sh
+
+Gets all organizations for a given enterprise. Handles pagination.
+
 ## get-org-team.sh
 
 Gets a team
