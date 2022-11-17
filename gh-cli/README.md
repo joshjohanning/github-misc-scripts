@@ -29,6 +29,14 @@ $ export GH_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
 See the [docs](https://cli.github.com/manual/gh_auth_login) for further information.
 
+## add-ip-allow-list.sh
+
+Adds an IP to an enterprise's or organization's [IP allow list](https://docs.github.com/en/enterprise-cloud@latest/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/managing-allowed-ip-addresses-for-your-organization).
+
+Use the [get-enterprise-id.sh](./get-enterprise-id.sh) or [get-organization-id.sh](./get-organization-id.sh) script to get the owner ID.
+
+See the [docs](https://docs.github.com/en/graphql/reference/mutations#createipallowlistentry) for further information.
+
 ## add-user-to-team.sh
 
 Adds (invites) a user to an organization team
@@ -87,6 +95,15 @@ Adding `-H X-Github-Next-Global-ID:1` per the documentation here to get the new 
 ## get-org-team.sh
 
 Gets a team
+
+## get-organization-id.sh
+
+Get the organization ID used for other GraphQL calls. Use the login of the Organization as the input.
+
+Adding `-H X-Github-Next-Global-ID:1` per the documentation here to get the new ID format:
+
+- https://github.blog/changelog/2022-11-10-graphql-legacy-global-id-deprecation-message/
+- https://docs.github.com/en/graphql/guides/migrating-graphql-global-node-ids
 
 ## get-releases.sh
 
