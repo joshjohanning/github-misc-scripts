@@ -1,5 +1,5 @@
 
-# gh cli's token needs to be able to admin organizations - run this first if it can't
+# gh cli's token needs to be able to admin enterprise - run this first if it can't
 # gh auth refresh -h github.com -s admin:enterprise
 
 gh api graphql --paginate -f enterpriseName='your-enterprise-name' -f query='
