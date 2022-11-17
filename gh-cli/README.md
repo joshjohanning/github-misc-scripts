@@ -92,6 +92,12 @@ Adding `-H X-Github-Next-Global-ID:1` per the documentation here to get the new 
 - https://github.blog/changelog/2022-11-10-graphql-legacy-global-id-deprecation-message/
 - https://docs.github.com/en/graphql/guides/migrating-graphql-global-node-ids
 
+## get-enterprise-ip-allow-list.sh
+
+Gets the current IP allow list for an enterprise.
+
+See the [docs](https://docs.github.com/en/graphql/reference/objects#enterpriseownerinfo) for further information.
+
 ## get-enterprise-organizations.sh
 
 Gets all organizations for a given enterprise. Handles pagination.
@@ -108,6 +114,12 @@ Adding `-H X-Github-Next-Global-ID:1` per the documentation here to get the new 
 
 - https://github.blog/changelog/2022-11-10-graphql-legacy-global-id-deprecation-message/
 - https://docs.github.com/en/graphql/guides/migrating-graphql-global-node-ids
+
+## get-organization-ip-allow-list.sh
+
+Gets the current IP allow list for an organization.
+
+See the [docs](https://docs.github.com/en/graphql/reference/objects#ipallowlistentry) for further information.
 
 ## get-releases.sh
 
