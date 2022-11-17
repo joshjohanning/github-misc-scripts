@@ -79,6 +79,11 @@ Gets a list of members on a team
 
 Get the enterprise ID used for other GraphQL calls. Use the URL slug of the Enterprise as the input.
 
+Adding `-H X-Github-Next-Global-ID:1` per the documentation here to get the new ID format:
+
+- https://github.blog/changelog/2022-11-10-graphql-legacy-global-id-deprecation-message/
+- https://docs.github.com/en/graphql/guides/migrating-graphql-global-node-ids
+
 ## get-org-team.sh
 
 Gets a team
