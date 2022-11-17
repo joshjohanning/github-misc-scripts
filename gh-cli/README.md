@@ -102,6 +102,10 @@ See the [docs](https://docs.github.com/en/graphql/reference/objects#enterpriseow
 
 Gets all organizations for a given enterprise. Handles pagination.
 
+## get-org-team-members.sh
+
+Gets the members of a team
+
 ## get-org-team.sh
 
 Gets a team
