@@ -10,4 +10,4 @@ fi
 org=$1
 team=$2
 
-gh api "/orgs/$org/teams/$team/members" | jq -r '.[].login'
+gh api --paginate "/orgs/$org/teams/$team/members" | jq -r '.[].login'
