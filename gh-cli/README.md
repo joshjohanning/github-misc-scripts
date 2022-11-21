@@ -169,6 +169,10 @@ May need to run this first in order for the gh cli to be able to retrieve the SA
 gh auth refresh -h github.com -s admin:org
 ```
 
+## get-user-id.sh
+
+Retrieves the ID of a user for other GraphQL calls
+
 ## sso-credential-authorizations.sh
 
 Retrieves a list of users who have SSO-enabled personal access tokens in an organization.
