@@ -102,6 +102,14 @@ See the [docs](https://docs.github.com/en/graphql/reference/objects#enterpriseow
 
 Gets all organizations for a given enterprise. Handles pagination.
 
+## get-enterprise-roles-in-organizations-all-roles.sh
+
+Queries every organization in an enterprise and returns whether the user is a member or a member + admin of the organization.
+
+## get-enterprise-roles-in-organizations-with-named-role.sh
+
+Queries the enterprise for all organizations given the specified role (e.g.: which organizations is the user an admin of)
+
 ## get-org-team-members.sh
 
 Gets the members of a team
@@ -124,6 +132,10 @@ Adding `-H X-Github-Next-Global-ID:1` per the documentation here to get the new 
 Gets the current IP allow list for an organization.
 
 See the [docs](https://docs.github.com/en/graphql/reference/objects#ipallowlistentry) for further information.
+
+## get-organization-members.sh
+
+Gets a list of members and their role in an organization
 
 ## get-releases.sh
 
