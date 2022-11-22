@@ -29,9 +29,9 @@ do
     if [ "$user" == "$current_user" ]; then
         echo "Skipping current user $user"
         continue
+    else
+        echo $"Removing $user from $org"
+        gh api --method DELETE /orgs/$org/memberships/$user
     fi
-
-    echo $"Removing $user from $org"
-    gh api --method DELETE /orgs/$org/memberships/$user
     
 done < "$filename"
