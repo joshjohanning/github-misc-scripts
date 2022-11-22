@@ -12,6 +12,10 @@ Invites users to a GitHub team from a list.
 
 Migrate work items from Azure DevOps to GitHub issues - this just links out to a [separate repo](https://github.com/joshjohanning/ado_workitems_to_github_issues)
 
+## create-enterprise-organizations.sh
+
+Loops through a list of orgs and creates them.
+
 ## delete-branch-protection-rules.ps1
 
 Delete branch protection rules programmatically based on a pattern.
