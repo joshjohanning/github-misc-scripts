@@ -137,6 +137,10 @@ See the [docs](https://docs.github.com/en/graphql/reference/objects#ipallowliste
 
 Gets a list of members and their role in an organization
 
+## get-package-download-url.sh
+
+Gets a the dynamic package download URL for a given package type, name, and version.
+
 ## get-releases.sh
 
 Gets a list of releases for a repository
