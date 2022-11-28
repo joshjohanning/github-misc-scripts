@@ -181,9 +181,11 @@ Retrieves the ID of a user for other GraphQL calls
 
 Renaming a repo
 
-## set-ip-allow-list.sh
+## set-ip-allow-list-setting.sh
 
 Sets the IP allow list to enabled/disable for an enterprise or organization. You can't enable the IP allow list unless the IP running the script is in the list.
+
+See the [docs](https://docs.github.com/en/graphql/reference/mutations#updateipallowlistenabledsetting) for further information.
 
 ## sso-credential-authorizations.sh
 

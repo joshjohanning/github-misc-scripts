@@ -4,6 +4,10 @@
 
 # IP running this has to be added to the whitelist before running this - see `add-ip-allow-list.sh`
 
+# IpAllowListEnabledSettingValue
+# - ENABLED: IP allow list is enabled for the owner.
+# - DISABLED: IP allow list is disabled for the owner.
+
 gh api graphql -f owner_id='O_kgDOBbB18g' -f setting_value='ENABLED' -f query='
 mutation ($owner_id: ID! $setting_value: IpAllowListEnabledSettingValue!) { 
   updateIpAllowListEnabledSetting(input: { ownerId: $owner_id settingValue: $setting_value }) { 
