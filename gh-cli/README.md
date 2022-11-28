@@ -177,10 +177,14 @@ gh auth refresh -h github.com -s admin:org
 
 Retrieves the ID of a user for other GraphQL calls
 
-## sso-credential-authorizations.sh
-
-Retrieves a list of users who have SSO-enabled personal access tokens in an organization.
-
 ## rename-repo.sh
 
 Renaming a repo
+
+## set-ip-allow-list.sh
+
+Sets the IP allow list to enabled/disable for an enterprise or organization. You can't enable the IP allow list unless the IP running the script is in the list.
+
+## sso-credential-authorizations.sh
+
+Retrieves a list of users who have SSO-enabled personal access tokens in an organization.
