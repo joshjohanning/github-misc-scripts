@@ -190,3 +190,7 @@ See the [docs](https://docs.github.com/en/graphql/reference/mutations#updateipal
 ## sso-credential-authorizations.sh
 
 Retrieves a list of users who have SSO-enabled personal access tokens in an organization.
+
+## update-enterprise-owner-organizational-role.sh
+
+Adds your account to an organization in an enterprise as an owner, member, or leave the organization.
