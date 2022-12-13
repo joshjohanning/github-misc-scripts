@@ -29,6 +29,10 @@ $ export GH_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
 See the [docs](https://cli.github.com/manual/gh_auth_login) for further information.
 
+## add-enterprise-organization-member.sh
+
+Adds a user from an Enterprise into an org. See: [Documentation](https://docs.github.com/en/graphql/reference/mutations#addenterpriseorganizationmember)
+
 ## add-ip-allow-list.sh
 
 Adds an IP to an enterprise's or organization's [IP allow list](https://docs.github.com/en/enterprise-cloud@latest/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/managing-allowed-ip-addresses-for-your-organization).
