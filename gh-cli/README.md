@@ -141,6 +141,14 @@ Gets a list of members and their role in an organization
 
 Gets a the dynamic package download URL for a given package type, name, and version.
 
+## get-package-download-url-for-latest-version
+
+Retrieve the download URL for the latest version of a package in GitHub Packages. See: [Documentation](https://docs.github.com/en/graphql/reference/objects#package)
+
+## get-package-download-url-for-specific-version.sh
+
+Retrieve the download URL for a specific version of a package in GitHub Packages. See: [Documentation](https://docs.github.com/en/graphql/reference/objects#package)
+
 ## get-releases.sh
 
 Gets a list of releases for a repository

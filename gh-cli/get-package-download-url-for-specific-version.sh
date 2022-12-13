@@ -11,29 +11,29 @@
 # - PYPI
 # - RUBYGEMS
 
-gh api graphql -f packageType="NUGET" -f owner="joshjohanning-org" -f repo="Wolfringo-github-packages" -f packageName="Wolfringo.Core" -f packageVersion="1.1.4" -f query='
+gh api graphql -f packageType="NUGET" -f owner="joshjohanning-org-packages" -f repo="packages-repo1" -f packageName="NUnit3.DotNetNew.Template" -f packageVersion="1.7.0" -f query='
 query ($packageType: PackageType!, $owner: String!, $repo: String!, $packageName: [String!], $packageVersion: String!) {
-    repository(owner: $owner, name: $repo) {
+  repository(owner: $owner, name: $repo) {
     packages(first: 100, packageType: $packageType, names: $packageName) {
-        edges {
+      edges {
         node {
-            id
-            name
-            packageType
-            version(version: $packageVersion) {
+          id
+          name
+          packageType
+          version(version: $packageVersion) {
             id
             version
             files(first: 10) {
-                nodes {
+              nodes {
                 name
                 updatedAt
                 size
                 url
-                }
+              }
             }
-            }
+          }
         }
-        }
+      }
     }
-    }
+  }
 }' -q '.data.repository.packages.edges[].node.version.files.nodes[].url'
