@@ -87,6 +87,14 @@ Gets the commits of since a certain date - date should be in [ISO 8601](https://
 
 Gets a list of members on a team
 
+## get-earliest-restricted-contribution-date.sh
+
+In a 1 year block, return the date of the first non-public contribution
+
+> The date of the first restricted contribution the user made in this time period. Can only be non-null when the user has enabled private contribution counts.
+
+See also: [Another example](https://github.com/orgs/community/discussions/24427#discussioncomment-3244093)
+
 ## get-enterprise-id.sh
 
 Get the enterprise ID used for other GraphQL calls. Use the URL slug of the Enterprise as the input.
