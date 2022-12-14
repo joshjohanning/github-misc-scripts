@@ -169,6 +169,14 @@ Gets a list of releases for a repository
 
 Gets details about a repo
 
+## get-repos-not-using-actions.sh
+
+Get repos not using actions, by files committed in the `.github/workflows` directory
+
+## get-repos-using-actions.sh
+
+Get repos using actions, by files committed in the `.github/workflows` directory
+
 ## get-repository-topics.sh
 
 Gets a list of topics for a repository
