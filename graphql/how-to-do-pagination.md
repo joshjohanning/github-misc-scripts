@@ -4,8 +4,9 @@ See:
 
 https://graphql.org/learn/pagination/#complete-connection-model
 
+To see how to do pagination in `gh api` call, see this as an example: [link](../gh-cli/get-enterprise-organizations.sh)
 
-For example, this GraphQL command only retreives 1 user, but there are more than 1 user in our Organization:
+For example, this GraphQL command only retrieves 1 user, but there are more than 1 user in our Organization:
 
 Query: 
 

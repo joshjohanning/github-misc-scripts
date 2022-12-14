@@ -1,10 +1,6 @@
 # graphql
 
-Some of the queries are provided as `.json` files, such as `list-enterprise-id.json` and `create-organization.json`. To use `post_gql.sh` to call GraphQL query, use this as an example:
-
-```bash
-./post_gql.sh --file list-enterprise-id.json --pat xxx
-```
+There are some GraphQL queries here, but **most of them have been moved to `gh cli` queries [here](../gh-cli/)**.
 
 See the [how to do pagination](how-to-do-pagination.md) page for more information on how to do pagination.
 
