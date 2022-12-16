@@ -79,6 +79,10 @@ Enable actions on repository - similar to [API example](./../api/enable-actions-
 
 Gets the status of Actions on a repository (ie, if Actions are disabled)
 
+## get-apps-installed-in-org.sh
+
+Get the slug of the apps installed in an organization.
+
 ## get-commits-since-date.sh
 
 Gets the commits of since a certain date - date should be in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format, ie: `since=2022-03-28T16:00:49Z`
