@@ -36,6 +36,10 @@ Extracts the authors of all commits in a repo and the number of commits they mad
 
 Find large files in a git repo
 
+## force-push-tag.sh
+
+Useful for force pushing / updating a tag so that you can update the tag atomically
+
 ## get-full-sha-from-short-sha.sh
 
 Get the full SHA from a short SHA
