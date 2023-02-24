@@ -213,6 +213,12 @@ Retrieves the ID of a user for other GraphQL calls
 
 Renaming a repo
 
+## search-org-for-code.sh
+
+Code search in an organization.
+
+See the [docs](https://docs.github.com/en/rest/search?apiVersion=2022-11-28#search-code) and [StackOverflow](https://stackoverflow.com/questions/24132790/how-to-search-for-code-in-github-with-github-api) for more information.
+
 ## set-ip-allow-list-setting.sh
 
 Sets the IP allow list to enabled/disable for an enterprise or organization. You can't enable the IP allow list unless the IP running the script is in the list.
