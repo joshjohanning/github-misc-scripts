@@ -209,6 +209,15 @@ gh auth refresh -h github.com -s admin:org
 
 Retrieves the ID of a user for other GraphQL calls
 
+## remove-enterprise-user.sh
+
+Removes an enterprise user. See notes:
+
+1. Get enterprise id: `./get-enterprise-id.sh`
+2. Get user id by one of the following:
+    1. List org members and get the id from there: `./get-organization-members.sh`
+    2. Get user id: `./get-user-id.sh`
+
 ## rename-repo.sh
 
 Renaming a repo
