@@ -45,7 +45,7 @@ See the [docs](https://docs.github.com/en/graphql/reference/mutations#createipal
 
 Adds (invites) a user to an organization team
 
-## change-repo-visibility.sh
+## change-repository-visibility.sh
 
 Change a repository visibility to internal, for example
 
@@ -53,15 +53,15 @@ Change a repository visibility to internal, for example
 
 Creates an enterprise organization - you just need to pass in the enterprise ID (obtained [via](./get-enterprise-id.sh)) along with billing email, admin logins, and organization name
 
-## create-repo-from-template.sh
+## create-repository-from-template.sh
 
-Create a new repo from a repo template - note that it only creates as public or private, if you want internal you have to do a subsequent call (see `change-repo-visibility.sh`)
+Create a new repo from a repo template - note that it only creates as public or private, if you want internal you have to do a subsequent call (see `change-repository-visibility.sh`)
 
 ## delete-release.sh
 
 Deletes a release from a repository - need the [ID](#get-releasessh) of the release
 
-## delete-repo.sh
+## delete-repository.sh
 
 Deletes a repo - also works if the repository is locked from a failed migration, etc.
 
@@ -79,7 +79,7 @@ Enable actions on repository - similar to [API example](./../api/enable-actions-
 
 Gets the status of Actions on a repository (ie, if Actions are disabled)
 
-## get-apps-installed-in-org.sh
+## get-apps-installed-in-organization.sh
 
 Get the slug of the apps installed in an organization.
 
@@ -165,21 +165,25 @@ Retrieve the download URL for a specific version of a package in GitHub Packages
 
 Gets a list of releases for a repository
 
-## get-repo.sh
+## get-repositories-not-using-actions.sh
 
-Gets details about a repo
+Get repositories not using actions, by files committed in the `.github/workflows` directory
 
-## get-repos-not-using-actions.sh
+## get-repositories-using-actions.sh
 
-Get repos not using actions, by files committed in the `.github/workflows` directory
+Get repositories using actions, by files committed in the `.github/workflows` directory
 
-## get-repos-using-actions.sh
+## get-repositories-using-circleci.sh
 
-Get repos using actions, by files committed in the `.github/workflows` directory
+Get repositories that have a CircleCI configuration file `.circleci/config.yml`
 
 ## get-repository-topics.sh
 
 Gets a list of topics for a repository
+
+## get-repository.sh
+
+Gets details about a repo
 
 ## get-saml-identities-in-enterprise.sh
 
@@ -191,7 +195,7 @@ May need to run this first in order for the gh cli to be able to retrieve the SA
 gh auth refresh -h github.com -s admin:enterprise
 ```
 
-## get-saml-identities-in-org.sh
+## get-saml-identities-in-organization.sh
 
 Retrieves the SAML linked identity of a user in a GitHub organization.
 
@@ -214,7 +218,7 @@ Removes an enterprise user. See notes:
     1. List org members and get the id from there: `./get-organization-members.sh`
     2. Get user id: `./get-user-id.sh`
 
-## rename-repo.sh
+## rename-repository.sh
 
 Renaming a repo
 
