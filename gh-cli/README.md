@@ -87,10 +87,6 @@ Get the slug of the apps installed in an organization.
 
 Gets the commits of since a certain date - date should be in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format, ie: `since=2022-03-28T16:00:49Z`
 
-## get-org-team-members.sh
-
-Gets a list of members on a team
-
 ## get-earliest-restricted-contribution-date.sh
 
 In a 1 year block, return the date of the first non-public contribution
@@ -126,14 +122,6 @@ Queries every organization in an enterprise and returns whether the user is a me
 
 Queries the enterprise for all organizations given the specified role (e.g.: which organizations is the user an admin of)
 
-## get-org-team-members.sh
-
-Gets the members of a team
-
-## get-org-team.sh
-
-Gets a team
-
 ## get-organization-id.sh
 
 Get the organization ID used for other GraphQL calls. Use the login of the Organization as the input.
@@ -152,6 +140,14 @@ See the [docs](https://docs.github.com/en/graphql/reference/objects#ipallowliste
 ## get-organization-members.sh
 
 Gets a list of members and their role in an organization
+
+## get-organization-team-members.sh
+
+Gets the members of a team
+
+## get-organization-team.sh
+
+Gets a team
 
 ## get-package-download-url.sh
 
@@ -222,7 +218,7 @@ Removes an enterprise user. See notes:
 
 Renaming a repo
 
-## search-org-for-code.sh
+## search-organization-for-code.sh
 
 Code search in an organization.
 
