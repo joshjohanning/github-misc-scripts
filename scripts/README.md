@@ -27,6 +27,10 @@ Delete branch protection rules programmatically based on a pattern.
 3. Run `./delete-repos-from-list.sh repos.csv`
 4. If you need to restore, [you have 90 days to restore](https://docs.github.com/en/repositories/creating-and-managing-repositories/restoring-a-deleted-repository)
 
+## gei-clean-up-azure-storage-account.sh
+
+Clean up Azure Storage Account Containers from GEI migrations.
+
 ## generate-repos-list.sh
 
 Generates a list of repos in the organization - has many uses, but the exported repos can be used in the `delete-repos-from-list.sh` script.
