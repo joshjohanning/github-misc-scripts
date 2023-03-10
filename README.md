@@ -4,7 +4,7 @@ Miscellaneous GitHub scripts, `gh` commands, API calls, GraphQL queries, etc. fo
 
 See the folder categories:
 - [api](/api)
-- [gh cli](gh-cli)
+- [gh cli](gh-cli) ✨ ⬅️ most updated! 
 - [git](git)
 - [graphql](graphql)
 - [scripts](scripts)
