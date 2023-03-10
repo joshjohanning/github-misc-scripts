@@ -83,6 +83,10 @@ Gets the status of Actions on a repository (ie, if Actions are disabled)
 
 Get the slug of the apps installed in an organization.
 
+## get-branch-protection-rule.sh
+
+Gets a branch protection rule for a given branch.
+
 ## get-commits-since-date.sh
 
 Gets the commits of since a certain date - date should be in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format, ie: `since=2022-03-28T16:00:49Z`
@@ -237,6 +241,10 @@ See the [docs](https://docs.github.com/en/graphql/reference/mutations#updateipal
 ## sso-credential-authorizations.sh
 
 Retrieves a list of users who have SSO-enabled personal access tokens in an organization.
+
+## update-branch-protection-rule.sh
+
+Updates a branch protection rule for a given branch.
 
 ## update-enterprise-owner-organizational-role.sh
 
