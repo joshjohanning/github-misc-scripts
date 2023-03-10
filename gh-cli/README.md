@@ -29,6 +29,12 @@ $ export GH_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
 See the [docs](https://cli.github.com/manual/gh_auth_login) for further information.
 
+## add-branch-protection-status-checks.sh
+
+Adds a status check to the branch protection status check contexts.
+
+See the [docs](https://docs.github.com/en/rest/branches/branch-protection?apiVersion=2022-11-28#add-status-check-contexts) for more information.
+
 ## add-enterprise-organization-member.sh
 
 Adds a user from an Enterprise into an org. See: [Documentation](https://docs.github.com/en/graphql/reference/mutations#addenterpriseorganizationmember)
@@ -86,6 +92,12 @@ Get the slug of the apps installed in an organization.
 ## get-branch-protection-rule.sh
 
 Gets a branch protection rule for a given branch.
+
+## get-branch-protection-status-checks.sh
+
+Gets the branch protection status check contexts.
+
+See the [docs](https://docs.github.com/en/rest/branches/branch-protection?apiVersion=2022-11-28#get-all-status-check-contexts) for more information.
 
 ## get-commits-since-date.sh
 
@@ -213,6 +225,12 @@ gh auth refresh -h github.com -s admin:org
 
 Retrieves the ID of a user for other GraphQL calls
 
+## remove-branch-protection-status-checks.sh
+
+Removes a status check from the branch protection status check contexts.
+
+See the [docs](https://docs.github.com/en/rest/branches/branch-protection?apiVersion=2022-11-28#remove-status-check-contexts) for more information.
+
 ## remove-enterprise-user.sh
 
 Removes an enterprise user. See notes:
@@ -231,6 +249,12 @@ Renaming a repo
 Code search in an organization.
 
 See the [docs](https://docs.github.com/en/rest/search?apiVersion=2022-11-28#search-code) and [StackOverflow](https://stackoverflow.com/questions/24132790/how-to-search-for-code-in-github-with-github-api) for more information.
+
+## set-branch-protection-status-checks.sh
+
+Set the branch protection status check contexts.
+
+See the [docs](https://docs.github.com/en/rest/branches/branch-protection?apiVersion=2022-11-28#set-status-check-contexts) for more information.
 
 ## set-ip-allow-list-setting.sh
 
