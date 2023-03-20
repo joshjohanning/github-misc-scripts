@@ -138,6 +138,10 @@ Queries every organization in an enterprise and returns whether the user is a me
 
 Queries the enterprise for all organizations given the specified role (e.g.: which organizations is the user an admin of)
 
+## get-label-usage-in-repository.sh
+
+Gets the usage of a label in a repository. Returns data in table format.
+
 ## get-organization-id.sh
 
 Get the organization ID used for other GraphQL calls. Use the login of the Organization as the input.
