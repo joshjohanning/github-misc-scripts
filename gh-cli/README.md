@@ -169,6 +169,10 @@ Gets the members of a team
 
 Gets a team
 
+## get-outside-collaborators-added-to-repository.sh
+
+Get outside collaborators added to a repository
+
 ## get-package-download-url.sh
 
 Gets a the dynamic package download URL for a given package type, name, and version.
