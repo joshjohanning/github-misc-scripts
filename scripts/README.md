@@ -45,6 +45,15 @@ Generates a list of users from a team in the organization - has many uses, but t
 
 1. Run: `./generate-users-from-team <org> <team> > users.csv`
 
+## get-new-outside-collaborators-added-to-repository.sh
+
+This script will generate a list of new outside collaborators added to a repository. It uses a database file specified to determine if any new users were added to the repository and echo them to the console for review.
+
+My use case is to use this list to determine who needs to be added to a organization's project board (ProjectsV2).
+
+1. Run: `./new-users-to-add-to-project.sh <org> <repo> <file>`
+2. Don't delete the `<file>` as it functions as your user database
+
 ## remove-users-from-org.sh
 
 Removes a list of users from the organization.
