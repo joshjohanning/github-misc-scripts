@@ -38,6 +38,10 @@ do
     team=${data}
     echo "Creating team: $team ..."
 
+    # reset the parent_param
+    parent_param=""
+
+    # if the team is a child team, need to get the parent team id
     if [[ $team == *"/"* ]]; then
         child_team=$(echo $team | rev | cut -d'/' -f1 | rev)
         parent_team=$(echo $team | rev | cut -d'/' -f2 | rev)
