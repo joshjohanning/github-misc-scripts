@@ -8,6 +8,14 @@ Invites users to a GitHub team from a list.
 2. Make sure to leave a trailing line at the end of the csv
 3. Run: `./add-users-to-team-from-list.sh users.csv <org> <team>`
 
+Example input file:
+
+```csv
+joshjohanning
+FluffyCarlton
+
+```
+
 ## ado_workitems_to_github_issues.ps1
 
 Migrate work items from Azure DevOps to GitHub issues - this just links out to a [separate repo](https://github.com/joshjohanning/ado_workitems_to_github_issues)
@@ -15,6 +23,25 @@ Migrate work items from Azure DevOps to GitHub issues - this just links out to a
 ## create-enterprise-organizations.sh
 
 Loops through a list of orgs and creates them.
+
+## create-teams-from-list.sh
+
+Loops through a list of teams and creates them.
+
+1. Create a list of teams in a csv file, 1 per line, with a trailing empty line at the end of the file
+    - Child teams should have a slash in the name, e.g. `test1-team/test1-1-team`
+    - Build out the parent structure in the input file before creating the child teams; e.g. have the `test1-team` come before `test1-team/test1-1-team` in the file
+2. Run: `./create-teams-from-list.sh teams.csv <org>`
+
+Example input file:
+
+```csv
+test11-team
+test22-team
+test11-team/test11111-team
+test11-team/test11111-team/textxxx-team
+
+```
 
 ## delete-branch-protection-rules.ps1
 
@@ -26,6 +53,25 @@ Delete branch protection rules programmatically based on a pattern.
 2. Clean up the `repos.csv` file and remove the repos you **don't want to delete**
 3. Run `./delete-repos-from-list.sh repos.csv`
 4. If you need to restore, [you have 90 days to restore](https://docs.github.com/en/repositories/creating-and-managing-repositories/restoring-a-deleted-repository)
+
+## delete-teams-from-list.sh
+
+Loops through a list of teams and deletes them.
+
+1. Create a list of teams in a csv file, 1 per line, with a trailing empty line at the end of the file
+    - Child teams should have a slash in the name, e.g. `test1-team/test1-1-team`
+    - `!!! Important !!!` Note that if a team has child teams, all of the child teams will be deleted as well
+2. Run: `./delete-teams-from-list.sh teams.csv <org>`
+
+Example input file:
+
+```csv
+test11-team
+test22-team
+test11-team/test11111-team
+test11-team/test11111-team/textxxx-team
+
+```
 
 ## gei-clean-up-azure-storage-account.sh
 
