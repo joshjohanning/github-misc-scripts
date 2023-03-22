@@ -5,7 +5,7 @@
 # Step 1: Create a list of users in a csv file, 1 per line, with a trailing empty line at the end of the file
 # Step 2: ./add-users-to-team-from-list.sh users.csv <org> <team>
 
-if [ $# -lt "2" ]; then
+if [ $# -lt "3" ]; then
     echo "Usage: $0 <users-file-name> <org> <team-slug>"
     exit 1
 fi
