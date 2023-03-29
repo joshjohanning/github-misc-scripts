@@ -59,6 +59,10 @@ Change a repository visibility to internal, for example
 
 Creates an enterprise organization - you just need to pass in the enterprise ID (obtained [via](./get-enterprise-id.sh)) along with billing email, admin logins, and organization name
 
+## create-organization-webhook.sh
+
+Creates an organization webhook, with a secret, with some help from `jq`. 
+
 ## create-repository-from-template.sh
 
 Create a new repo from a repo template - note that it only creates as public or private, if you want internal you have to do a subsequent call (see `change-repository-visibility.sh`)
