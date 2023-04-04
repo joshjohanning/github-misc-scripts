@@ -85,6 +85,10 @@ gh auth refresh -h github.com -s delete_repo
 
 Enable actions on repository - similar to [API example](./../api/enable-actions-on-repository.sh), but using `gh cli`
 
+## generate-release-notes-from-tags.sh
+
+Generates release notes between two tags. See the [release notes docs](https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes) on further customizations and the [API docs](https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#generate-release-notes-content-for-a-release) for info on the API.
+
 ## get-actions-permissions-on-repository.sh
 
 Gets the status of Actions on a repository (ie, if Actions are disabled)
