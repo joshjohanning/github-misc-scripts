@@ -18,6 +18,7 @@ query ($owner: String!, $endCursor: String) {
         # - ADMIN: The user is an administrator/owner of the organization.
         role
         node {
+          id
           login
           name
           email
