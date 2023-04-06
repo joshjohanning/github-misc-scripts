@@ -85,6 +85,10 @@ gh auth refresh -h github.com -s delete_repo
 
 Downloads a release artifact from a private/internal repository. Can either download latest version or specific version, and supports file pattern matching to download one or multiple files. See [docs](https://cli.github.com/manual/gh_release_download) for more info.
 
+## download-public-release-artifact.sh
+
+Using `curl`, `wget`, or `gh release download` to download public release assets.
+
 ## enable-actions-on-repository.sh
 
 Enable actions on repository - similar to [API example](./../api/enable-actions-on-repository.sh), but using `gh cli`
