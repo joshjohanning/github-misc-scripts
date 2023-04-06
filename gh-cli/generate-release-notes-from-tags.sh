@@ -9,6 +9,5 @@ gh api -X POST /repos/joshjohanning-org/Test-Release-Notes/releases/generate-not
   --input - << EOF
 {  
   "tag_name": "newest",
-  "target_commitish": "newest",
   "previous_tag_name": "new"
 }
