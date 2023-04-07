@@ -100,6 +100,8 @@ This script will generate a JWT for a GitHub App. It will use the private key an
     - You will need to have the `jwt` package installed via `pip3`: `pip3 install jwt`
     - The JWT is valid for 10 minutes (maximum)
 
+Script sourced from [GitHub docs](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app#example-using-python-to-generate-a-jwt).
+
 ## get-app-tokens-for-each-installation.sh
 
 This script will generate generate a JWT for a GitHub app and use that JWT to generate installation tokens for each org installation. The installation tokens, returned as `ghs_abc`, can then be used for normal API calls. It will use the private key and app ID from the GitHub App's settings page and the `get-app-jwt.py` script to generate the JWT, and then use the JWT to generate the installation tokens for each org installation.
@@ -117,6 +119,11 @@ Output example:
 > Getting installation token for: joshjohanning-org ...
 > 
 >  ... token: ghs_xyz
+
+Docs:
+- [Generate a JWT for a GitHub App](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app#example-using-python-to-generate-a-jwt)
+- [Generating an installation access token for a GitHub App](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app#generating-an-installation-access-token)
+- [List installations for the authenticated app](https://docs.github.com/en/rest/apps/apps?apiVersion=2022-11-28#list-installations-for-the-authenticated-app)
 
 ## get-new-outside-collaborators-added-to-repository.sh
 
