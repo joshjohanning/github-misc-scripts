@@ -91,6 +91,33 @@ Generates a list of users from a team in the organization - has many uses, but t
 
 1. Run: `./generate-users-from-team <org> <team> > users.csv`
 
+## get-app-jwt.py
+
+This script will generate a JWT for a GitHub App. It will use the private key and app ID from the GitHub App's settings page.
+
+1. Run: `python3 get-jwt.py ./<private-key>.pem <app-id>`
+    - You can also just run `python3 get-jwt.py` and it will prompt you for the private key and app ID
+    - You will need to have the `jwt` package installed via `pip3`: `pip3 install jwt`
+    - The JWT is valid for 10 minutes (maximum)
+
+## get-app-tokens-for-each-installation.sh
+
+This script will generate generate a JWT for a GitHub app and use that JWT to generate installation tokens for each org installation. The installation tokens, returned as `ghs_abc`, can then be used for normal API calls. It will use the private key and app ID from the GitHub App's settings page and the `get-app-jwt.py` script to generate the JWT, and then use the JWT to generate the installation tokens for each org installation.
+
+1. Run: `./get-app-tokens-for-each-installation.sh <app_id> <private_key_path>"`
+    - Requires `python3` and `pip3 install jwt` to run the `get-jwt.py` script to generate the JWT
+    - The installation access token will expire after 1 hour
+
+Output example:
+
+> Getting installation token for: Josh-Test ...
+> 
+>  ... token: ghs_abc
+> 
+> Getting installation token for: joshjohanning-org ...
+> 
+>  ... token: ghs_xyz
+
 ## get-new-outside-collaborators-added-to-repository.sh
 
 This script will generate a list of new outside collaborators added to a repository. It uses a database file specified to determine if any new users were added to the repository and echo them to the console for review.
