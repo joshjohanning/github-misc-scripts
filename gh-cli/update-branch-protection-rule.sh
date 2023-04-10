@@ -15,3 +15,4 @@ gh api -X PUT /repos/joshjohanning-org/circleci-test/branches/main/protection \
   },
   "restrictions": null
 }
+EOF

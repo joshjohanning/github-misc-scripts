@@ -8,3 +8,4 @@ gh api -X DELETE /repos/joshjohanning-org/circleci-test/branches/main/protection
     "ci/circleci: test-go-1"
   ]
 }
+EOF

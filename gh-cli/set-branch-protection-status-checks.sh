@@ -8,3 +8,4 @@ gh api -X PUT /repos/joshjohanning-org/circleci-test/branches/main/protection/re
     "ci/circleci: test-go-2"
   ]
 }
+EOF

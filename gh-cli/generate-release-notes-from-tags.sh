@@ -11,3 +11,4 @@ gh api -X POST /repos/joshjohanning-org/Test-Release-Notes/releases/generate-not
   "tag_name": "newest",
   "previous_tag_name": "new"
 }
+EOF
