@@ -251,6 +251,14 @@ May need to run this first in order for the gh cli to be able to retrieve the SA
 gh auth refresh -h github.com -s admin:org
 ```
 
+## get-sso-enabled-pats.sh
+
+Retrieves all SSO enabled PATs users have created for an organization.
+
+## get-sso-enabled-ssh-keys.sh
+
+Retrieves all SSO-enabled SSH keys users have created for an organization.
+
 ## get-user-id.sh
 
 Retrieves the ID of a user for other GraphQL calls
@@ -269,6 +277,10 @@ Removes an enterprise user. See notes:
 2. Get user id by one of the following:
     1. List org members and get the id from there: `./get-organization-members.sh`
     2. Get user id: `./get-user-id.sh`
+
+## remove-sso-enabled-pat.sh
+
+Revokes an SSO-enabled PAT that a user created in an organization.
 
 ## rename-repository.sh
 
