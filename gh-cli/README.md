@@ -217,6 +217,12 @@ Get repositories using actions, by files committed in the `.github/workflows` di
 
 Get repositories that have a CircleCI configuration file `.circleci/config.yml`
 
+(not perfect, doesn't search for `codeql*.yml`)
+
+## get-repositories-using-codeql.sh
+
+Get repositories that have a CodeQL configuration file `.github/workflows/codeql.yml`
+
 ## get-repository-topics.sh
 
 Gets a list of topics for a repository
