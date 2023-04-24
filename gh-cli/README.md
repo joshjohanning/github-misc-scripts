@@ -223,6 +223,10 @@ Get repositories that have a CircleCI configuration file `.circleci/config.yml`
 
 Get repositories that have a CodeQL configuration file `.github/workflows/codeql.yml`
 
+## get-repository-licenses-for-organization.sh
+
+Get the repository license information (ie: MIT, Apache 2.0, etc) for all repositories in an organization.
+
 ## get-repository-topics.sh
 
 Gets a list of topics for a repository
