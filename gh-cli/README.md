@@ -47,6 +47,10 @@ Use the [get-enterprise-id.sh](./get-enterprise-id.sh) or [get-organization-id.s
 
 See the [docs](https://docs.github.com/en/graphql/reference/mutations#createipallowlistentry) for further information.
 
+## add-team-to-repository.sh
+
+Adds a team to a repository with a given permission level
+
 ## add-user-to-team.sh
 
 Adds (invites) a user to an organization team

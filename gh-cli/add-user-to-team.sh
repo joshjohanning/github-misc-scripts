@@ -1,3 +1,5 @@
+#!/bin/bash
+
 gh api \
   --method PUT \
   -H "Accept: application/vnd.github+json" \
