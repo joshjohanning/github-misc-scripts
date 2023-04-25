@@ -223,6 +223,19 @@ Get repositories that have a CircleCI configuration file `.circleci/config.yml`
 
 Get repositories that have a CodeQL configuration file `.github/workflows/codeql.yml`
 
+## get-repository-languages-for-organization.sh
+
+Get the repository language information (ie: JavaScript, Python, etc) for all repositories in an organization. Can specify how many language results to return (top X).
+
+Example output:
+
+```csv
+repo,language
+ghas-demo,Java
+zero-to-hero-codeql-test,C#
+Python_scripts_examples,Python
+```
+
 ## get-repository-licenses-for-organization.sh
 
 Get the repository license information (ie: MIT, Apache 2.0, etc) for all repositories in an organization.
@@ -234,6 +247,18 @@ Gets a list of topics for a repository
 ## get-repository.sh
 
 Gets details about a repo
+
+## get-repository-users-by-permission.sh
+
+Gets a list of users by permission level for a repository (ie: retrieve the list of users who have admin access to a repository). For write access, use `push` as the permission. There is a flag to either cumulatively return permissions (ie: `push` returns those with `maintain` and `admin` as well), but the default is explicitly return users with the permission you specify.
+
+Example output:
+
+```csv
+login,permission
+joshgoldfishturtle,admin
+joshjohanning,admin
+```
 
 ## get-saml-identities-in-enterprise.sh
 
@@ -266,6 +291,18 @@ Retrieves all SSO-enabled SSH keys users have created for an organization.
 ## get-user-id.sh
 
 Retrieves the ID of a user for other GraphQL calls
+
+## get-users-directly-added-to-repositories.sh
+
+Gets a list of users directly added to repositories
+
+Example output:
+
+```csv
+"ghas-demo", "joshjohanning", "ADMIN"
+"ghas-demo", "FluffyCarlton", "WRITE"
+"Test-Migrate", "joshjohanning", "ADMIN"
+```
 
 ## remove-branch-protection-status-checks.sh
 

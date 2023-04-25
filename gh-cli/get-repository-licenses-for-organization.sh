@@ -1,18 +1,25 @@
 #!/bin/bash
 
 # Usage: 
-# ./get-license-usage-for-organization.sh <org>
+# ./get-license-usage-for-organization.sh <org> <output_filename>
 
 if [ $# -lt "1" ]; then
-    echo "Usage: $0 <org>"
-    echo "Example: ./get-license-usage-for-organization.sh joshjohanning-org"
-    echo "Optionally pipe the output to a file: ./get-license-usage-for-organization.sh joshjohanning-org > output.csv"
+    echo "Usage: $0 <org> <output_filename>"
+    echo "Example: ./get-license-usage-for-organization.sh joshjohanning-org > output.csv"
+
     exit 1
 fi
 
 ORG=$1
+# OUTPUT=$2
 
-echo "repo,license"
+# mv output.log if it exists
+# if [ -f "$OUTPUT" ]; then
+#     date=$(date +"%Y-%m-%d %T")
+#     mv $OUTPUT "$OUTPUT-$date.csv"
+# fi
+
+echo "repo,license" # > $OUTPUT
 
 gh api graphql --paginate -F owner="${ORG}" -f query='
 query ($owner: String!, $endCursor: String) {
@@ -30,4 +37,4 @@ query ($owner: String!, $endCursor: String) {
       }
     }
   }
-}' --jq '[ .data.organization.repositories.nodes[] | { name:.name, license: .licenseInfo.name } ]' | jq -r '.[] | "\(.name),\(.license)"'
+}' --jq '[ .data.organization.repositories.nodes[] | { name:.name, license: .licenseInfo.name } ]' | jq -r '.[] | "\(.name),\(.license)"' # >> $OUTPUT
