@@ -158,6 +158,10 @@ Queries every organization in an enterprise and returns whether the user is a me
 
 Queries the enterprise for all organizations given the specified role (e.g.: which organizations is the user an admin of)
 
+## get-enterprise-settings.sh
+
+Gets info about an enterprise using the [EnterpriseOwnerInfo](https://docs.github.com/en/graphql/reference/objects#enterpriseownerinfo) GraphQL object.
+
 ## get-label-usage-in-repository.sh
 
 Gets the usage of a label in a repository. Returns data in table format.
