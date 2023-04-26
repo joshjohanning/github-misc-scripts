@@ -3,7 +3,7 @@
 # gh cli's token needs to be able to admin enterprise - run this first if it can't
 # gh auth refresh -h github.com -s admin:enterprise
 
-gh api graphql --paginate -f enterpriseName='fasttrack-ghec' -f query='
+gh api graphql -f enterpriseName='fabrikam' -f query='
 query getEnterpriseIpAllowList($enterpriseName: String! $endCursor: String) {
   enterprise(slug: $enterpriseName) {
     ownerInfo {
@@ -62,25 +62,21 @@ query getEnterpriseIpAllowList($enterpriseName: String! $endCursor: String) {
       }
       organizationProjectsSetting
       repositoryProjectsSetting
-      samlIdentityProvider { # double check this
+      samlIdentityProvider {
         digestMethod
-        externalIdentities(first: 100, after: $endCursor) {
-          nodes {
-            samlIdentity {
-              nameId
-            }
-          }
-          pageInfo {
-            endCursor
-            hasNextPage
-          }
-        }
         idpCertificate
         issuer
         signatureMethod
         ssoUrl
       }
-      # supportEntitlements # fix
+      supportEntitlements(first: 20) {
+        totalCount
+        nodes {
+          ... on User {
+            login
+          }
+        }
+      }
       teamDiscussionsSetting
       twoFactorRequiredSetting
     }
