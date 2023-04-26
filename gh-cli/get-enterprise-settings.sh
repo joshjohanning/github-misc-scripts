@@ -3,11 +3,12 @@
 # gh cli's token needs to be able to admin enterprise - run this first if it can't
 # gh auth refresh -h github.com -s admin:enterprise
 
-gh api graphql -f enterpriseName='fabrikam' -f query='
+gh api graphql -f enterpriseName='fasttrack-ghec' -f query='
 query getEnterpriseIpAllowList($enterpriseName: String! $endCursor: String) {
   enterprise(slug: $enterpriseName) {
     ownerInfo {
       admins(first: 100, after: $endCursor) {
+        totalCount
         nodes {
           login
         }
@@ -20,6 +21,7 @@ query getEnterpriseIpAllowList($enterpriseName: String! $endCursor: String) {
       allowPrivateRepositoryForkingSettingPolicyValue
       defaultRepositoryPermissionSetting
       domains(first: 100, after: $endCursor) {
+        totalCount
         nodes {
           domain
           isApproved
@@ -33,6 +35,7 @@ query getEnterpriseIpAllowList($enterpriseName: String! $endCursor: String) {
       ipAllowListEnabledSetting
       ipAllowListForInstalledAppsEnabledSetting
       ipAllowListEntries(first: 100, after: $endCursor) {
+        totalCount
         nodes {
           allowListValue
           isActive
