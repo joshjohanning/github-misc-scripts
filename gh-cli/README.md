@@ -105,6 +105,18 @@ Generates release notes between two tags. See the [release notes docs](https://d
 
 Gets the status of Actions on a repository (ie, if Actions are disabled)
 
+## get-actions-usage-in-repository.sh
+
+Gets the usage of Actions on a repository; example output:
+
+```csv
+actions/checkout@3
+github/codeql-action/analyze@2
+github/codeql-action/autobuild@2
+github/codeql-action/init@2
+actions/dependency-review-action@3
+```
+
 ## get-apps-installed-in-organization.sh
 
 Get the slug of the apps installed in an organization.
@@ -122,6 +134,18 @@ See the [docs](https://docs.github.com/en/rest/branches/branch-protection?apiVer
 ## get-commits-since-date.sh
 
 Gets the commits of since a certain date - date should be in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format, ie: `since=2022-03-28T16:00:49Z`
+
+## get-dependencies-in-repository.sh
+
+Gets dependencies used in the repository, including the ecosystem and version number. Example output: 
+
+```csv
+npm/source-list-map@2.0.1
+pypi/keyring@17.1.1
+maven/io.jsonwebtoken/jjwt@0.7.0
+golang/github.com/mattn/go-sqlite3@1.14.4
+githubactions/actions/checkout@3
+```
 
 ## get-earliest-restricted-contribution-date.sh
 
@@ -287,6 +311,10 @@ May need to run this first in order for the gh cli to be able to retrieve the SA
 ```
 gh auth refresh -h github.com -s admin:org
 ```
+
+## get-sbom-in-repository.sh
+
+Gets the SBOM for a repository.
 
 ## get-sso-enabled-pats.sh
 
