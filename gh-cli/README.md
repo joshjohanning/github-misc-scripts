@@ -316,6 +316,10 @@ gh auth refresh -h github.com -s admin:org
 
 Gets the SBOM for a repository.
 
+## get-search-results.sh
+
+Uses the search API for code search.
+
 ## get-sso-enabled-pats.sh
 
 Retrieves all SSO enabled PATs users have created for an organization.
