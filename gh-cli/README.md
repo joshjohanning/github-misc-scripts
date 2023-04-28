@@ -131,6 +131,20 @@ Gets the branch protection status check contexts.
 
 See the [docs](https://docs.github.com/en/rest/branches/branch-protection?apiVersion=2022-11-28#get-all-status-check-contexts) for more information.
 
+## get-code-scanning-status-for-every-repository.sh
+
+Get code scanning analyses status for every repository in an organization.
+
+Example output:
+
+```csv
+"joshjohanning-org/ghas-demo","CodeQL","refs/pull/140/merge","2023-04-28T07:08:36Z",".github/workflows/codeql-analysis.yml:analyze"
+"joshjohanning-org/zero-to-hero-codeql-test","CodeQL","refs/heads/main","2023-04-23T20:28:16Z",".github/workflows/codeql-analysis.yml:analyze"
+"joshjohanning-org/Python_scripts_examples","CodeQL","refs/heads/main","2023-04-24T14:21:16Z",".github/workflows/codeql-analysis.yml:analyze"
+joshjohanning-org/.github, no code scanning results
+"joshjohanning-org/azdo-terraform-tailspin","defsec","refs/heads/main","2023-04-22T21:35:22Z",".github/workflows/tfsec-analysis.yml:tfsec"
+```
+
 ## get-commits-since-date.sh
 
 Gets the commits of since a certain date - date should be in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format, ie: `since=2022-03-28T16:00:49Z`
