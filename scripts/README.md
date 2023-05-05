@@ -20,6 +20,27 @@ FluffyCarlton
 
 Migrate work items from Azure DevOps to GitHub issues - this just links out to a [separate repo](https://github.com/joshjohanning/ado_workitems_to_github_issues)
 
+## add-codeowners-file-to-repositories.sh
+
+Adds a `CODEOWNERS` file to a list of repositories.
+
+1. Run: `./generate-repos.sh <org> > repos.csv`
+    - Or create a list of repos in a csv file, 1 per line, with a trailing empty line at the end of the file
+2. Run: `./add-codeowners-file-to-repositories.sh repos.csv ./CODEOWNERS false`
+    - For the 3rd argument, pass `true` if you want to overwrite existing file, otherwise it appends to existing
+
+> **Note** 
+> This is currently only checking for CODEOWNERS files in the root
+
+## add-gitignore-file-to-repositories.sh
+
+Adds a `.gitignore` file to a list of repositories.
+
+1. Run: `./generate-repos.sh <org> > repos.csv`
+    - Or create a list of repos in a csv file, 1 per line, with a trailing empty line at the end of the file
+2. Run: `./add-gitignore-file-to-repositories.sh repos.csv ./.gitignore false`
+    - For the 3rd argument, pass `true` if you want to overwrite existing file, otherwise it appends to existing
+
 ## create-enterprise-organizations.sh
 
 Loops through a list of orgs and creates them.
