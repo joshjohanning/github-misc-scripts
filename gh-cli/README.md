@@ -151,7 +151,9 @@ Gets the commits of since a certain date - date should be in [ISO 8601](https://
 
 ## get-dependencies-in-repository.sh
 
-Gets dependencies used in the repository, including the ecosystem and version number. Example output: 
+Gets dependencies used in the repository, including the ecosystem and version number.
+
+Example output: 
 
 ```csv
 npm/source-list-map@2.0.1
@@ -218,6 +220,20 @@ Adding `-H X-Github-Next-Global-ID:1` per the documentation here to get the new 
 Gets the current IP allow list for an organization.
 
 See the [docs](https://docs.github.com/en/graphql/reference/objects#ipallowlistentry) for further information.
+
+## get-organization-language-count.sh
+
+Get a total count of the primary language of repositories in an organization.
+
+Example output:
+
+```
+  21 Shell
+  11 JavaScript
+  11 Dockerfile
+  10 C#
+   4 Java
+```
 
 ## get-organization-members.sh
 
