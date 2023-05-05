@@ -6,7 +6,7 @@ query getEnterpriseOrganizations($enterpriseName: String! $endCursor: String) {
     organizations(first: 100, after: $endCursor) {
       nodes {
         id
-        name
+        login
       }
       pageInfo {
         endCursor
