@@ -1,8 +1,10 @@
 #!/bin/bash
-# DOT NOT REMOVE TRAILING NEW LINE IN THE INPUT CSV FILE
+
+# Remove users from an organization from a CSV input list
 
 # Usage: 
 # Step 1: Create a list of users in a csv file, 1 per line, with a trailing empty line at the end of the file (or use ./generate-users-from-team <org> <team>)
+#   - DO NOT REMOVE TRAILING NEW LINE IN THE INPUT CSV FILE
 # Step 2: ./remove-users-from-org.sh <file> <org>
 
 if [ $# -ne "2" ]; then

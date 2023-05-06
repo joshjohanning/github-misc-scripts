@@ -1,13 +1,15 @@
 #!/bin/bash
-# DOT NOT REMOVE TRAILING NEW LINE IN THE INPUT CSV FILE
+
+# Creates teams in an organization from a CSV input list
 
 # Need to run this to be able to create teams: gh auth refresh -h github.com -s admin:org
 
 # Usage: 
 # Step 1: Create a list of teams in a csv file, 1 per line, with a trailing empty line at the end of the file
-#           - child teams should have a slash in the name, e.g. test1-team/test1-1-team
-#           - build out the parent structure in the input file before creating the child teams;
-#               e.g. have the 'test1-team' come before 'test1-team/test1-1-team' in the file
+#   - child teams should have a slash in the name, e.g. test1-team/test1-1-team
+#   - build out the parent structure in the input file before creating the child teams;
+#       e.g. have the 'test1-team' come before 'test1-team/test1-1-team' in the file
+#   - DO NOT REMOVE TRAILING NEW LINE IN THE INPUT CSV FILE
 # Step 2: ./create-teams-from-list.sh teams.csv <org>
 
 # Example input file:
@@ -16,7 +18,7 @@
 # test22-team
 # test11-team/test11111-team
 # test11-team/test11111-team/textxxx-team
-
+# 
 
 if [ $# -lt "2" ]; then
     echo "Usage: $0 <teams-file-name> <org>"

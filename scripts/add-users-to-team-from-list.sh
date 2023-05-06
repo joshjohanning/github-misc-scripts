@@ -1,8 +1,10 @@
 #!/bin/bash
-# DOT NOT REMOVE TRAILING NEW LINE IN THE INPUT CSV FILE
+
+# Adds users to an organization team from a CSV input list
 
 # Usage: 
 # Step 1: Create a list of users in a csv file, 1 per line, with a trailing empty line at the end of the file
+#   - DO NOT REMOVE TRAILING NEW LINE IN THE INPUT CSV FILE
 # Step 2: ./add-users-to-team-from-list.sh users.csv <org> <team>
 
 if [ $# -lt "3" ]; then

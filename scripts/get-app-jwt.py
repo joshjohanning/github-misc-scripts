@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+
+# This script generates a JWT for a GitHub App
+
 import jwt # pip3 install jwt
 import time
 import sys

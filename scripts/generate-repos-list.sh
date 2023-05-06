@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Generates a list of repositories in an organization to a CSV file
+
 # Usage: ./generate-repos.sh <org> > csv.csv
 
 # Credits to @tspascoal from this repo: https://github.com/tspascoal/dependabot-alerts-helper

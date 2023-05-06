@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Get app tokens for each organization installation of a GitHub app
+
 # example usage: `./get-app-tokens-for-each-installation.sh 314893 ./test-for-jwt-app-auth.2023-04-06.private-key.pem`
 
 if [ -z "$2" ]; then

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Get new outside collaborators added to a repository since the last time this script was run
+
 # Usage: 
 # Step 1: ./new-users-to-add-to-project.sh <org> <repo> <file>
 # Step 2: Don't delete the `<file>` as it functions as your user database

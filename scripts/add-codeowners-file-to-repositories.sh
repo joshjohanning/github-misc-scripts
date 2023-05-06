@@ -1,11 +1,11 @@
 #!/bin/bash
-# DOT NOT REMOVE TRAILING NEW LINE IN THE INPUT CSV FILE
 
-# Need to run this to get the repo delete scope: gh auth refresh -h github.com -s delete_repo
+# Adds a CODEOWNERS file to the default branch in a CSV list of repositories
 
 # Usage: 
 # Step 1: Run ./generate-repos.sh <org> > repos.csv 
-#    (or create a list of repos in a csv file, 1 per line, with a trailing empty line at the end of the file)
+#   - Or create a list of repos in a csv file, 1 per line, with a trailing empty line at the end of the file
+#   - DO NOT REMOVE TRAILING NEW LINE IN THE INPUT CSV FILE
 # Step 2: ./add-codeowners-file-to-repositories.sh repos.csv ./CODEOWNERS false
 #
 # Overwrite or append: 

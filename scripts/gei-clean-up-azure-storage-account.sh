@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Cleans up containers from a storage account older than a specified time
+
 # modified from https://learn.microsoft.com/en-us/azure/storage/scripts/storage-blobs-container-delete-by-prefix-cli#run-the-script
 # requires GNU date.
 # if using a mac: `brew install coreutils`

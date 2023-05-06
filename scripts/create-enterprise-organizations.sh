@@ -1,5 +1,8 @@
 #!/bin/bash
-# DOT NOT REMOVE TRAILING NEW LINE IN THE INPUT CSV FILE
+
+# Creates organizations in an enterprise from a CSV input list (orgs-to-create.csv)
+
+# DO NOT REMOVE TRAILING NEW LINE IN THE INPUT CSV FILE
 
 # Use ../gh-cli/get-enterprise-id.sh to get the enterprise id to use here
 

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Generate list of users from team
+
 # Usage: ./generate-users-from-team.sh <org> <team> > users.csv
 
 if [ $# -ne "2" ]; then

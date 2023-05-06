@@ -70,6 +70,8 @@ Delete branch protection rules programmatically based on a pattern.
 
 ## delete-repos-from-list.sh
 
+Deletes a list of repositories.
+
 1. Run: `./generate-repos-list.sh <org> > repos.csv`
 2. Clean up the `repos.csv` file and remove the repos you **don't want to delete**
 3. Run `./delete-repos-from-list.sh repos.csv`

@@ -1,12 +1,14 @@
 #!/bin/bash
-# DOT NOT REMOVE TRAILING NEW LINE IN THE INPUT CSV FILE
+
+# Deletes teams in an organization from a CSV input list
 
 # Need to run this to be able to delete teams: gh auth refresh -h github.com -s admin:org
 
 # Usage: 
 # Step 1: Create a list of teams in a csv file, 1 per line, with a trailing empty line at the end of the file
-#           - child teams should have a slash in the name, e.g. test1-team/test1-1-team
-#           - !!! Important !!! Note that if a team has child teams, all of the child teams will be deleted as well
+#     - child teams should have a slash in the name, e.g. test1-team/test1-1-team
+#     - !!! Important !!! Note that if a team has child teams, all of the child teams will be deleted as well
+#     - DO NOT REMOVE TRAILING NEW LINE IN THE INPUT CSV FILE
 # Step 2: ./delete-teams-from-list.sh teams.csv <org>
 
 # Example input file:

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Verify if a specified user is a member of a team
+
 members=$(gh api --paginate /orgs/joshjohanning-org/teams/approver-team/members --jq='.[] | [.login] | join(",")')
 
 themember="joshjohanning"
