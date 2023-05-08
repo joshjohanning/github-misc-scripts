@@ -1,14 +1,19 @@
 #!/bin/bash
 
+# No longer works for GitHub.com and deprecated for GHES 3.7+
+#
+# See:
+# - https://github.blog/changelog/2022-08-18-deprecation-notice-graphql-for-packages/
+# - https://docs.github.com/en/graphql/overview/breaking-changes#changes-scheduled-for-2022-11-21-1
+# - https://docs.github.com/en/enterprise-server@3.7/admin/release-notes#3.7.0-deprecations
+
 # gh auth refresh -h github.com -s read:packages
 
 # packageType (https://docs.github.com/en/graphql/reference/enums#packagetype)
-# - DEBIAN
 # - DOCKER
 # - MAVEN
 # - NPM
 # - NUGET
-# - PYPI
 # - RUBYGEMS
 
 gh api graphql -f packageType="NUGET" -f owner="joshjohanning-org-packages" -f repo="packages-repo1" -f packageName="NUnit3.DotNetNew.Template" -f packageVersion="1.7.0" -f query='

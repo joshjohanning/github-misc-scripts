@@ -251,17 +251,31 @@ Gets a team
 
 Get outside collaborators added to a repository
 
-## get-package-download-url.sh
-
-Gets a the dynamic package download URL for a given package type, name, and version.
-
 ## get-package-download-url-for-latest-version
 
 Retrieve the download URL for the latest version of a package in GitHub Packages. See: [Documentation](https://docs.github.com/en/graphql/reference/objects#package)
 
+> **Note:**
+> No longer works for GitHub.com and deprecated for GHES 3.7+. See [Changelog post](https://github.blog/changelog/2022-08-18-deprecation-notice-graphql-for-packages/), [GraphQL breaking changes](https://docs.github.com/en/graphql/overview/breaking-changes#changes-scheduled-for-2022-11-21-1), and [GHES 3.7 deprecations](https://docs.github.com/en/enterprise-server@3.7/admin/release-notes#3.7.0-deprecations)
+
+## get-package-download-url-for-specific-version-maven.sh
+
+Retrieve the download URL for a specific version of an Maven package in GitHub Packages.
+
+## get-package-download-url-for-specific-version-npm.sh
+
+Retrieve the download URL for a specific version of an NPM package in GitHub Packages.
+
+## get-package-download-url-for-specific-version-nuget.sh
+
+Retrieve the download URL for a specific version of an Maven package in GitHub Packages.
+
 ## get-package-download-url-for-specific-version.sh
 
 Retrieve the download URL for a specific version of a package in GitHub Packages. See: [Documentation](https://docs.github.com/en/graphql/reference/objects#package)
+
+> **Note:**
+> No longer works for GitHub.com and deprecated for GHES 3.7+. See [Changelog post](https://github.blog/changelog/2022-08-18-deprecation-notice-graphql-for-packages/), [GraphQL breaking changes](https://docs.github.com/en/graphql/overview/breaking-changes#changes-scheduled-for-2022-11-21-1), and [GHES 3.7 deprecations](https://docs.github.com/en/enterprise-server@3.7/admin/release-notes#3.7.0-deprecations)
 
 ## get-releases.sh
 
