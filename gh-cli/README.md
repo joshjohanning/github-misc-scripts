@@ -328,6 +328,20 @@ Gets a list of topics for a repository
 
 Gets details about a repo
 
+## get-repository-users-by-permission-for-organization.sh
+
+Similar to `get-repository-users-by-permission.sh` except that it loops through all repositories. See the below note about cumulative permissions; if you query for `push` you will also get users for `maintain` and `admin`, but you can pass in a `false` and retrieve only users who have `push`.
+
+Example output:
+
+```csv
+repo,login,permission
+ghas-demo,joshgoldfishturtle,admin
+ghas-demo,joshjohanning,admin
+zero-to-hero-codeql-test,joshjohanning,admin
+Python_scripts_examples,joshjohanning,admin
+```
+
 ## get-repository-users-by-permission.sh
 
 Gets a list of users by permission level for a repository (ie: retrieve the list of users who have admin access to a repository). For write access, use `push` as the permission. There is a flag to either cumulatively return permissions (ie: `push` returns those with `maintain` and `admin` as well), but the default is explicitly return users with the permission you specify.
@@ -339,6 +353,10 @@ login,permission
 joshgoldfishturtle,admin
 joshjohanning,admin
 ```
+
+## get-repository-users-permission-and-source.sh
+
+Returns the permission for everyone who can access the repo and how they access it (direct, team, org)
 
 ## get-saml-identities-in-enterprise.sh
 

@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # this works for users added directly to repo and team
-# by default, this is not cumulative; so if you query for push, you get just PUSH - pass in true if you want cumulative permissions (ie: querying for push would return admin and maintain as well)
+# by default, this is not cumulative; so if you query for push, you get just PUSH
+#   - pass in true if you want cumulative permissions (ie: querying for PUSH would return ADMIN and MAINTAIN as well)
 
 if [ $# -lt "2" ]; then
     echo "Usage: $0 <org/repo> <admin|maintain|push|triage|read> <cumulative-true-or-false>"
@@ -14,6 +15,7 @@ REPO=$1
 PERMISSION=$2
 CUMULATIVE=$3
 
+# pass in true if you want cumulative permissions (ie: querying for PUSH would return ADMIN and MAINTAIN as well)
 if [ -z "$CUMULATIVE" ]; then
     CUMULATIVE="false"
 fi
