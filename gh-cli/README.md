@@ -239,6 +239,10 @@ Example output:
 
 Gets a list of members and their role in an organization
 
+## get-organization-repository-count.sh
+
+Gets the repository count in an organization
+
 ## get-organization-team-members.sh
 
 Gets the members of a team
