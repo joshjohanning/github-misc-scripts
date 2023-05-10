@@ -157,6 +157,14 @@ My use case is to use this list to determine who needs to be added to a organiza
 1. Run: `./new-users-to-add-to-project.sh <org> <repo> <file>`
 2. Don't delete the `<file>` as it functions as your user database
 
+## migrate-npm-packages-between-github-instances.sh
+
+Migrate NPM packages in GitHub Packages from one GitHub organization to another.
+
+1. Define the source GitHub PAT env var: export GH_SOURCE_PAT=ghp_abc (must have at least `read:packages`, `read:org` scope)
+2. Define the target GitHub PAT env var: export GH_TARGET_PAT=ghp_abc (must have at least `write:packages`, `read:org` scope)
+3. Run: `./migrate-npm-packages-between-github-instances.sh joshjohanning-org github.com joshjohanning-emu github.com`
+
 ## remove-users-from-org.sh
 
 Removes a list of users from the organization.
