@@ -235,9 +235,13 @@ Example output:
    4 Java
 ```
 
+## get-organization-members-api.sh
+
+Gets a list of members in an organization using the REST API (able to get their ID to tie to Git event audit log)
+
 ## get-organization-members.sh
 
-Gets a list of members and their role in an organization
+Gets a list of members (via GraphQL) and their role in an organization
 
 ## get-organization-repository-count.sh
 
