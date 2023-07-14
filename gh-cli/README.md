@@ -466,3 +466,16 @@ Updates a branch protection rule for a given branch.
 ## update-enterprise-owner-organizational-role.sh
 
 Adds your account to an organization in an enterprise as an owner, member, or leave the organization.
+
+## get-repositories-webhooks-csv.sh
+
+Gets a CSV with the list of repository webhooks in a GitHub organization.
+
+Generates a CSV with 4 columns:
+
+- repo name - The repository name
+- is active - If the webhook is active or not
+- webhook url - The url of the weehook
+- secret - Webhook secret, it will be masked since the API doesn't return the actual secret.
+
+This script is useful when doing migrations, to determine the kind of actions that might be needed based on the webhooks inventory.
