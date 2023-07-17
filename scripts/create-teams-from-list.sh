@@ -37,16 +37,16 @@ while read -r repofull ;
 do
     read -ra data <<< "$repofull"
 
-    team=${data}
-    echo "Creating team: $team ..."
+    team=${data[0]}
+    echo -e "\nCreating team: $team ..."
 
     # reset the parent_param
     parent_param=""
 
     # if the team is a child team, need to get the parent team id
     if [[ $team == *"/"* ]]; then
-        child_team=$(echo $team | rev | cut -d'/' -f1 | rev)
-        parent_team=$(echo $team | rev | cut -d'/' -f2 | rev)
+        child_team=$(echo "$team" | rev | cut -d'/' -f1 | rev)
+        parent_team=$(echo "$team" | rev | cut -d'/' -f2 | rev)
         team=$child_team
 
         echo "  - parent team: $parent_team"
@@ -56,19 +56,22 @@ do
         parent_team_id=$(gh api \
             --method GET \
             -H "Accept: application/vnd.github+json" \
-            /orgs/$org/teams/$parent_team \
+            "/orgs/$org/teams/$parent_team" \
             -q '.id')
 
         parent_param="-F parent_team_id=$parent_team_id"
         echo "  - ...okay now creating $team with parent of $parent_team (parent id: $parent_team_id)..."
     fi
 
+    # we want to pass the parent_param as (potentially multiple arguments, so we don't double quote it)
+    # shellcheck disable=SC2086  
     response=$(gh api \
       --method POST \
       -H "Accept: application/vnd.github+json" \
-      /orgs/$org/teams \
-      -f name="$team" -f privacy='closed' $parent_param)
+      "/orgs/$org/teams" \
+      -f name="$team" -f privacy='closed' \
+      $parent_param)
 
-    echo $response
+    echo -e "\n$response"
 
 done < "$filename"
