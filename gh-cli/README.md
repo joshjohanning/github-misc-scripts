@@ -479,3 +479,25 @@ Generates a CSV with 4 columns:
 - secret - Webhook secret, it will be masked since the API doesn't return the actual secret.
 
 This script is useful when doing migrations, to determine the kind of actions that might be needed based on the webhooks inventory.
+
+## copy-permissions-between-org-repos.sh
+
+Copy user and team repository member permissions to another repository (it can be in the same or on different organizations).
+
+If the team on the target organization doesn't exist, one will be created (same name, description, privacy and notification settings ONLY).
+
+> **Note:** The created team will not be a full copy, **Only** name and description are honored. If the team is part of a child/parent relantionship, or it's associated with an IDP group it will not be honored. If you want to change this behavior, you can modify the `createTeamIfNotExists` function.
+
+This script requires 2 environment variables (with another optional one):
+
+- SOURCE_TOKEN - A GitHub Token to access data from the source organization. Requires org:read and repo scopes.
+- TARGET_TOKEN - A GitHub Token to set data on the target organization. Requires org:admin and repo scopes.
+- MAP_USER_SCRIPT - path to a script to map user login. This is optional, if you set this environment value it will call the script to map user logins before adding them on the target repo. The script will receive the user login as the first argument and it should return the new login. For example, if you want to add a suffix to the user login:
+
+```shell
+#!/bin/bash
+
+echo "$1"_SHORTCODE
+```
+
+You can have more complex mappings this just a basic example, where a copy is being done between a GHEC and a GHEC EMU instance where the logins are going to be exactly the same, but the EMU instance has a suffix on the logins.
