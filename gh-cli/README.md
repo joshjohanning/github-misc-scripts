@@ -188,7 +188,13 @@ See the [docs](https://docs.github.com/en/graphql/reference/objects#enterpriseow
 
 ## get-enterprise-organizations.sh
 
-Gets all organizations for a given enterprise. Handles pagination.
+Gets all organizations for a given enterprise, requires the enterprise slug. Handles pagination and returns the organization id and login.
+
+To get the list of all org names you can use `jq` to parse the JSON output:
+
+```shell
+./get-enterprise-organizations.sh octocat-corp | jq -r '.data.enterprise.organizations.nodes[].login'
+```
 
 ## get-enterprise-roles-in-organizations-all-roles.sh
 
