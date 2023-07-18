@@ -69,11 +69,22 @@ Creates an enterprise organization - you just need to pass in the enterprise ID 
 
 ## create-organization-webhook.sh
 
-Creates an organization webhook, with a secret, with some help from `jq`. 
+Creates an organization webhook, with a secret, with some help from `jq`.
 
 ## create-repository-from-template.sh
 
 Create a new repo from a repo template - note that it only creates as public or private, if you want internal you have to do a subsequent call (see `change-repository-visibility.sh`)
+
+## copy-repo-variables.sh
+
+Copy repository variables from one repo to another.
+
+This script requires 2 environment variables:
+
+- SOURCE_TOKEN - A GitHub Token to access data from the source organization. Requires `repo` scope.
+- TARGET_TOKEN - A GitHub Token to set data on the target organization. Requires `repo` scope.
+
+The user running the command needs to be a repo admin or an organization owner on the target repository.
 
 ## copy-permissions-between-org-repos.sh
 
