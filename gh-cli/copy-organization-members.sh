@@ -41,15 +41,10 @@ fi
 GH_TOKEN=$SOURCE_TOKEN gh api graphql --paginate -F owner="$source_org" -f query='query membersWithRole($owner: String! $endCursor: String) {
   organization(login: $owner) {
     membersWithRole(first: 100, after: $endCursor) {
-      pageInfo {
-        hasNextPage
-        endCursor
-      }
+      pageInfo { hasNextPage endCursor }
       edges {
         role
-        node {
-          login
-        }
+        node { login }
       }
     }
   }
