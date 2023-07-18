@@ -20,13 +20,6 @@ if [[ ! " ${permissions[*]} " =~  ${permission}  ]]
     exit 1
 fi
 
-
-if [ "$permission" != "pull" ] &&  [ "$permission" != "triage" ] && [ "$permission" != "push" ] && [ "$permission" != "mantain" ] && [ "$permission" != "admin" ]
-  then
-    echo "permission must be one of following values: ${permissions[*]}"
-    exit 1
-fi
-
 # https://docs.github.com/en/rest/teams/teams?apiVersion=2022-11-28#add-or-update-team-repository-permissions
 
-gh api --method PUT "/orgs/$org/teams/$team/repos/$org/$repo" -f permission="$permission"
+gh api --method PUT "orgs/$org/teams/$team/repos/$org/$repo" -f permission="$permission"
