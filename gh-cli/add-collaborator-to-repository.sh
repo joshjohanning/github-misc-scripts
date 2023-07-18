@@ -20,4 +20,4 @@ if [[ ! " ${permissions[*]} " =~  ${role}  ]]
 fi
 
 # https://docs.github.com/en/rest/collaborators/collaborators?apiVersion=2022-11-28#add-a-repository-collaborator
-gh api --method PUT "/repos/$org/$repo/collaborators/$login" -f permission="$role"
+gh api --method PUT "repos/$org/$repo/collaborators/$login" -f permission="$role"
