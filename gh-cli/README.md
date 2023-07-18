@@ -484,6 +484,8 @@ This script is useful when doing migrations, to determine the kind of actions th
 
 Copy user and team repository member permissions to another repository (it can be in the same or on different organizations).
 
+External collaborators are not copied intentionally.
+
 If the team on the target organization doesn't exist, one will be created (same name, description, privacy and notification settings ONLY).
 
 > **Note:** The created team will not be a full copy, **Only** name and description are honored. If the team is part of a child/parent relantionship, or it's associated with an IDP group it will not be honored. If you want to change this behavior, you can modify the `createTeamIfNotExists` function.
