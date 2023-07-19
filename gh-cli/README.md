@@ -75,7 +75,7 @@ Creates an organization webhook, with a secret, with some help from `jq`.
 
 Create a new repo from a repo template - note that it only creates as public or private, if you want internal you have to do a subsequent call (see `change-repository-visibility.sh`)
 
-## copy-repo-variables.sh
+## copy-repository-variables.sh
 
 Copy repository variables from one repo to another.
 
