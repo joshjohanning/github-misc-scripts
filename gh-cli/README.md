@@ -281,6 +281,10 @@ Gets a list of members (via GraphQL) and their role in an organization
 
 Gets the repository count in an organization
 
+## get-organizations-projects-count.sh
+
+Gets the count of projects in all organizations in a given enterprise
+
 ## get-organization-team-members.sh
 
 Gets the members of a team
