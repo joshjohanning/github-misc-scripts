@@ -101,7 +101,7 @@ You can have more complex mappings this just a basic example, where a copy is be
 
 ## copy-organization-members.sh
 
-Copy organization members from one organization to the other, the member will **retain** the source role (owner or member), member cannot be demoted, if they already exist at the target with an ower role they cannot be demoted to member.
+Copy organization members from one organization to the other, the member will **retain** the source role (owner or member), member cannot be demoted, if they already exist at the target with an owner role they cannot be demoted to member.
 
 On Enterprise Managed Users organizations the users are only added if they are part of the Enterprise already (they need to be provisioned by the IDP)
 
