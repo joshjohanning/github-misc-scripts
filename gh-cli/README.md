@@ -83,7 +83,31 @@ External collaborators are not copied intentionally.
 
 If the team on the target organization doesn't exist, one will be created (same name, description, privacy, and notification settings ONLY).
 
-> **Note:** The created team will not be a full copy, **Only** name and description are honored. If the team is part of a child/parent relationship, or it's associated with an IDP group it will not be honored. If you want to change this behavior, you can modify the `createTeamIfNotExists` function.
+> **Note** The created team will not be a full copy, **Only** name and description are honored. If the team is part of a child/parent relationship, or it's associated with an IDP group it will not be honored. If you want to change this behavior, you can modify the `createTeamIfNotExists` function.
+
+This script requires 2 environment variables (with another optional one):
+
+- SOURCE_TOKEN - A GitHub Token to access data from the source organization. Requires `org:read` and `repo` scopes.
+- TARGET_TOKEN - A GitHub Token to set data on the target organization. Requires `org:admin` and `repo` scopes.
+- MAP_USER_SCRIPT - path to a script to map user login. This is optional, if you set this environment value it will call the script to map user logins before adding them on the target repo. The script will receive the user login as the first argument and it should return the new login. For example, if you want to add a suffix to the user login:
+
+```shell
+#!/bin/bash
+
+echo "$1"_SHORTCODE
+```
+
+You can have more complex mappings this just a basic example, where a copy is being done between a GHEC and a GHEC EMU instance where the logins are going to be exactly the same, but the EMU instance has a suffix on the logins.
+
+## copy-organization-members.sh
+
+Copy organization members from one organization to the other, the member will **retain** the source role (owner or member), member cannot be demoted, if they already exist at the target with an owner role they cannot be demoted to member.
+
+On Enterprise Managed Users organizations the users are only added if they are part of the Enterprise already (they need to be provisioned by the IDP)
+
+On GitHub Enterprise Cloud the added users will get an invitation to join the organization.
+
+> **Warning** For GitHub Enterprise Cloud the number of users you can copy in a day is limited per target org. See [API note on rate limits](https://docs.github.com/en/enterprise-cloud@latest/rest/orgs/members?apiVersion=2022-11-28#set-organization-membership-for-a-user) for the limit values.
 
 This script requires 2 environment variables (with another optional one):
 
