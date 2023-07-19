@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ $# -ne 4 ]
+if [ $# -lt 3 ]
   then
     echo "usage: $0 <source org> <source repo> <target org> [target repo]"
     echo "If target repo is skipped the name will be same as the source repo"
@@ -22,7 +22,7 @@ fi
 source_owner=$1
 source_repo=$2
 target_owner=$3
-target_repo=${4:-$repo}
+target_repo=${4:-$source_repo}
 
 function createOrUpdateRepoVariable() {
   local name=$1
