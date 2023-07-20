@@ -1,13 +1,19 @@
 #!/bin/bash
 
-# Verify if a specified user is a member of a team
+if [ $# -lt 3 ]
+  then
+    echo "usage: $(basename $0) <org> <team> <user>"
+    exit 1
+fi
 
-members=$(gh api --paginate /orgs/joshjohanning-org/teams/approver-team/members --jq='.[] | [.login] | join(",")')
+org=$1
+team=$2
+user=$3
 
-themember="joshjohanning"
+members=$(gh api --paginate /orgs/$org/teams/$team/members --jq='.[] | [.login] | join(",")')
 
-if grep -q "$members" <<< "$themember"; then
-  echo "member present"
+if [[ " ${members[*]} " =~ ${user} ]]; then
+  echo "User is a member of the team."
 else
-  echo "member not present"
+  echo "User is not a member of the team."
 fi
