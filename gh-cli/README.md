@@ -134,6 +134,14 @@ echo "$1"_SHORTCODE
 
 You can have more complex mappings this just a basic example, where a copy is being done between a GHEC and a GHEC EMU instance where the logins are going to be exactly the same, but the EMU instance has a suffix on the logins.
 
+## copy-organization-variables.sh
+
+Copy organization variables from one organization to another.
+
+If the variable already exists on the target organization it will be updated.
+
+> **Warning** If the variable is available to selected repositories and a repository with the same doesn't exist on the target organization that association is ignored.
+
 ## delete-release.sh
 
 Deletes a release from a repository - need the [ID](#get-releasessh) of the release
