@@ -35,6 +35,18 @@ Adds a status check to the branch protection status check contexts.
 
 See the [docs](https://docs.github.com/en/rest/branches/branch-protection?apiVersion=2022-11-28#add-status-check-contexts) for more information.
 
+## add-codeowners-file-to-repositories.sh
+
+Adds a `CODEOWNERS` file to a list of repositories.
+
+1. Run: `./generate-repositories-list.sh <org> > repos.csv`
+    - Or create a list of repos in a csv file, 1 per line, with a trailing empty line at the end of the file
+2. Run: `./add-codeowners-file-to-repositories.sh repos.csv ./CODEOWNERS false`
+    - For the 3rd argument, pass `true` if you want to overwrite existing file, otherwise it appends to existing
+
+> **Note** 
+> This is currently only checking for CODEOWNERS files in the root
+
 ## add-collaborator-to-repository.sh
 
 Adds a user with a specified role to a repository. Used in the `./copy-permissions-between-org-repos.sh` script.
@@ -42,6 +54,15 @@ Adds a user with a specified role to a repository. Used in the `./copy-permissio
 ## add-enterprise-organization-member.sh
 
 Adds a user from an Enterprise into an org. See: [Documentation](https://docs.github.com/en/graphql/reference/mutations#addenterpriseorganizationmember)
+
+## add-gitignore-file-to-repositories.sh
+
+Adds a `.gitignore` file to a list of repositories.
+
+1. Run: `./generate-repositories-list.sh <org> > repos.csv`
+    - Or create a list of repos in a csv file, 1 per line, with a trailing empty line at the end of the file
+2. Run: `./add-gitignore-file-to-repositories.sh repos.csv ./.gitignore false`
+    - For the 3rd argument, pass `true` if you want to overwrite existing file, otherwise it appends to existing
 
 ## add-ip-allow-list.sh
 
@@ -59,6 +80,22 @@ Adds a team to a repository with a given permission level
 
 Adds (invites) a user to an organization team
 
+## add-users-to-team-from-list.sh
+
+Invites users to a GitHub team from a list.
+
+1. Create a new csv file with the users you want to add, 1 per line
+2. Make sure to leave a trailing line at the end of the csv
+3. Run: `./add-users-to-team-from-list.sh users.csv <org> <team>`
+
+Example input file:
+
+```csv
+joshjohanning
+FluffyCarlton
+
+```
+
 ## change-repository-visibility.sh
 
 Change a repository visibility to internal, for example
@@ -67,9 +104,32 @@ Change a repository visibility to internal, for example
 
 Creates an enterprise organization - you just need to pass in the enterprise ID (obtained [via](./get-enterprise-id.sh)) along with billing email, admin logins, and organization name
 
+## create-enterprise-organizations-from-list.sh
+
+Creates organizations in an enterprise from a CSV input list (`orgs-to-create.csv`)
+
 ## create-organization-webhook.sh
 
-Creates an organization webhook, with a secret, with some help from `jq`.
+Creates an organization webhook, with a secret, with some help from `jq`
+
+## create-teams-from-list.sh
+
+Loops through a list of teams and creates them.
+
+1. Create a list of teams in a csv file, 1 per line, with a trailing empty line at the end of the file
+    - Child teams should have a slash in the name, e.g. `test1-team/test1-1-team`
+    - Build out the parent structure in the input file before creating the child teams; e.g. have the `test1-team` come before `test1-team/test1-1-team` in the file
+2. Run: `./create-teams-from-list.sh teams.csv <org>`
+
+Example input file:
+
+```csv
+test11-team
+test22-team
+test11-team/test11111-team
+test11-team/test11111-team/textxxx-team
+
+```
 
 ## create-repository-from-template.sh
 
@@ -146,6 +206,15 @@ If the variable already exists on the target organization it will be updated.
 
 Deletes a release from a repository - need the [ID](#get-releasessh) of the release
 
+## delete-repos-from-list.sh
+
+Deletes a list of repositories.
+
+1. Run: `./generate-repositories-list.sh <org> > repos.csv`
+2. Clean up the `repos.csv` file and remove the repos you **don't want to delete**
+3. Run `./delete-repositories-from-list.sh repos.csv`
+4. If you need to restore, [you have 90 days to restore](https://docs.github.com/en/repositories/creating-and-managing-repositories/restoring-a-deleted-repository)
+
 ## delete-repository.sh
 
 Deletes a repo - also works if the repository is locked from a failed migration, etc.
@@ -162,6 +231,25 @@ Deletes all webhooks from a repository.
 
 > **Warning** This operation is not reversible.
 
+## delete-teams-from-list.sh
+
+Loops through a list of teams and deletes them.
+
+1. Create a list of teams in a csv file, 1 per line, with a trailing empty line at the end of the file
+    - Child teams should have a slash in the name, e.g. `test1-team/test1-1-team`
+    - `!!! Important !!!` Note that if a team has child teams, all of the child teams will be deleted as well
+2. Run: `./delete-teams-from-list.sh teams.csv <org>`
+
+Example input file:
+
+```csv
+test11-team
+test22-team
+test11-team/test11111-team
+test11-team/test11111-team/textxxx-team
+
+```
+
 ## download-private-release-artifact.sh
 
 Downloads a release artifact from a private/internal repository. Can either download latest version or specific version, and supports file pattern matching to download one or multiple files. See [docs](https://cli.github.com/manual/gh_release_download) for more info.
@@ -177,6 +265,20 @@ Enable actions on repository - similar to [API example](./../api/enable-actions-
 ## generate-release-notes-from-tags.sh
 
 Generates release notes between two tags. See the [release notes docs](https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes) on further customizations and the [API docs](https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#generate-release-notes-content-for-a-release) for info on the API.
+
+## generate-repositories-list.sh
+
+Generates a list of repos in the organization - has many uses, but the exported repos can be used in the `delete-repos-from-list.sh` script.
+
+Credits to @tspascoal from this repo: https://github.com/tspascoal/dependabot-alerts-helper
+
+1. Run: `./generate-repositories.sh <org> > repos.csv`
+
+## generate-users-from-team.sh
+
+Generates a list of users from a team in the organization - has many uses, but the exported users can be used in the `remove-users-from-org.sh` script.
+
+1. Run: `./generate-users-from-team <org> <team> > users.csv`
 
 ## get-actions-permissions-on-repository.sh
 
@@ -545,6 +647,13 @@ Removes an enterprise user. See notes:
 
 Revokes an SSO-enabled PAT that a user created in an organization.
 
+## remove-users-from-org.sh
+
+Removes a list of users from the organization.
+
+1. Create a list of users in a csv file, 1 per line, with a trailing empty line at the end of the file (or use `./generate-users-from-team <org> <team>`)
+2. Run: `./remove-users-from-org.sh <file> <org>`
+
 ## rename-repository.sh
 
 Renaming a repo
@@ -574,3 +683,7 @@ Updates a branch protection rule for a given branch.
 ## update-enterprise-owner-organizational-role.sh
 
 Adds your account to an organization in an enterprise as an owner, member, or leave the organization.
+
+## verify-team-membership.sh
+
+Simple script to verify that a user is a member of a team
