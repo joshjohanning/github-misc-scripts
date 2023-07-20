@@ -156,6 +156,12 @@ May need to run this first in order for the gh cli to be able to have delete rep
 gh auth refresh -h github.com -s delete_repo
 ```
 
+## delete-repository-webhooks.sh
+
+Deletes all webhooks from a repository.
+
+> **Warning** This operation is not reversible.
+
 ## download-private-release-artifact.sh
 
 Downloads a release artifact from a private/internal repository. Can either download latest version or specific version, and supports file pattern matching to download one or multiple files. See [docs](https://cli.github.com/manual/gh_release_download) for more info.
