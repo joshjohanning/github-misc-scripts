@@ -498,6 +498,10 @@ Gets the SBOM for a repository.
 
 Uses the search API for code search.
 
+## sso-credential-authorizations.sh
+
+Retrieves a list of users who have SSO-enabled personal access tokens in an organization.
+
 ## get-sso-enabled-pats.sh
 
 Retrieves all SSO enabled PATs users have created for an organization.
@@ -562,10 +566,6 @@ See the [docs](https://docs.github.com/en/rest/branches/branch-protection?apiVer
 Sets the IP allow list to enabled/disable for an enterprise or organization. You can't enable the IP allow list unless the IP running the script is in the list.
 
 See the [docs](https://docs.github.com/en/graphql/reference/mutations#updateipallowlistenabledsetting) for further information.
-
-## sso-credential-authorizations.sh
-
-Retrieves a list of users who have SSO-enabled personal access tokens in an organization.
 
 ## update-branch-protection-rule.sh
 
