@@ -372,6 +372,14 @@ Retrieve the download URL for a specific version of a package in GitHub Packages
 > **Note:**
 > No longer works for GitHub.com and deprecated for GHES 3.7+. See [Changelog post](https://github.blog/changelog/2022-08-18-deprecation-notice-graphql-for-packages/), [GraphQL breaking changes](https://docs.github.com/en/graphql/overview/breaking-changes#changes-scheduled-for-2022-11-21-1), and [GHES 3.7 deprecations](https://docs.github.com/en/enterprise-server@3.7/admin/release-notes#3.7.0-deprecations)
 
+## get-pull-requests-in-organization.sh
+
+Gets the pull requests in an organization
+
+## get-pull-requests-in-repository.sh
+
+Gets the pull requests in a repository
+
 ## get-releases.sh
 
 Gets a list of releases for a repository
