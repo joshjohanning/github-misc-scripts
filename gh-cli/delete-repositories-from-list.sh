@@ -30,6 +30,6 @@ do
     repo=${data[1]}
 
     echo $"Deleting: $org/$repo"
-    gh repo delete $org/$repo --confirm
+    gh repo delete $org/$repo --yes
 
 done < "$filename"
