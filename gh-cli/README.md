@@ -96,6 +96,52 @@ FluffyCarlton
 
 ```
 
+## copy-organization-team-members.sh
+
+Copy organization team members from one organization to the other, the member will **retain** the source role (maintainer, member).
+
+It copies the members of team members of teams in the source organization but only for teams that also exist in the target organization.
+
+This script requires 2 environment variables (with another optional one):
+
+- SOURCE_TOKEN - A GitHub Token to access data from the source organization. Requires `org:read` scopes.
+- TARGET_TOKEN - A GitHub Token to set data on the target organization. Requires `org:admin` and `repo` scopes.
+- MAP_USER_SCRIPT - path to a script to map user login. This is optional, if you set this environment value it will call the script to map user logins before adding them on the target repo. The script will receive the user login as the first argument and it should return the new login. For example, if you want to add a suffix to the user login:
+
+```shell
+#!/bin/bash
+
+echo "$1"_SHORTCODE
+```
+
+You can have more complex mappings this just a basic example, where a copy is being done between a GHEC and a GHEC EMU instance where the logins are going to be exactly the same, but the EMU instance has a suffix on the logins.
+
+> **Warning** If users are not members of the target organizations they will not be added to the target team but may receive an invite to join the org.
+
+## copy-team-members.sh
+
+Copy team member from one team to another, it respect source role type (maintainer, member).
+
+> **Note** Only direct members are copied, child team members are not copied.
+
+If the target team already has user they will be preserved, this **doesn't** synch members between teams, it merely copies them. If you want a synch then you need to delete the existem team members in the target team before running this script.
+
+This script requires 2 environment variables (with another optional one):
+
+- SOURCE_TOKEN - A GitHub Token to access data from the source organization. Requires `org:read` scopes.
+- TARGET_TOKEN - A GitHub Token to set data on the target organization. Requires `org:admin` and `repo` scopes.
+- MAP_USER_SCRIPT - path to a script to map user login. This is optional, if you set this environment value it will call the script to map user logins before adding them on the target repo. The script will receive the user login as the first argument and it should return the new login. For example, if you want to add a suffix to the user login:
+
+```shell
+#!/bin/bash
+
+echo "$1"_SHORTCODE
+```
+
+You can have more complex mappings this just a basic example, where a copy is being done between a GHEC and a GHEC EMU instance where the logins are going to be exactly the same, but the EMU instance has a suffix on the logins.
+
+> **Warning** If users are not members of the target organizations they will not be added to the target team but may receive an invite to join the org.
+
 ## change-repository-visibility.sh
 
 Change a repository visibility to internal, for example
