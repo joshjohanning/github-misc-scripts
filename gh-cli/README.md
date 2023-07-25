@@ -135,6 +135,21 @@ test11-team/test11111-team/textxxx-team
 
 Create a new repo from a repo template - note that it only creates as public or private, if you want internal you have to do a subsequent call (see `change-repository-visibility.sh`)
 
+## copy-repository-environments.sh
+
+Copy environments from one repo to another.
+
+It copies all [environments](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment) and copies the following settings:
+
+- [Required Reviewers](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#required-reviewers)
+- [Wait Timer](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#wait-timer)
+- [Deployment Branches](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#deployment-branches)
+
+> **Note** The following settings are **not** copied:
+- [Environment Variables](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#environment-variables)
+- [Custom Deployment Protection Rules](https://docs.github.com/en/actions/deployment/protecting-deployments/configuring-custom-deployment-protection-rules#using-existing-custom-deployment-protection-rules)
+- Secrets
+
 ## copy-repository-variables.sh
 
 Copy repository variables from one repo to another.
