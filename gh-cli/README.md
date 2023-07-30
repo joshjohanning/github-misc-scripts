@@ -629,6 +629,17 @@ Generates a CSV with 4 columns:
 
 This script is useful when doing migrations, to determine the kind of actions that might be needed based on the webhooks inventory.
 
+## get-repositories-autolinks-csv.sh
+
+Gets a CSV with the list of repository autolinks in a GitHub organization.
+
+Generates a CSV with 4 columns:
+
+- repo name - The repository name
+- preffix - The autolink prefix
+- url template - The autolink url template
+- autonumeric - If the autolink is autonumeric or not (true/false)
+
 ## get-repository.sh
 
 Gets details about a repo
