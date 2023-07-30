@@ -631,7 +631,7 @@ This script is useful when doing migrations, to determine the kind of actions th
 
 ## get-repositories-autolinks-csv.sh
 
-Gets a CSV with the list of repository webhooks in a GitHub organization.
+Gets a CSV with the list of repository autolinks in a GitHub organization.
 
 Generates a CSV with 4 columns:
 
