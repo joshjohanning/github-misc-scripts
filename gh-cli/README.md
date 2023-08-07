@@ -357,6 +357,16 @@ github/codeql-action/init@2
 actions/dependency-review-action@3
 ```
 
+## get-app-tokens-for-each-installation.sh
+
+Generates a JWT for a GitHub app and use that JWT to generate installation tokens for each org installation. The installation tokens, returned as `ghs_abc`, can then be used for normal API calls. It requires the App ID and Private Key `pem` file as input.
+
+Notes:
+
+- Not using `gh-cli` since we have to pass in JWT using `curl` (but otherwise no PAT required)
+- Similar script to [get-apps-installed-in-organization.sh](./../scripts/get-app-tokens-for-each-installation.sh), but this one doesn't have a python dependency
+- Thanks [@kenmuse](https://github.com/kenmuse) for the [starter](https://gist.github.com/kenmuse/9429221d6944c087deaed2ec5075d0bf)! 
+
 ## get-apps-installed-in-organization.sh
 
 Get the slug of the apps installed in an organization.
