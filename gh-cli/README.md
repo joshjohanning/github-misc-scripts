@@ -710,6 +710,28 @@ Example output:
 "Test-Migrate", "joshjohanning", "ADMIN"
 ```
 
+## get-workflow-dispatch-inputs.sh
+
+Gets a list of `workflow_dispatch` inputs used to queue a workflow run since it's not available otherwise in the API
+
+Example output:
+
+```json
+[
+  {
+    "workflowName": "workflow-b",
+    "workflowId": "5870059990",
+    "inputs": {
+      "animal": "bee",
+      "color": "orange",
+      "food": "avocado"
+    },
+    "createdAt": "2023-08-15T17:45:21Z",
+    "conclusion": "success"
+  }
+],
+```
+
 ## remove-branch-protection-status-checks.sh
 
 Removes a status check from the branch protection status check contexts.
