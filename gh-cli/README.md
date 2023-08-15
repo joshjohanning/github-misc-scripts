@@ -737,6 +737,45 @@ Sets the IP allow list to enabled/disable for an enterprise or organization. You
 
 See the [docs](https://docs.github.com/en/graphql/reference/mutations#updateipallowlistenabledsetting) for further information.
 
+## set-org-ip-allow-list-rules.sh
+
+Sets the IP allow list rules for an organization from a set of rules defined in a file, the script is idempotent running it multiple times will only make the changes needed to match the rules in the file.
+
+In order to insure availability of the service, the script first adds all necessary rules and only after that will delete rules no longer applicable, this insures no dispruption of service if the change has an (partial) overlapping set of rules.
+
+Optionally you can optin in to save a backup of rules on GitHub before the changes are applied.
+
+> **Warning**
+> The script doesn't take into account if existing rules are active, if changes are made to an inactive rule it will be become active. If no changes are made, then active status will be ignored.
+
+This script requires `org:admin` scope.
+
+The file with the rules should be in the following format:
+
+```json
+ {
+     "list": [
+         {
+             "name": "proxy-us",
+             "ip": "192.168.1.1"
+         },
+         {
+             "name": "proxy-us",
+             "ip": "192.168.1.2"
+         },
+         {
+             "name": "proxy-eu",
+             "ip": "192.168.88.0/23"
+         }
+     ]
+ }
+```
+
+> **Note**
+> The script is not dependent of the rules, if you want to use a different format a cirurgical changed to the rules normalization is enough to use a different format (see script source code,search for `CUSTOMIZE` keyword)
+
+Run the script in `dry-run` to get a preview of the changes without actually applying them.
+
 ## update-branch-protection-rule.sh
 
 Updates a branch protection rule for a given branch.
