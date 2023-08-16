@@ -772,7 +772,7 @@ The file with the rules should be in the following format:
 ```
 
 > **Note**
-> The script is not dependent of the rules, if you want to use a different format a cirurgical changed to the rules normalization is enough to use a different format (see script source code,search for `CUSTOMIZE` keyword)
+> The script logic is independent of the rules format since the file is normalized before comparisons are performed. Ff you want to use a different format a cirurgical change to the rules normalization is enough to use another format (see script source code,search for `CUSTOMIZE` keyword)
 
 Run the script in `dry-run` to get a preview of the changes without actually applying them.
 
