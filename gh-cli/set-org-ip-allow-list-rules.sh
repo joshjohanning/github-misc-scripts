@@ -137,6 +137,10 @@ create_ip_allow_list_entry() {
   local allow_list_value=$2
   local name=$3
 
+   if [ "$dry_run" == "true" ]; then
+    return
+   fi
+
   gh api graphql -f owner_id="$owner_id" -f allow_list_value="$allow_list_value" -f name="$name" -f query='mutation ($owner_id: ID! $allow_list_value: String! $name: String!) { 
     createIpAllowListEntry(input: { ownerId: $owner_id allowListValue: $allow_list_value name: $name isActive: true }) { 
         ipAllowListEntry { id }
