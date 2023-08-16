@@ -2,7 +2,7 @@
 
 set -e
 
-## This script synchronizes the IP allow list rules in an organization with rules defined in a JSON file
+## This script synchronizes the IP allow list rules in an enterprise or organization with rules defined in a JSON file
 ## The script ignores if the rules are active or not, it only checks if the rule exists or not
 ## It doesn't validate the IP addresses nor checks if there are overlapping rules it does
 ## exact matches.
@@ -58,22 +58,24 @@ fi
 PrintUsage()
 {
   cat <<EOM
-Usage: migrate [options]
+Usage: $0 [options]
 
 Options:
     -h, --help                    : Show script help
     -r, --rules-file              : The file with IP Allow List rules to apply
     --backup-rules-file           : The file to backup the current rules to (optional)
-    --org                         : The organization to apply the rules to    
+    --org                         : The organization to apply the rules to (pass in an org OR an enterprise)
+    --enterprise                  : The enterprise to apply the rules to (pass in an org OR an enterprise)
     --dry-run                     : Run the script without making any changes
     
 Description:
 
 Example:
   ./set-ip-allow-list-setting.sh --org fabrikam -r rules.json --dry-run
+  ./set-ip-allow-list-setting.sh --enterprise fabrikam-enterprise -r rules.json --dry-run
 
 EOM
-  exit 0
+  exit 1
 }
 
 ####################################
@@ -87,6 +89,10 @@ while (( "$#" )); do
       ;;
     --org)
       organization_name=$2
+      shift 2
+      ;;
+    --enterprise)
+      enterprise_name=$2
       shift 2
       ;;
     --dry-run)
@@ -116,7 +122,7 @@ while (( "$#" )); do
   esac
 done
 
-if [ -z "$organization_name" ] || [ -z "$rules_file" ]; then
+if [ -z "$rules_file" ] || { [ "$organization_name" ] && [ "$enterprise_name" ]; } || { [ -z "$organization_name" ] && [ -z "$enterprise_name" ]; }; then
   PrintUsage
 fi
 
@@ -160,13 +166,22 @@ if [ "$dry_run" == "true" ]; then
   echo "Running in dry-run mode. No changes will be made"
 fi
 
-# get org id
-org_id=$(gh api graphql -f organizationName="$organization_name" \
-    -f query='query getOrganizationId($organizationName: String!) { organization(login: $organizationName) { id  } }' \
-    --jq '.data.organization.id')
+# get org/enterprise id
+if [ -n "$organization_name" ]; then
+  entity_name="$organization_name"
+  entity_id=$(gh api graphql -f organizationName="$organization_name" \
+      -f query='query getOrganizationId($organizationName: String!) { organization(login: $organizationName) { id  } }' \
+      --jq '.data.organization.id')
+elif [ -n "$enterprise_name" ]; then
+  entity_name="$enterprise_name"
+  entity_id=$(gh api -H X-Github-Next-Global-ID:1 graphql -f slug="$enterprise_name" \
+      -f query='query getEnterpriseId($slug: String!) { enterprise(slug: $slug) { id  } }' \
+      --jq '.data.enterprise.id')
+fi
 
-if [ "$org_id" == "null" ]  || [ "$org_id" == "" ]; then
-  echo "Organization $organization_name does not exist"
+
+if [ "$entity_id" == "null" ]  || [ "$entity_id" == "" ]; then
+  echo "$entity_name does not exist"
   exit 1
 fi
 
@@ -174,28 +189,52 @@ ipallow_file="_ip-allow-list.$$.json"
 ipallow_normalized_file="_ip-allow-list-normalized.$$.json"
 rules_normalized_file="_rules-normalized.$$.json"
 
-gh api graphql --paginate -f organizationName="$organization_name" -f query='
-query getOrganizationIpAllowList($organizationName: String! $endCursor: String) {
-  organization(login: $organizationName) {
-    ipAllowListEntries(first: 100, after: $endCursor) {
-      nodes {
-        id
-        allowListValue
-        name
-        isActive
-        createdAt
-        updatedAt
-      }
-      pageInfo {
-        endCursor
-        hasNextPage
+if [ -n "$organization_name" ]; then
+  gh api graphql --paginate -f organizationName="$organization_name" -f query='
+  query getOrganizationIpAllowList($organizationName: String! $endCursor: String) {
+    organization(login: $organizationName) {
+      ipAllowListEntries(first: 100, after: $endCursor) {
+        nodes {
+          id
+          allowListValue
+          name
+          isActive
+          createdAt
+          updatedAt
+        }
+        pageInfo {
+          endCursor
+          hasNextPage
+        }
       }
     }
-  }
-}' --jq '.data.organization.ipAllowListEntries.nodes[]' | jq -s '.' > "$ipallow_file"
+  }' --jq '.data.organization.ipAllowListEntries.nodes[]' | jq -s '.' > "$ipallow_file"
+elif [ -n "$enterprise_name" ]; then
+  gh api graphql --paginate -f enterpriseName="$enterprise_name" -f query='
+  query getEnterpriseIpAllowList($enterpriseName: String! $endCursor: String) {
+    enterprise(slug: $enterpriseName) {
+      ownerInfo {
+        ipAllowListEntries(first: 100, after: $endCursor) {
+          nodes {
+            id
+            allowListValue
+            name
+            isActive
+            createdAt
+            updatedAt
+          }
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+        }
+      }
+    }
+  }' --jq '.data.enterprise.ownerInfo.ipAllowListEntries.nodes[]' | jq -s '.' > "$ipallow_file"
+fi
 
 
-echo -e "\nCurrent number of rules in $organization_name: $(jq '. | length' < "$ipallow_file")"
+echo -e "\nCurrent number of rules in $entity_name: $(jq '. | length' < "$ipallow_file")"
 echo "Number of rules in $rules_file: $(jq '.list | length' < "$rules_file")"
 
 if [ -n "$backup_rules_file" ]; then
@@ -228,7 +267,7 @@ comm -23 <(sort "$rules_normalized_file") <(sort "$ipallow_normalized_file") | w
   
   echo "  Adding rule: $name with value: $allowListValue"
 
-  create_ip_allow_list_entry "$org_id" "$allowListValue" "$name"
+  create_ip_allow_list_entry "$entity_id" "$allowListValue" "$name"
 done
 
 ################# Remove rules #################

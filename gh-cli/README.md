@@ -774,16 +774,9 @@ Set the branch protection status check contexts.
 
 See the [docs](https://docs.github.com/en/rest/branches/branch-protection?apiVersion=2022-11-28#set-status-check-contexts) for more information.
 
-## set-ip-allow-list-setting.sh
+## set-ip-allow-list-rules.sh
 
-Sets the IP allow list to enabled/disable for an enterprise or organization. You can't enable the IP allow list unless the IP running the script is in the list.
-
-See the [docs](https://docs.github.com/en/graphql/reference/mutations#updateipallowlistenabledsetting) for further information.
-
-## set-org-ip-allow-list-rules.sh
-
-```suggestion
-Sets the IP allow list rules for an organization from a set of rules defined in a file. The script is idempotent; running it multiple times will only make the changes needed to match the rules in the file.
+Sets the IP allow list rules for an enterprise or organization from a set of rules defined in a file. The script is idempotent; running it multiple times will only make the changes needed to match the rules in the file.
 
 In order to ensure availability of the service, the script first adds all necessary rules and only after that will delete rules no longer applicable. This ensures no disruption of service if the change has an (partial) overlapping set of rules.
 
@@ -797,28 +790,34 @@ This script requires `org:admin` scope.
 The file with the rules should be in the following format:
 
 ```json
- {
-     "list": [
-         {
-             "name": "proxy-us",
-             "ip": "192.168.1.1"
-         },
-         {
-             "name": "proxy-us",
-             "ip": "192.168.1.2"
-         },
-         {
-             "name": "proxy-eu",
-             "ip": "192.168.88.0/23"
-         }
-     ]
- }
+{
+    "list": [
+        {
+            "name": "proxy-us",
+            "ip": "192.168.1.1"
+        },
+        {
+            "name": "proxy-us",
+            "ip": "192.168.1.2"
+        },
+        {
+            "name": "proxy-eu",
+            "ip": "192.168.88.0/23"
+        }
+    ]
+}
 ```
 
 > **Note**
 > The script logic is independent of the rules format since the file is normalized before comparisons are performed. If you want to use a different format, a surgical change to the rules normalization can be made (see script source code,search for `CUSTOMIZE` keyword)
 
 Run the script in `dry-run` to get a preview of the changes without actually applying them.
+
+## set-ip-allow-list-setting.sh
+
+Sets the IP allow list to enabled/disable for an enterprise or organization. You can't enable the IP allow list unless the IP running the script is in the list.
+
+See the [docs](https://docs.github.com/en/graphql/reference/mutations#updateipallowlistenabledsetting) for further information.
 
 ## update-branch-protection-rule.sh
 
