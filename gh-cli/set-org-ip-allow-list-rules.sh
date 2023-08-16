@@ -154,7 +154,6 @@ if [ "$dry_run" == "true" ]; then
   echo "Running in dry-run mode. No changes will be made"
 fi
 
-
 # get org id
 org_id=$(gh api graphql -f organizationName="$organization_name" \
     -f query='query getOrganizationId($organizationName: String!) { organization(login: $organizationName) { id  } }' \
@@ -189,6 +188,9 @@ query getOrganizationIpAllowList($organizationName: String! $endCursor: String) 
   }
 }' --jq '.data.organization.ipAllowListEntries.nodes[]' | jq -s '.' > "$ipallow_file"
 
+
+echo -e "\nCurrent number of rules in $organization_name: $(jq '. | length' < "$ipallow_file")"
+echo "Number of rules in $rules_file: $(jq '.list | length' < "$rules_file")"
 
 if [ -n "$backup_rules_file" ]; then
   echo "Writing backup of rules to $backup_rules_file"
@@ -225,6 +227,9 @@ done
 
 ################# Remove rules #################
 # This deletes the rules that are either different or just don't exist anymore
+
+# Print number of rules
+
 
 echo -e "\nChecking rules no longer relevant for deletion"
 
