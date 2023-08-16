@@ -34,6 +34,12 @@ set -e
 # The name is used as a key to identify the rule, so if you change the name, the rule will added (as a duplicated value) and then be deleted 
 # The key doesn't need to be unique, the same name can be used for multiple rules
 
+# check if gh is installed
+if ! command -v gh &> /dev/null
+then
+    echo "gh could not be found. Please install this required dependency"
+    exit 1
+fi
 
 # check if comm is installed
 if ! command -v comm &> /dev/null
