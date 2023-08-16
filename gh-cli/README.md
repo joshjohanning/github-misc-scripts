@@ -739,14 +739,15 @@ See the [docs](https://docs.github.com/en/graphql/reference/mutations#updateipal
 
 ## set-org-ip-allow-list-rules.sh
 
-Sets the IP allow list rules for an organization from a set of rules defined in a file, the script is idempotent running it multiple times will only make the changes needed to match the rules in the file.
+```suggestion
+Sets the IP allow list rules for an organization from a set of rules defined in a file. The script is idempotent; running it multiple times will only make the changes needed to match the rules in the file.
 
-In order to insure availability of the service, the script first adds all necessary rules and only after that will delete rules no longer applicable, this insures no disruption of service if the change has an (partial) overlapping set of rules.
+In order to ensure availability of the service, the script first adds all necessary rules and only after that will delete rules no longer applicable. This ensures no disruption of service if the change has an (partial) overlapping set of rules.
 
-Optionally you can opt-in in to save a backup of rules on GitHub before the changes are applied.
+Optionally, you can opt-in in to save a backup of rules on GitHub before the changes are applied.
 
 > **Warning**
-> The script doesn't take into account if existing rules are active, if changes are made to an inactive rule it will be become active. If no changes are made, then active status will be ignored.
+> The script doesn't take into account if existing rules are active. If changes are made to an inactive rule it will be become active. If no changes are made, then active status will be ignored.
 
 This script requires `org:admin` scope.
 
@@ -772,7 +773,7 @@ The file with the rules should be in the following format:
 ```
 
 > **Note**
-> The script logic is independent of the rules format since the file is normalized before comparisons are performed. Ff you want to use a different format a cirurgical change to the rules normalization is enough to use another format (see script source code,search for `CUSTOMIZE` keyword)
+> The script logic is independent of the rules format since the file is normalized before comparisons are performed. If you want to use a different format, a surgical change to the rules normalization can be made (see script source code,search for `CUSTOMIZE` keyword)
 
 Run the script in `dry-run` to get a preview of the changes without actually applying them.
 
