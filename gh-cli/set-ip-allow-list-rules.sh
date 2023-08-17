@@ -75,7 +75,6 @@ Example:
   ./set-ip-allow-list-setting.sh --enterprise fabrikam-enterprise -r rules.json --dry-run
 
 EOM
-  exit 1
 }
 
 ####################################
@@ -86,6 +85,7 @@ while (( "$#" )); do
   case "$1" in
     -h|--help)
       PrintUsage;
+      exit 0;
       ;;
     --org)
       organization_name=$2
@@ -124,6 +124,7 @@ done
 
 if [ -z "$rules_file" ] || { [ "$organization_name" ] && [ "$enterprise_name" ]; } || { [ -z "$organization_name" ] && [ -z "$enterprise_name" ]; }; then
   PrintUsage
+  exit 1
 fi
 
 # check if file exists
