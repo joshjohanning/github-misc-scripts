@@ -462,6 +462,10 @@ Gets info about an enterprise using the [EnterpriseOwnerInfo](https://docs.githu
 
 Gets the usage of a label in a repository. Returns data in table format.
 
+## get-organization-active-repositories.sh
+
+Gets a list of repositories in an organization that have had code pushed to it in the last X days.
+
 ## get-organization-id.sh
 
 Get the organization ID used for other GraphQL calls. Use the login of the Organization as the input.
