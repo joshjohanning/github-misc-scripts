@@ -311,6 +311,10 @@ test11-team/test11111-team/textxxx-team
 
 ```
 
+## delete-workflow-runs-for-workflow.sh
+
+This DELETES *ALL* workflow runs for a particular workflow in a repo. Can pass in a workflow file name or workflow ID.
+
 ## download-private-release-artifact.sh
 
 Downloads a release artifact from a private/internal repository. Can either download latest version or specific version, and supports file pattern matching to download one or multiple files. See [docs](https://cli.github.com/manual/gh_release_download) for more info.
