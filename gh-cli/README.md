@@ -349,9 +349,36 @@ Generates a list of users from a team in the organization - has many uses, but t
 
 Gets the status of Actions on a repository (ie, if Actions are disabled)
 
+## get-actions-usage-in-organization.sh
+
+Returns a list of all actions used in an organization using the SBOM API
+
+Example output:
+
+```csv
+71 actions/checkout@3
+42 actions/checkout@2
+13 actions/upload-artifact@2
+13 actions/setup-node@3
+```
+
+Or (`count-by-action` option to count by action as opposed to action@version):
+
+```csv
+130 actions/checkout
+35 actions/upload-artifact
+27 actions/github-script
+21 actions/setup-node
+```
+
+> **Note**
+> The count returned is the # of repositories that use the action - if single a repository uses the action 2x times, it will only be counted 1x
+
 ## get-actions-usage-in-repository.sh
 
-Gets the usage of Actions on a repository; example output:
+Returns a list of all actions used in a repository using the SBOM API
+
+Example output:
 
 ```csv
 actions/checkout@3
