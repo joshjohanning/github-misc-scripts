@@ -122,7 +122,8 @@ You can have more complex mappings this just a basic example, where a copy is be
 
 Copy team member from one team to another, it respect source role type (maintainer, member).
 
-> **Note** Only direct members are copied, child team members are not copied.
+> **Note** 
+> Only direct members are copied, child team members are not copied.
 
 If the target team already has user they will be preserved, this **doesn't** synch members between teams, it merely copies them. If you want a synch then you need to delete the existem team members in the target team before running this script.
 
@@ -191,10 +192,11 @@ It copies all [environments](https://docs.github.com/en/actions/deployment/targe
 - [Wait Timer](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#wait-timer)
 - [Deployment Branches](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#deployment-branches)
 
-> **Note** The following settings are **not** copied:
-- [Environment Variables](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#environment-variables)
-- [Custom Deployment Protection Rules](https://docs.github.com/en/actions/deployment/protecting-deployments/configuring-custom-deployment-protection-rules#using-existing-custom-deployment-protection-rules)
-- Secrets
+> **Note**
+> The following settings are **not** copied:
+>  - [Environment Variables](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#environment-variables)
+>  - [Custom Deployment Protection Rules](https://docs.github.com/en/actions/deployment/protecting-deployments/configuring-custom-deployment-protection-rules#using-existing-custom-deployment-protection-rules)
+>  - Secrets
 
 ## copy-repository-variables.sh
 
@@ -215,7 +217,8 @@ External collaborators are not copied intentionally.
 
 If the team on the target organization doesn't exist, one will be created (same name, description, privacy, and notification settings ONLY).
 
-> **Note** The created team will not be a full copy, **Only** name and description are honored. If the team is part of a child/parent relationship, or it's associated with an IDP group it will not be honored. If you want to change this behavior, you can modify the `createTeamIfNotExists` function.
+> **Note** 
+> The created team will not be a full copy, **Only** name and description are honored. If the team is part of a child/parent relationship, or it's associated with an IDP group it will not be honored. If you want to change this behavior, you can modify the `createTeamIfNotExists` function.
 
 This script requires 2 environment variables (with another optional one):
 
@@ -239,7 +242,8 @@ On Enterprise Managed Users organizations the users are only added if they are p
 
 On GitHub Enterprise Cloud the added users will get an invitation to join the organization.
 
-> **Warning** For GitHub Enterprise Cloud the number of users you can copy in a day is limited per target org. See [API note on rate limits](https://docs.github.com/en/enterprise-cloud@latest/rest/orgs/members?apiVersion=2022-11-28#set-organization-membership-for-a-user) for the limit values.
+> **Warning** 
+> For GitHub Enterprise Cloud the number of users you can copy in a day is limited per target org. See [API note on rate limits](https://docs.github.com/en/enterprise-cloud@latest/rest/orgs/members?apiVersion=2022-11-28#set-organization-membership-for-a-user) for the limit values.
 
 This script requires 2 environment variables (with another optional one):
 
@@ -558,7 +562,7 @@ Get outside collaborators added to a repository
 
 Retrieve the download URL for the latest version of a package in GitHub Packages. See: [Documentation](https://docs.github.com/en/graphql/reference/objects#package)
 
-> **Note:**
+> **Note**
 > No longer works for GitHub.com and deprecated for GHES 3.7+. See [Changelog post](https://github.blog/changelog/2022-08-18-deprecation-notice-graphql-for-packages/), [GraphQL breaking changes](https://docs.github.com/en/graphql/overview/breaking-changes#changes-scheduled-for-2022-11-21-1), and [GHES 3.7 deprecations](https://docs.github.com/en/enterprise-server@3.7/admin/release-notes#3.7.0-deprecations)
 
 ## get-package-download-url-for-specific-version-maven.sh
@@ -577,7 +581,7 @@ Retrieve the download URL for a specific version of an Maven package in GitHub P
 
 Retrieve the download URL for a specific version of a package in GitHub Packages. See: [Documentation](https://docs.github.com/en/graphql/reference/objects#package)
 
-> **Note:**
+> **Note**
 > No longer works for GitHub.com and deprecated for GHES 3.7+. See [Changelog post](https://github.blog/changelog/2022-08-18-deprecation-notice-graphql-for-packages/), [GraphQL breaking changes](https://docs.github.com/en/graphql/overview/breaking-changes#changes-scheduled-for-2022-11-21-1), and [GHES 3.7 deprecations](https://docs.github.com/en/enterprise-server@3.7/admin/release-notes#3.7.0-deprecations)
 
 ## get-pull-requests-in-organization.sh
