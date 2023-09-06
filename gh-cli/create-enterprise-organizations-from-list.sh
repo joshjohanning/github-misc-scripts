@@ -4,11 +4,32 @@
 
 # DO NOT REMOVE TRAILING NEW LINE IN THE INPUT CSV FILE
 
-# Use ../gh-cli/get-enterprise-id.sh to get the enterprise id to use here
+# adds ID of user running the script as an org admin
+
+if [ -z "$3" ]; then
+  echo "Usage: $0 <enterprise> <org-csv-file> <billing_email>"
+  echo "Example: ./create-enterprise-organizations-from-list.sh avocado-corp orgs.csv myemail@domain.com"
+  exit 1
+fi
+
+enterprise="$1"
+orgs="$2"
+billing_email="$3"
+
+user=$(gh api user --jq .login)
+admin_logins=$(jq -c -n --arg admin "$user" '[$admin]')
+
+enterprise_id=$(gh api graphql -H X-Github-Next-Global-ID:1 -f enterprise="$enterprise" -f query='
+query ($enterprise: String!)
+  { enterprise(slug: $enterprise) { 
+    id 
+  } 
+}
+' --jq '.data.enterprise.id')
 
 while read line;
 do
-gh api graphql -f enterprise_id='enterprise-graphql-guid' -f organization_name="$line" -f admin_logins='["my-username"]' -f billing_email='my@email.com' -f query='
+gh api graphql -F enterprise_id="$enterprise_id" -F organization_name="$line" -F admin_logins="$admin_logins" -F billing_email="$billing_email" -f query='
   mutation ($enterprise_id: ID! $organization_name: String! $admin_logins: [String!]! $billing_email: String!) {
     createEnterpriseOrganization(input: { enterpriseId: $enterprise_id login: $organization_name billingEmail: $billing_email profileName: $organization_name adminLogins: $admin_logins }) {
       enterprise {
@@ -20,4 +41,4 @@ gh api graphql -f enterprise_id='enterprise-graphql-guid' -f organization_name="
       }
     }
   }';
-done < orgs-to-create.csv
+done < $orgs
