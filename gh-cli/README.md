@@ -428,6 +428,10 @@ github/codeql-action/init@2
 actions/dependency-review-action@3
 ```
 
+### get-all-users-in-repository.sh
+
+Gets all users who have created an issue, pull request, issue comment, or pull request comment in a repository.
+
 ### get-app-tokens-for-each-installation.sh
 
 Generates a JWT for a GitHub app and use that JWT to generate installation tokens for each org installation. The installation tokens, returned as `ghs_abc`, can then be used for normal API calls. It requires the App ID and Private Key `pem` file as input.
