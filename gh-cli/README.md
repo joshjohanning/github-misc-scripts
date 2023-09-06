@@ -1,21 +1,36 @@
-# gh cli
+# gh-cli
+
+This directory contains a majority of the GitHub scripts for interacting with the GitHub API using the [gh cli](https://cli.github.com/) 🚀.
 
 ## CLI Setup
 
 ### Install
 
 ```bash
-brew install gh # install gh cli on mac with brew
-brew upgrade gh # upgrade
+$ brew install gh # install gh cli on mac with brew
+$ brew upgrade gh # upgrade
 ```
 
-Other OS's can find instructions [here](https://cli.github.com/manual/installation)
+```bash
+choco install gh # install gh cli on windows with chocolatey
+choco upgrade gh # upgrade
+```
+
+Other OS's (and install binaries) can find instructions [here](https://cli.github.com/manual/installation)
 
 ### Authentication 
 
+#### Authenticate in the CLI
+
 ```bash
-# start interactive setup
+# start interactive authentication
 $ gh auth login
+
+# start interactive authentication specifying additional scopes
+$ gh auth login -s admin:org
+
+# add additional scopes to existing token
+$ gh auth refresh -s admin:org
 
 # authenticate to github.com by reading the token from a file
 $ gh auth login --with-token < mytoken.txt
@@ -23,19 +38,32 @@ $ gh auth login --with-token < mytoken.txt
 # authenticate from standard input
 $ echo ${{ secrets.GITHUB_TOKEN }} | gh auth login --with-token
 
-# authenticate from environment variable
+# authenticate by setting an environment variable
 $ export GH_TOKEN=${{ secrets.GITHUB_TOKEN }}
+
+# authenticate to a GitHub Enterprise Server instance
+$ gh auth login -h github.mycompany.com # -h github.com is the default
+```
+
+#### Authenticate in GitHub Actions
+
+```yml
+- run: gh api -X GET --paginate /repos/joshjohanning/github-misc-scripts/pulls -f state=all --jq '.[].title'
+  env:
+    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 See the [docs](https://cli.github.com/manual/gh_auth_login) for further information.
 
-## add-branch-protection-status-checks.sh
+## Scripts 
+
+### add-branch-protection-status-checks.sh
 
 Adds a status check to the branch protection status check contexts.
 
 See the [docs](https://docs.github.com/en/rest/branches/branch-protection?apiVersion=2022-11-28#add-status-check-contexts) for more information.
 
-## add-codeowners-file-to-repositories.sh
+### add-codeowners-file-to-repositories.sh
 
 Adds a `CODEOWNERS` file to a list of repositories.
 
@@ -47,15 +75,15 @@ Adds a `CODEOWNERS` file to a list of repositories.
 > **Note** 
 > This is currently only checking for CODEOWNERS files in the root
 
-## add-collaborator-to-repository.sh
+### add-collaborator-to-repository.sh
 
 Adds a user with a specified role to a repository. Used in the `./copy-permissions-between-org-repos.sh` script.
 
-## add-enterprise-organization-member.sh
+### add-enterprise-organization-member.sh
 
 Adds a user from an Enterprise into an org. See: [Documentation](https://docs.github.com/en/graphql/reference/mutations#addenterpriseorganizationmember)
 
-## add-gitignore-file-to-repositories.sh
+### add-gitignore-file-to-repositories.sh
 
 Adds a `.gitignore` file to a list of repositories.
 
@@ -64,7 +92,7 @@ Adds a `.gitignore` file to a list of repositories.
 2. Run: `./add-gitignore-file-to-repositories.sh repos.csv ./.gitignore false`
     - For the 3rd argument, pass `true` if you want to overwrite existing file, otherwise it appends to existing
 
-## add-ip-allow-list.sh
+### add-ip-allow-list.sh
 
 Adds an IP to an enterprise's or organization's [IP allow list](https://docs.github.com/en/enterprise-cloud@latest/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/managing-allowed-ip-addresses-for-your-organization).
 
@@ -72,15 +100,15 @@ Use the [get-enterprise-id.sh](./get-enterprise-id.sh) or [get-organization-id.s
 
 See the [docs](https://docs.github.com/en/graphql/reference/mutations#createipallowlistentry) for further information.
 
-## add-team-to-repository.sh
+### add-team-to-repository.sh
 
 Adds a team to a repository with a given permission level
 
-## add-user-to-team.sh
+### add-user-to-team.sh
 
 Adds (invites) a user to an organization team
 
-## add-users-to-team-from-list.sh
+### add-users-to-team-from-list.sh
 
 Invites users to a GitHub team from a list.
 
@@ -96,7 +124,7 @@ FluffyCarlton
 
 ```
 
-## copy-organization-team-members.sh
+### copy-organization-team-members.sh
 
 Copy organization team members from one organization to the other, the member will **retain** the source role (maintainer, member).
 
@@ -118,7 +146,7 @@ You can have more complex mappings this just a basic example, where a copy is be
 
 > **Warning** If users are not members of the target organizations they will not be added to the target team but may receive an invite to join the org.
 
-## copy-team-members.sh
+### copy-team-members.sh
 
 Copy team member from one team to another, it respect source role type (maintainer, member).
 
@@ -143,23 +171,23 @@ You can have more complex mappings this just a basic example, where a copy is be
 
 > **Warning** If users are not members of the target organizations they will not be added to the target team but may receive an invite to join the org.
 
-## change-repository-visibility.sh
+### change-repository-visibility.sh
 
 Change a repository visibility to internal, for example
 
-## create-enterprise-organization.sh
+### create-enterprise-organization.sh
 
 Creates an enterprise organization - you just need to pass in the enterprise ID (obtained [via](./get-enterprise-id.sh)) along with billing email, admin logins, and organization name
 
-## create-enterprise-organizations-from-list.sh
+### create-enterprise-organizations-from-list.sh
 
 Creates organizations in an enterprise from a CSV input list (`orgs-to-create.csv`)
 
-## create-organization-webhook.sh
+### create-organization-webhook.sh
 
 Creates an organization webhook, with a secret, with some help from `jq`
 
-## create-teams-from-list.sh
+### create-teams-from-list.sh
 
 Loops through a list of teams and creates them.
 
@@ -178,11 +206,11 @@ test11-team/test11111-team/textxxx-team
 
 ```
 
-## create-repository-from-template.sh
+### create-repository-from-template.sh
 
 Create a new repo from a repo template - note that it only creates as public or private, if you want internal you have to do a subsequent call (see `change-repository-visibility.sh`)
 
-## copy-repository-environments.sh
+### copy-repository-environments.sh
 
 Copy environments from one repo to another.
 
@@ -198,7 +226,7 @@ It copies all [environments](https://docs.github.com/en/actions/deployment/targe
 >  - [Custom Deployment Protection Rules](https://docs.github.com/en/actions/deployment/protecting-deployments/configuring-custom-deployment-protection-rules#using-existing-custom-deployment-protection-rules)
 >  - Secrets
 
-## copy-repository-variables.sh
+### copy-repository-variables.sh
 
 Copy repository variables from one repo to another.
 
@@ -209,7 +237,7 @@ This script requires 2 environment variables:
 
 The user running the command needs to be a repo admin or an organization owner on the target repository.
 
-## copy-permissions-between-org-repos.sh
+### copy-permissions-between-org-repos.sh
 
 Copy user and team repository member permissions to another repository (it can be in the same or on different organizations).
 
@@ -234,7 +262,7 @@ echo "$1"_SHORTCODE
 
 You can have more complex mappings this just a basic example, where a copy is being done between a GHEC and a GHEC EMU instance where the logins are going to be exactly the same, but the EMU instance has a suffix on the logins.
 
-## copy-organization-members.sh
+### copy-organization-members.sh
 
 Copy organization members from one organization to the other, the member will **retain** the source role (owner or member), member cannot be demoted, if they already exist at the target with an owner role they cannot be demoted to member.
 
@@ -259,7 +287,7 @@ echo "$1"_SHORTCODE
 
 You can have more complex mappings this just a basic example, where a copy is being done between a GHEC and a GHEC EMU instance where the logins are going to be exactly the same, but the EMU instance has a suffix on the logins.
 
-## copy-organization-variables.sh
+### copy-organization-variables.sh
 
 Copy organization variables from one organization to another.
 
@@ -267,11 +295,11 @@ If the variable already exists on the target organization it will be updated.
 
 > **Warning** If the variable is available to selected repositories and a repository with the same doesn't exist on the target organization that association is ignored.
 
-## delete-release.sh
+### delete-release.sh
 
 Deletes a release from a repository - need the [ID](#get-releasessh) of the release
 
-## delete-repos-from-list.sh
+### delete-repos-from-list.sh
 
 Deletes a list of repositories.
 
@@ -280,7 +308,7 @@ Deletes a list of repositories.
 3. Run `./delete-repositories-from-list.sh repos.csv`
 4. If you need to restore, [you have 90 days to restore](https://docs.github.com/en/repositories/creating-and-managing-repositories/restoring-a-deleted-repository)
 
-## delete-repository.sh
+### delete-repository.sh
 
 Deletes a repo - also works if the repository is locked from a failed migration, etc.
 
@@ -290,13 +318,13 @@ May need to run this first in order for the gh cli to be able to have delete rep
 gh auth refresh -h github.com -s delete_repo
 ```
 
-## delete-repository-webhooks.sh
+### delete-repository-webhooks.sh
 
 Deletes all webhooks from a repository.
 
 > **Warning** This operation is not reversible.
 
-## delete-teams-from-list.sh
+### delete-teams-from-list.sh
 
 Loops through a list of teams and deletes them.
 
@@ -315,27 +343,27 @@ test11-team/test11111-team/textxxx-team
 
 ```
 
-## delete-workflow-runs-for-workflow.sh
+### delete-workflow-runs-for-workflow.sh
 
 This DELETES *ALL* workflow runs for a particular workflow in a repo. Can pass in a workflow file name or workflow ID.
 
-## download-private-release-artifact.sh
+### download-private-release-artifact.sh
 
 Downloads a release artifact from a private/internal repository. Can either download latest version or specific version, and supports file pattern matching to download one or multiple files. See [docs](https://cli.github.com/manual/gh_release_download) for more info.
 
-## download-public-release-artifact.sh
+### download-public-release-artifact.sh
 
 Using `curl`, `wget`, or `gh release download` to download public release assets.
 
-## enable-actions-on-repository.sh
+### enable-actions-on-repository.sh
 
 Enable actions on repository - similar to [API example](./../api/enable-actions-on-repository.sh), but using `gh cli`
 
-## generate-release-notes-from-tags.sh
+### generate-release-notes-from-tags.sh
 
 Generates release notes between two tags. See the [release notes docs](https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes) on further customizations and the [API docs](https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#generate-release-notes-content-for-a-release) for info on the API.
 
-## generate-repositories-list.sh
+### generate-repositories-list.sh
 
 Generates a list of repos in the organization - has many uses, but the exported repos can be used in the `delete-repos-from-list.sh` script.
 
@@ -343,17 +371,17 @@ Credits to @tspascoal from this repo: https://github.com/tspascoal/dependabot-al
 
 1. Run: `./generate-repositories.sh <org> > repos.csv`
 
-## generate-users-from-team.sh
+### generate-users-from-team.sh
 
 Generates a list of users from a team in the organization - has many uses, but the exported users can be used in the `remove-users-from-org.sh` script.
 
 1. Run: `./generate-users-from-team <org> <team> > users.csv`
 
-## get-actions-permissions-on-repository.sh
+### get-actions-permissions-on-repository.sh
 
 Gets the status of Actions on a repository (ie, if Actions are disabled)
 
-## get-actions-usage-in-organization.sh
+### get-actions-usage-in-organization.sh
 
 Returns a list of all actions used in an organization using the SBOM API
 
@@ -378,7 +406,7 @@ Or (`count-by-action` option to count by action as opposed to action@version):
 > **Note**
 > The count returned is the # of repositories that use the action - if single a repository uses the action 2x times, it will only be counted 1x
 
-## get-actions-usage-in-repository.sh
+### get-actions-usage-in-repository.sh
 
 Returns a list of all actions used in a repository using the SBOM API
 
@@ -392,7 +420,7 @@ github/codeql-action/init@2
 actions/dependency-review-action@3
 ```
 
-## get-app-tokens-for-each-installation.sh
+### get-app-tokens-for-each-installation.sh
 
 Generates a JWT for a GitHub app and use that JWT to generate installation tokens for each org installation. The installation tokens, returned as `ghs_abc`, can then be used for normal API calls. It requires the App ID and Private Key `pem` file as input.
 
@@ -402,21 +430,21 @@ Notes:
 - Similar script to [get-apps-installed-in-organization.sh](./../scripts/get-app-tokens-for-each-installation.sh), but this one doesn't have a python dependency
 - Thanks [@kenmuse](https://github.com/kenmuse) for the [starter](https://gist.github.com/kenmuse/9429221d6944c087deaed2ec5075d0bf)! 
 
-## get-apps-installed-in-organization.sh
+### get-apps-installed-in-organization.sh
 
 Get the slug of the apps installed in an organization.
 
-## get-branch-protection-rule.sh
+### get-branch-protection-rule.sh
 
 Gets a branch protection rule for a given branch.
 
-## get-branch-protection-status-checks.sh
+### get-branch-protection-status-checks.sh
 
 Gets the branch protection status check contexts.
 
 See the [docs](https://docs.github.com/en/rest/branches/branch-protection?apiVersion=2022-11-28#get-all-status-check-contexts) for more information.
 
-## get-code-scanning-status-for-every-repository.sh
+### get-code-scanning-status-for-every-repository.sh
 
 Get code scanning analyses status for every repository in an organization.
 
@@ -430,11 +458,11 @@ joshjohanning-org/.github, no code scanning results
 "joshjohanning-org/azdo-terraform-tailspin","defsec","refs/heads/main","2023-04-22T21:35:22Z",".github/workflows/tfsec-analysis.yml:tfsec"
 ```
 
-## get-commits-since-date.sh
+### get-commits-since-date.sh
 
 Gets the commits of since a certain date - date should be in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format, ie: `since=2022-03-28T16:00:49Z`
 
-## get-dependencies-in-repository.sh
+### get-dependencies-in-repository.sh
 
 Gets dependencies used in the repository, including the ecosystem and version number.
 
@@ -448,7 +476,7 @@ golang/github.com/mattn/go-sqlite3@1.14.4
 githubactions/actions/checkout@3
 ```
 
-## get-earliest-restricted-contribution-date.sh
+### get-earliest-restricted-contribution-date.sh
 
 In a 1 year block, return the date of the first non-public contribution
 
@@ -457,6 +485,7 @@ In a 1 year block, return the date of the first non-public contribution
 See also: [Another example](https://github.com/orgs/community/discussions/24427#discussioncomment-3244093)
 
 ## get-enterprise-id.sh
+### get-enterprise-id.sh
 
 Get the enterprise ID used for other GraphQL calls. Use the URL slug of the Enterprise as the input.
 
@@ -465,13 +494,13 @@ Adding `-H X-Github-Next-Global-ID:1` per the documentation here to get the new 
 - https://github.blog/changelog/2022-11-10-graphql-legacy-global-id-deprecation-message/
 - https://docs.github.com/en/graphql/guides/migrating-graphql-global-node-ids
 
-## get-enterprise-ip-allow-list.sh
+### get-enterprise-ip-allow-list.sh
 
 Gets the current IP allow list for an enterprise.
 
 See the [docs](https://docs.github.com/en/graphql/reference/objects#enterpriseownerinfo) for further information.
 
-## get-enterprise-organizations.sh
+### get-enterprise-organizations.sh
 
 Gets all organizations for a given enterprise, requires the enterprise slug. Handles pagination and returns the organization id and login.
 
@@ -481,27 +510,27 @@ To get the list of all org names you can use `jq` to parse the JSON output:
 ./get-enterprise-organizations.sh octocat-corp | jq -r '.data.enterprise.organizations.nodes[].login'
 ```
 
-## get-enterprise-roles-in-organizations-all-roles.sh
+### get-enterprise-roles-in-organizations-all-roles.sh
 
 Queries every organization in an enterprise and returns whether the user is a member or a member + admin of the organization.
 
-## get-enterprise-roles-in-organizations-with-named-role.sh
+### get-enterprise-roles-in-organizations-with-named-role.sh
 
 Queries the enterprise for all organizations given the specified role (e.g.: which organizations is the user an admin of)
 
-## get-enterprise-settings.sh
+### get-enterprise-settings.sh
 
 Gets info about an enterprise using the [EnterpriseOwnerInfo](https://docs.github.com/en/graphql/reference/objects#enterpriseownerinfo) GraphQL object.
 
-## get-label-usage-in-repository.sh
+### get-label-usage-in-repository.sh
 
 Gets the usage of a label in a repository. Returns data in table format.
 
-## get-organization-active-repositories.sh
+### get-organization-active-repositories.sh
 
 Gets a list of repositories in an organization that have had code pushed to it in the last X days.
 
-## get-organization-id.sh
+### get-organization-id.sh
 
 Get the organization ID used for other GraphQL calls. Use the login of the Organization as the input.
 
@@ -510,13 +539,13 @@ Adding `-H X-Github-Next-Global-ID:1` per the documentation here to get the new 
 - https://github.blog/changelog/2022-11-10-graphql-legacy-global-id-deprecation-message/
 - https://docs.github.com/en/graphql/guides/migrating-graphql-global-node-ids
 
-## get-organization-ip-allow-list.sh
+### get-organization-ip-allow-list.sh
 
 Gets the current IP allow list for an organization.
 
 See the [docs](https://docs.github.com/en/graphql/reference/objects#ipallowlistentry) for further information.
 
-## get-organization-language-count.sh
+### get-organization-language-count.sh
 
 Get a total count of the primary language of repositories in an organization.
 
@@ -530,91 +559,91 @@ Example output:
    4 Java
 ```
 
-## get-organization-members-api.sh
+### get-organization-members-api.sh
 
 Gets a list of members in an organization using the REST API (able to get their ID to tie to Git event audit log)
 
-## get-organization-members.sh
+### get-organization-members.sh
 
 Gets a list of members (via GraphQL) and their role in an organization
 
-## get-organization-repository-count.sh
+### get-organization-repository-count.sh
 
 Gets the repository count in an organization
 
-## get-organizations-projects-count.sh
+### get-organizations-projects-count.sh
 
 Gets the count of projects in all organizations in a given enterprise
 
-## get-organization-team-members.sh
+### get-organization-team-members.sh
 
 Gets the members of a team
 
-## get-organization-team.sh
+### get-organization-team.sh
 
 Gets a team
 
-## get-outside-collaborators-added-to-repository.sh
+### get-outside-collaborators-added-to-repository.sh
 
 Get outside collaborators added to a repository
 
-## get-package-download-url-for-latest-version
+### get-package-download-url-for-latest-version
 
 Retrieve the download URL for the latest version of a package in GitHub Packages. See: [Documentation](https://docs.github.com/en/graphql/reference/objects#package)
 
 > **Note**
 > No longer works for GitHub.com and deprecated for GHES 3.7+. See [Changelog post](https://github.blog/changelog/2022-08-18-deprecation-notice-graphql-for-packages/), [GraphQL breaking changes](https://docs.github.com/en/graphql/overview/breaking-changes#changes-scheduled-for-2022-11-21-1), and [GHES 3.7 deprecations](https://docs.github.com/en/enterprise-server@3.7/admin/release-notes#3.7.0-deprecations)
 
-## get-package-download-url-for-specific-version-maven.sh
+### get-package-download-url-for-specific-version-maven.sh
 
 Retrieve the download URL for a specific version of an Maven package in GitHub Packages.
 
-## get-package-download-url-for-specific-version-npm.sh
+### get-package-download-url-for-specific-version-npm.sh
 
 Retrieve the download URL for a specific version of an NPM package in GitHub Packages.
 
-## get-package-download-url-for-specific-version-nuget.sh
+### get-package-download-url-for-specific-version-nuget.sh
 
 Retrieve the download URL for a specific version of an Maven package in GitHub Packages.
 
-## get-package-download-url-for-specific-version.sh
+### get-package-download-url-for-specific-version.sh
 
 Retrieve the download URL for a specific version of a package in GitHub Packages. See: [Documentation](https://docs.github.com/en/graphql/reference/objects#package)
 
 > **Note**
 > No longer works for GitHub.com and deprecated for GHES 3.7+. See [Changelog post](https://github.blog/changelog/2022-08-18-deprecation-notice-graphql-for-packages/), [GraphQL breaking changes](https://docs.github.com/en/graphql/overview/breaking-changes#changes-scheduled-for-2022-11-21-1), and [GHES 3.7 deprecations](https://docs.github.com/en/enterprise-server@3.7/admin/release-notes#3.7.0-deprecations)
 
-## get-pull-requests-in-organization.sh
+### get-pull-requests-in-organization.sh
 
 Gets the pull requests in an organization
 
-## get-pull-requests-in-repository.sh
+### get-pull-requests-in-repository.sh
 
 Gets the pull requests in a repository
 
-## get-releases.sh
+### get-releases.sh
 
 Gets a list of releases for a repository
 
-## get-repositories-not-using-actions.sh
+### get-repositories-not-using-actions.sh
 
 Get repositories not using actions, by files committed in the `.github/workflows` directory
 
-## get-repositories-using-actions.sh
+### get-repositories-using-actions.sh
 
 Get repositories using actions, by files committed in the `.github/workflows` directory
 
-## get-repositories-using-circleci.sh
+### get-repositories-using-circleci.sh
 
 Get repositories that have a CircleCI configuration file `.circleci/config.yml`
 
 (not perfect, doesn't search for `codeql*.yml`)
 
-## get-repositories-using-codeql.sh
+### get-repositories-using-codeql.sh
 
 Get repositories that have a CodeQL configuration file `.github/workflows/codeql.yml`
 
-## get-repository-languages-for-organization.sh
+### get-repository-languages-for-organization.sh
 
 Get the repository language information (ie: JavaScript, Python, etc) for all repositories in an organization. Can specify how many language results to return (top X).
 
@@ -627,15 +656,15 @@ zero-to-hero-codeql-test,C#
 Python_scripts_examples,Python
 ```
 
-## get-repository-licenses-for-organization.sh
+### get-repository-licenses-for-organization.sh
 
 Get the repository license information (ie: MIT, Apache 2.0, etc) for all repositories in an organization.
 
-## get-repository-topics.sh
+### get-repository-topics.sh
 
 Gets a list of topics for a repository
 
-## get-repository-users-by-permission-for-organization.sh
+### get-repository-users-by-permission-for-organization.sh
 
 Similar to `get-repository-users-by-permission.sh` except that it loops through all repositories. See the below note about cumulative permissions; if you query for `push` you will also get users for `maintain` and `admin`, but you can pass in a `false` and retrieve only users who have `push`.
 
@@ -649,7 +678,7 @@ zero-to-hero-codeql-test,joshjohanning,admin
 Python_scripts_examples,joshjohanning,admin
 ```
 
-## get-repository-users-by-permission.sh
+### get-repository-users-by-permission.sh
 
 Gets a list of users by permission level for a repository (ie: retrieve the list of users who have admin access to a repository). For write access, use `push` as the permission. There is a flag to either cumulatively return permissions (ie: `push` returns those with `maintain` and `admin` as well), but the default is explicitly return users with the permission you specify.
 
@@ -661,11 +690,11 @@ joshgoldfishturtle,admin
 joshjohanning,admin
 ```
 
-## get-repository-users-permission-and-source.sh
+### get-repository-users-permission-and-source.sh
 
 Returns the permission for everyone who can access the repo and how they access it (direct, team, org)
 
-## get-repositories-webhooks-csv.sh
+### get-repositories-webhooks-csv.sh
 
 Gets a CSV with the list of repository webhooks in a GitHub organization.
 
@@ -678,7 +707,7 @@ Generates a CSV with 4 columns:
 
 This script is useful when doing migrations, to determine the kind of actions that might be needed based on the webhooks inventory.
 
-## get-repositories-autolinks-csv.sh
+### get-repositories-autolinks-csv.sh
 
 Gets a CSV with the list of repository autolinks in a GitHub organization.
 
@@ -689,11 +718,11 @@ Generates a CSV with 4 columns:
 - url template - The autolink url template
 - autonumeric - If the autolink is autonumeric or not (true/false)
 
-## get-repository.sh
+### get-repository.sh
 
 Gets details about a repo
 
-## get-saml-identities-in-enterprise.sh
+### get-saml-identities-in-enterprise.sh
 
 Retrieves the SAML linked identity of a user in a GitHub Enterprise.
 
@@ -703,7 +732,7 @@ May need to run this first in order for the gh cli to be able to retrieve the SA
 gh auth refresh -h github.com -s admin:enterprise
 ```
 
-## get-saml-identities-in-organization.sh
+### get-saml-identities-in-organization.sh
 
 Retrieves the SAML linked identity of a user in a GitHub organization.
 
@@ -713,31 +742,31 @@ May need to run this first in order for the gh cli to be able to retrieve the SA
 gh auth refresh -h github.com -s admin:org
 ```
 
-## get-sbom-in-repository.sh
+### get-sbom-in-repository.sh
 
 Gets the SBOM for a repository.
 
-## get-search-results.sh
+### get-search-results.sh
 
 Uses the search API for code search.
 
-## sso-credential-authorizations.sh
+### sso-credential-authorizations.sh
 
 Retrieves a list of users who have SSO-enabled personal access tokens in an organization.
 
-## get-sso-enabled-pats.sh
+### get-sso-enabled-pats.sh
 
 Retrieves all SSO enabled PATs users have created for an organization.
 
-## get-sso-enabled-ssh-keys.sh
+### get-sso-enabled-ssh-keys.sh
 
 Retrieves all SSO-enabled SSH keys users have created for an organization.
 
-## get-user-id.sh
+### get-user-id.sh
 
 Retrieves the ID of a user for other GraphQL calls
 
-## get-users-directly-added-to-repositories.sh
+### get-users-directly-added-to-repositories.sh
 
 Gets a list of users directly added to repositories
 
@@ -749,7 +778,7 @@ Example output:
 "Test-Migrate", "joshjohanning", "ADMIN"
 ```
 
-## get-workflow-dispatch-inputs.sh
+### get-workflow-dispatch-inputs.sh
 
 Gets a list of `workflow_dispatch` inputs used to queue a workflow run since it's not available otherwise in the API
 
@@ -771,13 +800,13 @@ Example output:
 ],
 ```
 
-## remove-branch-protection-status-checks.sh
+### remove-branch-protection-status-checks.sh
 
 Removes a status check from the branch protection status check contexts.
 
 See the [docs](https://docs.github.com/en/rest/branches/branch-protection?apiVersion=2022-11-28#remove-status-check-contexts) for more information.
 
-## remove-enterprise-user.sh
+### remove-enterprise-user.sh
 
 Removes an enterprise user. See notes:
 
@@ -786,34 +815,34 @@ Removes an enterprise user. See notes:
     1. List org members and get the id from there: `./get-organization-members.sh`
     2. Get user id: `./get-user-id.sh`
 
-## remove-sso-enabled-pat.sh
+### remove-sso-enabled-pat.sh
 
 Revokes an SSO-enabled PAT that a user created in an organization.
 
-## remove-users-from-org.sh
+### remove-users-from-org.sh
 
 Removes a list of users from the organization.
 
 1. Create a list of users in a csv file, 1 per line, with a trailing empty line at the end of the file (or use `./generate-users-from-team <org> <team>`)
 2. Run: `./remove-users-from-org.sh <file> <org>`
 
-## rename-repository.sh
+### rename-repository.sh
 
 Renaming a repo
 
-## search-organization-for-code.sh
+### search-organization-for-code.sh
 
 Code search in an organization.
 
 See the [docs](https://docs.github.com/en/rest/search?apiVersion=2022-11-28#search-code) and [StackOverflow](https://stackoverflow.com/questions/24132790/how-to-search-for-code-in-github-with-github-api) for more information.
 
-## set-branch-protection-status-checks.sh
+### set-branch-protection-status-checks.sh
 
 Set the branch protection status check contexts.
 
 See the [docs](https://docs.github.com/en/rest/branches/branch-protection?apiVersion=2022-11-28#set-status-check-contexts) for more information.
 
-## set-ip-allow-list-rules.sh
+### set-ip-allow-list-rules.sh
 
 Sets the IP allow list rules for an enterprise or organization from a set of rules defined in a file. The script is idempotent; running it multiple times will only make the changes needed to match the rules in the file.
 
@@ -852,20 +881,20 @@ The file with the rules should be in the following format:
 
 Run the script in `dry-run` to get a preview of the changes without actually applying them.
 
-## set-ip-allow-list-setting.sh
+### set-ip-allow-list-setting.sh
 
 Sets the IP allow list to enabled/disable for an enterprise or organization. You can't enable the IP allow list unless the IP running the script is in the list.
 
 See the [docs](https://docs.github.com/en/graphql/reference/mutations#updateipallowlistenabledsetting) for further information.
 
-## update-branch-protection-rule.sh
+### update-branch-protection-rule.sh
 
 Updates a branch protection rule for a given branch.
 
-## update-enterprise-owner-organizational-role.sh
+### update-enterprise-owner-organizational-role.sh
 
 Adds your account to an organization in an enterprise as an owner, member, or leave the organization.
 
-## verify-team-membership.sh
+### verify-team-membership.sh
 
 Simple script to verify that a user is a member of a team
