@@ -492,7 +492,16 @@ In a 1 year block, return the date of the first non-public contribution
 
 See also: [Another example](https://github.com/orgs/community/discussions/24427#discussioncomment-3244093)
 
-## get-enterprise-id.sh
+### get-enterprise-audit-log-for-organization.sh
+
+This queries the [Enterprise audit log API](https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/using-the-audit-log-api-for-your-enterprise) to specifically return if features have been enabled or disabled in an organization since a given date.
+
+Additional resources:
+
+- [Using the audit log API for your enterprise](https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/using-the-audit-log-api-for-your-enterprise)
+- [Searching the audit log for your enterprise](https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/searching-the-audit-log-for-your-enterprise)
+- [Get the audit log for an enterprise](https://docs.github.com/en/enterprise-cloud@latest/rest/enterprise-admin/audit-log?apiVersion=2022-11-28#get-the-audit-log-for-an-enterprise)
+
 ### get-enterprise-id.sh
 
 Get the enterprise ID used for other GraphQL calls. Use the URL slug of the Enterprise as the input.
