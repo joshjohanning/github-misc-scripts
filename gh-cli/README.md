@@ -185,11 +185,11 @@ Change a repository visibility to internal, for example
 
 ### create-enterprise-organization.sh
 
-Creates an enterprise organization - you just need to pass in the enterprise ID (obtained [via](./get-enterprise-id.sh)) along with billing email, admin logins, and organization name
+Creates an organization in an enterprise
 
 ### create-enterprise-organizations-from-list.sh
 
-Creates organizations in an enterprise from a CSV input list (`orgs-to-create.csv`)
+Creates organizations in an enterprise from a CSV input list
 
 ### create-organization-webhook.sh
 
