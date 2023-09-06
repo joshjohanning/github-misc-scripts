@@ -1,22 +1,30 @@
 # gh-cli
 
-This directory contains a majority of the GitHub scripts for interacting with the GitHub API using the [gh cli](https://cli.github.com/) 🚀.
+This directory contains scripts for interacting with the GitHub API / GraphQL using the [gh cli](https://cli.github.com/) 🚀.
 
 ## CLI Setup
 
-### Install
+### Installation
+
+#### macOS
 
 ```bash
 $ brew install gh # install gh cli on mac with brew
 $ brew upgrade gh # upgrade
 ```
 
+#### Windows
+
 ```bash
-choco install gh # install gh cli on windows with chocolatey
-choco upgrade gh # upgrade
+$ choco install gh # install gh cli on windows with chocolatey
+$ choco upgrade gh # upgrade
 ```
 
-Other OS's (and install binaries) can find instructions [here](https://cli.github.com/manual/installation)
+MSI installer is available [here](https://github.com/cli/cli/releases/latest)
+
+#### Linux/other
+
+Other operating systems and install methods can be found [here](https://github.com/cli/cli#installation)
 
 ### Authentication 
 
