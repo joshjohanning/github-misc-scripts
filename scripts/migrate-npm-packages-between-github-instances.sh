@@ -87,4 +87,4 @@ done
 echo "Run this to clean up your working dir: rm -rf ./temp"
 
 # log out of gh - optional
-gh auth logout
+# gh auth logout -h $SOURCE_HOST
