@@ -30,7 +30,7 @@ if [ "$source_org" = "$target_org" ]
 fi
 
 # read all target teams and loops
-GH_TOKEN=$TARGET_TOKEN gh api "orgs/$target_org/teams" --jq '.[].slug' | while read -r slug; do
+GH_TOKEN=$TARGET_TOKEN gh api --paginate "orgs/$target_org/teams" --jq '.[].slug' | while read -r slug; do
   # check if team exists at source
   if ! GH_TOKEN=$SOURCE_TOKEN gh api "orgs/$source_org/teams/$slug" --silent ; then 
     echo "Team $slug does not exist at source. Skipping"
