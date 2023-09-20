@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Adds the authenticated user (Enterprise Owner) to an organization in an enterprise
+
 # Notes:
 #  - this script uses the enterprise owner's ability to add themselves to an organization in the enterprise
 #  - this script only adds the person running the script to the organization, and that person needs to be an enterprise owner

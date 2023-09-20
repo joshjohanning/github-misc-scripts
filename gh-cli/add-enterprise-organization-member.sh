@@ -1,7 +1,12 @@
 #!/bin/bash
 
-# gh cli's token needs to be able to admin enterprise - run this first if it can't
-# gh auth refresh -h github.com -s admin:enterprise
+# Adds a user to an organization in an enterprise
+
+# Notes:
+#  - for EMU, this currently only works for adding:
+#       1. Enterprise owners
+#       2. Members who are already added to at least (1) org in the enterprise
+#  - gh cli's token needs to be able to admin enterprise: gh auth refresh -h github.com -s admin:enterprise
 
 # role
 # - MEMBER: The user is a member of the organization.

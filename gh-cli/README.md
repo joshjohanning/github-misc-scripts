@@ -914,7 +914,7 @@ Updates a branch protection rule for a given branch.
 
 ### update-enterprise-owner-organizational-role.sh
 
-Adds your account to an organization in an enterprise as an owner, member, or leave the organization.
+Adds your account to an organization in an enterprise as an owner, member, or leave the organization. This requires the user running the script to be an Enterprise Owner.
 
 ### verify-team-membership.sh
 
