@@ -908,6 +908,15 @@ Sets the IP allow list to enabled/disable for an enterprise or organization. You
 
 See the [docs](https://docs.github.com/en/graphql/reference/mutations#updateipallowlistenabledsetting) for further information.
 
+### set-organization-membership-for-a-user.sh
+
+Sets (or adds) a user to an organization with a specified role
+
+Notable caps on the API:
+- 50 requests per 24 hours for free plans
+- 500 requests per 24 hours for organizations on paid plans
+- these caps do not apply to Enterprise Managed Users (EMU)
+
 ### update-branch-protection-rule.sh
 
 Updates a branch protection rule for a given branch.
