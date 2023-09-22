@@ -132,6 +132,35 @@ FluffyCarlton
 
 ```
 
+### change-repository-visibility.sh
+
+Change a repository visibility to internal, for example
+
+### copy-organization-members.sh
+
+Copy organization members from one organization to the other, the member will **retain** the source role (owner or member), member cannot be demoted, if they already exist at the target with an owner role they cannot be demoted to member.
+
+On Enterprise Managed Users organizations the users are only added if they are part of the Enterprise already (they need to be provisioned by the IDP)
+
+On GitHub Enterprise Cloud the added users will get an invitation to join the organization.
+
+> **Warning** 
+> For GitHub Enterprise Cloud the number of users you can copy in a day is limited per target org. See [API note on rate limits](https://docs.github.com/en/enterprise-cloud@latest/rest/orgs/members?apiVersion=2022-11-28#set-organization-membership-for-a-user) for the limit values.
+
+This script requires 2 environment variables (with another optional one):
+
+- SOURCE_TOKEN - A GitHub Token to access data from the source organization. Requires `org:read` and `repo` scopes.
+- TARGET_TOKEN - A GitHub Token to set data on the target organization. Requires `org:admin` and `repo` scopes.
+- MAP_USER_SCRIPT - path to a script to map user login. This is optional, if you set this environment value it will call the script to map user logins before adding them on the target repo. The script will receive the user login as the first argument and it should return the new login. For example, if you want to add a suffix to the user login:
+
+```shell
+#!/bin/bash
+
+echo "$1"_SHORTCODE
+```
+
+You can have more complex mappings this just a basic example, where a copy is being done between a GHEC and a GHEC EMU instance where the logins are going to be exactly the same, but the EMU instance has a suffix on the logins.
+
 ### copy-organization-team-members.sh
 
 Copy organization team members from one organization to the other, the member will **retain** the source role (maintainer, member).
@@ -154,18 +183,28 @@ You can have more complex mappings this just a basic example, where a copy is be
 
 > **Warning** If users are not members of the target organizations they will not be added to the target team but may receive an invite to join the org.
 
-### copy-team-members.sh
+### copy-organization-variables.sh
 
-Copy team member from one team to another, it respect source role type (maintainer, member).
+Copy organization variables from one organization to another.
+
+If the variable already exists on the target organization it will be updated.
+
+> **Warning** If the variable is available to selected repositories and a repository with the same doesn't exist on the target organization that association is ignored.
+
+### copy-permissions-between-org-repos.sh
+
+Copy user and team repository member permissions to another repository (it can be in the same or on different organizations).
+
+External collaborators are not copied intentionally.
+
+If the team on the target organization doesn't exist, one will be created (same name, description, privacy, and notification settings ONLY).
 
 > **Note** 
-> Only direct members are copied, child team members are not copied.
-
-If the target team already has user they will be preserved, this **doesn't** synch members between teams, it merely copies them. If you want a synch then you need to delete the existem team members in the target team before running this script.
+> The created team will not be a full copy, **Only** name and description are honored. If the team is part of a child/parent relationship, or it's associated with an IDP group it will not be honored. If you want to change this behavior, you can modify the `createTeamIfNotExists` function.
 
 This script requires 2 environment variables (with another optional one):
 
-- SOURCE_TOKEN - A GitHub Token to access data from the source organization. Requires `org:read` scopes.
+- SOURCE_TOKEN - A GitHub Token to access data from the source organization. Requires `org:read` and `repo` scopes.
 - TARGET_TOKEN - A GitHub Token to set data on the target organization. Requires `org:admin` and `repo` scopes.
 - MAP_USER_SCRIPT - path to a script to map user login. This is optional, if you set this environment value it will call the script to map user logins before adding them on the target repo. The script will receive the user login as the first argument and it should return the new login. For example, if you want to add a suffix to the user login:
 
@@ -176,47 +215,6 @@ echo "$1"_SHORTCODE
 ```
 
 You can have more complex mappings this just a basic example, where a copy is being done between a GHEC and a GHEC EMU instance where the logins are going to be exactly the same, but the EMU instance has a suffix on the logins.
-
-> **Warning** If users are not members of the target organizations they will not be added to the target team but may receive an invite to join the org.
-
-### change-repository-visibility.sh
-
-Change a repository visibility to internal, for example
-
-### create-enterprise-organization.sh
-
-Creates an organization in an enterprise
-
-### create-enterprise-organizations-from-list.sh
-
-Creates organizations in an enterprise from a CSV input list
-
-### create-organization-webhook.sh
-
-Creates an organization webhook, with a secret, with some help from `jq`
-
-### create-teams-from-list.sh
-
-Loops through a list of teams and creates them.
-
-1. Create a list of teams in a csv file, 1 per line, with a trailing empty line at the end of the file
-    - Child teams should have a slash in the name, e.g. `test1-team/test1-1-team`
-    - Build out the parent structure in the input file before creating the child teams; e.g. have the `test1-team` come before `test1-team/test1-1-team` in the file
-2. Run: `./create-teams-from-list.sh teams.csv <org>`
-
-Example input file:
-
-```csv
-test11-team
-test22-team
-test11-team/test11111-team
-test11-team/test11111-team/textxxx-team
-
-```
-
-### create-repository-from-template.sh
-
-Create a new repo from a repo template - note that it only creates as public or private, if you want internal you have to do a subsequent call (see `change-repository-visibility.sh`)
 
 ### copy-repository-environments.sh
 
@@ -245,20 +243,18 @@ This script requires 2 environment variables:
 
 The user running the command needs to be a repo admin or an organization owner on the target repository.
 
-### copy-permissions-between-org-repos.sh
+### copy-team-members.sh
 
-Copy user and team repository member permissions to another repository (it can be in the same or on different organizations).
-
-External collaborators are not copied intentionally.
-
-If the team on the target organization doesn't exist, one will be created (same name, description, privacy, and notification settings ONLY).
+Copy team member from one team to another, it respect source role type (maintainer, member).
 
 > **Note** 
-> The created team will not be a full copy, **Only** name and description are honored. If the team is part of a child/parent relationship, or it's associated with an IDP group it will not be honored. If you want to change this behavior, you can modify the `createTeamIfNotExists` function.
+> Only direct members are copied, child team members are not copied.
+
+If the target team already has user they will be preserved, this **doesn't** synch members between teams, it merely copies them. If you want a synch then you need to delete the existem team members in the target team before running this script.
 
 This script requires 2 environment variables (with another optional one):
 
-- SOURCE_TOKEN - A GitHub Token to access data from the source organization. Requires `org:read` and `repo` scopes.
+- SOURCE_TOKEN - A GitHub Token to access data from the source organization. Requires `org:read` scopes.
 - TARGET_TOKEN - A GitHub Token to set data on the target organization. Requires `org:admin` and `repo` scopes.
 - MAP_USER_SCRIPT - path to a script to map user login. This is optional, if you set this environment value it will call the script to map user logins before adding them on the target repo. The script will receive the user login as the first argument and it should return the new login. For example, if you want to add a suffix to the user login:
 
@@ -270,10 +266,42 @@ echo "$1"_SHORTCODE
 
 You can have more complex mappings this just a basic example, where a copy is being done between a GHEC and a GHEC EMU instance where the logins are going to be exactly the same, but the EMU instance has a suffix on the logins.
 
-### copy-organization-members.sh
+> **Warning** If users are not members of the target organizations they will not be added to the target team but may receive an invite to join the org.
 
-Copy organization members from one organization to the other, the member will **retain** the source role (owner or member), member cannot be demoted, if they already exist at the target with an owner role they cannot be demoted to member.
+### create-enterprise-organization.sh
 
+Creates an organization in an enterprise
+
+### create-enterprise-organizations-from-list.sh
+
+Creates organizations in an enterprise from a CSV input list
+
+### create-organization-webhook.sh
+
+Creates an organization webhook, with a secret, with some help from `jq`
+
+### create-repository-from-template.sh
+
+Create a new repo from a repo template - note that it only creates as public or private, if you want internal you have to do a subsequent call (see `change-repository-visibility.sh`)
+
+### create-teams-from-list.sh
+
+Loops through a list of teams and creates them.
+
+1. Create a list of teams in a csv file, 1 per line, with a trailing empty line at the end of the file
+    - Child teams should have a slash in the name, e.g. `test1-team/test1-1-team`
+    - Build out the parent structure in the input file before creating the child teams; e.g. have the `test1-team` come before `test1-team/test1-1-team` in the file
+2. Run: `./create-teams-from-list.sh teams.csv <org>`
+
+Example input file:
+
+```csv
+test11-team
+test22-team
+test11-team/test11111-team
+test11-team/test11111-team/textxxx-team
+
+```
 
 ### delete-packages-in-organization.sh
 
