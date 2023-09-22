@@ -125,3 +125,6 @@ echo "$packages" | while IFS= read -r response; do
 done
 
 echo "Run this to clean up your working dir: rm -rf ./temp"
+
+# download url if want to download maven artifact manually:
+# curl -H "Authorization: token $GH_SOURCE_PAT" -Ls https://maven.pkg.github.com/$SOURCE_ORG/download/$package_com/$package_group/$package_artifact/$version/$package_artifact-$version.jar
