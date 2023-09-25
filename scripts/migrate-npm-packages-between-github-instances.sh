@@ -9,6 +9,13 @@
 # 3. Set the target GitHub PAT env var: `export GH_TARGET_PAT=ghp_xyz` (must have at least `write:packages`, `read:org` scope)
 #
 # Example: ./migrate-npm-packages-between-github-instances.sh joshjohanning-org github.com joshjohanning-emu github.com
+#
+# Notes:
+# - This script assumes that the target org's repo name is the same as the source
+# - If the repo doesn't exist, the package will still import but won't be mapped to a repo
+#
+
+set -e
 
 if [ $# -ne "4" ]; then
     echo "Usage: $0 <source-org> <source-host> <target-org> <target-host>"
@@ -33,9 +40,6 @@ SOURCE_HOST=$2
 TARGET_ORG=$3
 TARGET_HOST=$4
 
-# log in to gh cli with source pat
-export GH_TOKEN=$GH_SOURCE_PAT
-
 # create temp dir
 mkdir -p ./temp
 cd ./temp
@@ -44,7 +48,7 @@ temp_dir=$(pwd)
 # set up .npmrc for target org
 echo @$TARGET_ORG:https://npm.pkg.$TARGET_HOST/ > $temp_dir/.npmrc && echo "//npm.pkg.$TARGET_HOST/:_authToken=$GH_TARGET_PAT" >> $temp_dir/.npmrc
 
-packages=$(GH_HOST="$SOURCE_HOST" gh api --paginate "/orgs/$SOURCE_ORG/packages?package_type=npm" -q '.[] | .name + " " + .repository.name')
+packages=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages?package_type=npm" -q '.[] | .name + " " + .repository.name')
 
 echo "$packages" | while IFS= read -r response; do
 
@@ -53,7 +57,7 @@ echo "$packages" | while IFS= read -r response; do
 
   echo "org: $SOURCE_ORG repo: $repo_name --> package name $package_name"
   
-  versions=$(GH_HOST="$SOURCE_HOST" gh api --paginate "/orgs/$SOURCE_ORG/packages/npm/$package_name/versions" -q '.[] | .name' | sort -V)
+  versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages/npm/$package_name/versions" -q '.[] | .name' | sort -V)
   for version in $versions
   do
     echo "$version"

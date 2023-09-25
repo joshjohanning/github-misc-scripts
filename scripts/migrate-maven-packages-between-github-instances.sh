@@ -15,6 +15,7 @@
 # - This scripts creates the repo if it doesn't exist
 # - Otherwise, if the repo doesn't exist, receive "example-1.0.5.jar was not found in the repository" error
 # - Link to [GitHub public roadmap item](https://github.com/github/roadmap/issues/578)
+# - The `mvnfeed-cli` tool doesn't appear to support copying `.war` files (only `.jar`)
 #
 
 set -e
@@ -42,39 +43,28 @@ SOURCE_HOST=$2
 TARGET_ORG=$3
 TARGET_HOST=$4
 
-# log in to gh cli with source pat
-export GH_TOKEN=$GH_SOURCE_PAT
-
 # create temp dir
 mkdir -p ./temp
 cd ./temp
 temp_dir=$(pwd)
+mkdir -p ./artifacts
 
-# check if mvnfeed is installed
-if ! command -v mvnfeed &> /dev/null
-then
-  # check if python3 is installed
-  if ! command -v python3 &> /dev/null
-  then
-    echo "Error: python3 could not be found"
-    exit
+# check if python3 is installed
+if command -v python3 &> /dev/null; then
+  if [ ! -d "./tool/mvnfeed-cli" ]; then
+    git clone https://github.com/microsoft/mvnfeed-cli.git ./tool/mvnfeed-cli
+    cd ./tool/mvnfeed-cli && python3 ./scripts/dev_setup.py && cd $temp_dir
   fi
-  if [ -d "./tool/mvnfeed-cli" ]; then rm -rf ./tool/mvnfeed-cli; fi
-  git clone https://github.com/microsoft/mvnfeed-cli.git ./tool/mvnfeed-cli
-  cd ./tool/mvnfeed-cli
-  python3 ./scripts/dev_setup.py
-  cd $temp_dir
+else
+  echo "Error: python3 could not be found"
+  exit 1
 fi
 
-# get current user for source/target
-current_user_source=$(curl -s -H "Authorization: Bearer $GH_SOURCE_PAT" https://api.$SOURCE_HOST/user | jq -r '.login')
-current_user_target=$(curl -s -H "Authorization: Bearer $GH_TARGET_PAT" https://api.$TARGET_HOST/user | jq -r '.login')
-
 # base64 encode auth for mvnfeed
-auth_source=$(echo -n "$current_user_source:$GH_SOURCE_PAT" | base64 -w0)
-auth_target=$(echo -n "$current_user_target:$GH_TARGET_PAT" | base64 -w0)
+auth_source=$(echo -n "user:$GH_SOURCE_PAT" | base64 -w0)
+auth_target=$(echo -n "user:$GH_TARGET_PAT" | base64 -w0)
 
-packages=$(GH_HOST="$SOURCE_HOST" gh api --paginate "/orgs/$SOURCE_ORG/packages?package_type=maven" -q '.[] | .name + " " + .repository.name')
+packages=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages?package_type=maven" -q '.[] | .name + " " + .repository.name')
 
 echo "$packages" | while IFS= read -r response; do
 
@@ -99,22 +89,21 @@ echo "$packages" | while IFS= read -r response; do
   mvnfeed config stage_dir set --path $temp_dir/artifacts
 
   # check if $TARGET_ORG/$repo_name exists in GitHub - if not, create it
-  if ! GH_HOST="$TARGET_HOST" gh api "/repos/$TARGET_ORG/$repo_name" >/dev/null 2>&1
+  if ! GH_HOST="$TARGET_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api "/repos/$TARGET_ORG/$repo_name" >/dev/null 2>&1
   then
     echo "creating repo $TARGET_ORG/$repo_name"
     GH_HOST="$TARGET_HOST" gh repo create "$TARGET_ORG/$repo_name" --private --confirm
   fi
 
-  versions=$(GH_HOST="$SOURCE_HOST" gh api --paginate "/orgs/$SOURCE_ORG/packages/maven/$package_name/versions" -q '.[] | .name' | sort -V)
+  versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages/maven/$package_name/versions" -q '.[] | .name' | sort -V)
   for version in $versions
   do
-    echo "$version"
     package_com=$(echo "$package_name" | cut -d '.' -f 1)
     package_group=$(echo "$package_name" | cut -d '.' -f 2- | rev | cut -d '.' -f 2- | rev)
     package_artifact=$(echo "$package_name" | rev | cut -d '.' -f 1 | rev)
 
     name=$(echo $package_com.$package_group:$package_artifact:$version)
-    echo $name
+    echo "   pushing: $name"
 
     mvnfeed artifact transfer --from=githubsource --to=githubtarget --name=$package_com.$package_group:$package_artifact:$version
 
