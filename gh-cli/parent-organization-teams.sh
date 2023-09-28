@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# NOTE: this script is called from parent-organization-teams.sh it's not meant to be called directly
-
 script_path=$(dirname "$0")
 
 if [ $# -lt 2 ]; then

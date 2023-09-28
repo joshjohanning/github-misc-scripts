@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# NOTE: this script is called from parent-organization-teams.sh it's not meant to be called directly
+
 if [ $# -lt 3 ]; then
     echo "usage: $0 <source org> <target org> <slug> [logfilename]"
     echo "WARNING: this is an internal function. Do not call directly"    
@@ -71,10 +73,10 @@ if ! target_team_id=$(GH_TOKEN=$TARGET_TOKEN gh api "orgs/$target_org/teams/$slu
     new_team_id=$(GH_TOKEN=$TARGET_TOKEN gh api --method POST "orgs/$target_org/teams" --input - <<< "$JSON" --jq .id)
 
     # Remove us from the team, so the team is empty
-    if [ -z "$ghuser" ]; then
-        ghuser=$(GH_TOKEN=$TARGET_TOKEN gh api user --jq '.login')
+    if [ -z "$__ghuser" ]; then
+        __ghuser=$(GH_TOKEN=$TARGET_TOKEN gh api user --jq '.login')
     fi
-    GH_TOKEN=$TARGET_TOKEN gh api --method DELETE  "orgs/$target_org/teams/$slug/memberships/$ghuser" --silent
+    GH_TOKEN=$TARGET_TOKEN gh api --method DELETE  "orgs/$target_org/teams/$slug/memberships/$__ghuser" --silent
 
     parent_desc="(no parent)"
     if [ "$source_parent_id" != "null" ]; then
