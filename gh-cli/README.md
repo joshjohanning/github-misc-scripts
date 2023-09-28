@@ -63,7 +63,7 @@ $ gh auth login -h github.mycompany.com # -h github.com is the default
 
 See the [docs](https://cli.github.com/manual/gh_auth_login) for further information.
 
-## Scripts 
+## Scripts
 
 ### add-branch-protection-status-checks.sh
 
@@ -827,6 +827,17 @@ Example output:
   }
 ],
 ```
+
+### parent-organization-teams.sh
+
+Sets the parents of teams in an target organization based on existing child/parent relantion ship on a source organization teams.
+
+This is uself to mirror a parent child/relantionship between teams on two organizations.
+
+This script requires 2 environment variables;
+
+- SOURCE_TOKEN - A GitHub Token to access data from the source organization. Requires `org:read` scopes.
+- TARGET_TOKEN - A GitHub Token to set data on the target organization. Requires `org:admin` and `repo` scopes.
 
 ### remove-branch-protection-status-checks.sh
 
