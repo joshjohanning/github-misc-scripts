@@ -1,7 +1,12 @@
 #!/bin/bash
 
-if [ $# -ne 2 ]; then
-    echo "usage: $0 <source org> <target org>"
+# NOTE: this script is called from parent-organization-teams.sh it's not meant to be called directly
+
+script_path=$(dirname "$0")
+
+if [ $# -lt 2 ]; then
+    echo "usage: $0 <source org> <target org> [create parent(s) if not exist]"
+    echo "create parent if not exists = true|false"
     exit 1
 fi
 
@@ -17,11 +22,20 @@ fi
 
 source_org=$1
 target_org=$2
+create_parent=${3:-false}
 
 if [ "$source_org" = "$target_org" ]; then
     echo "source org and target org must be different"
     exit 1
 fi
+
+############# Script Start
+echo "Parenting teams at [$target_org] based on parents at [$source_org]"
+echo "Create parent if not exists: $create_parent"
+echo ""
+
+# Cache running user for the helper script
+export __ghuser=$(GH_TOKEN=$TARGET_TOKEN gh api user --jq '.login')
 
 # read all target teams and loop
 GH_TOKEN=$TARGET_TOKEN gh api --paginate "orgs/$target_org/teams" --jq '.[] | [.slug, .parent.id] | @tsv' | while read -r slug target_parent_id; do
@@ -41,15 +55,25 @@ GH_TOKEN=$TARGET_TOKEN gh api --paginate "orgs/$target_org/teams" --jq '.[] | [.
             GH_TOKEN=$TARGET_TOKEN gh api -X PATCH "orgs/$target_org/teams/$slug" \
                 -F parent_team_id="null" \
                 --silent
-        elif [ -n "$source_parent_slug" ]; then            
+        elif [ -n "$source_parent_slug" ]; then
             # add/set parent to target team
 
-            if ! parent_id=$(GH_TOKEN=$TARGET_TOKEN gh api "orgs/$target_org/teams/$source_parent_slug" --jq '.id' 2> /dev/null) ; then
-                echo "  Parent [$source_parent_slug] does not exist at target. Skipping"
+            if ! parent_id=$(GH_TOKEN=$TARGET_TOKEN gh api "orgs/$target_org/teams/$source_parent_slug" --jq '.id' 2>/dev/null); then
                 if [ -n "$target_parent_id" ]; then
-                    echo "  Warning: [$slug] may be in an ambiguous state because it has a parent [$target_parent_id] but the parent does not exist at target"
+                    echo "  Warning: [$slug] may be in an ambiguous state because it has a parent [$target_parent_id] but the parent [$source_parent_slug] does not exist at target"
+                    continue
                 fi
-                continue
+
+                if [ "$create_parent" = "true" ]; then
+                    echo "  Parent [$source_parent_slug] does not exist at target"
+                    create_logs=$(mktemp)
+                    parent_id=$(DEBUG=$DEBUG "$script_path/__copy_team_if_not_exists_at_target.sh" "$source_org" "$target_org" "$source_parent_slug" "$create_logs")
+                    cat "$create_logs"
+                    rm "$create_logs"
+                else
+                    echo "  Parent [$source_parent_slug] does not exist at target. Skipping"
+                    continue
+                fi
             fi
 
             if [ "$parent_id" == "$target_parent_id" ]; then

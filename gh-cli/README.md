@@ -832,12 +832,18 @@ Example output:
 
 Sets the parents of teams in an target organization based on existing child/parent relantion ship on a source organization teams.
 
-This is uself to mirror a parent child/relantionship between teams on two organizations.
+This is useful to mirror a parent child/relationship between teams on two organizations.
 
 This script requires 2 environment variables;
 
 - SOURCE_TOKEN - A GitHub Token to access data from the source organization. Requires `org:read` scopes.
 - TARGET_TOKEN - A GitHub Token to set data on the target organization. Requires `org:admin` and `repo` scopes.
+
+The script has three parameters:
+
+- `source-org` - The source organization name from which team hiercarchy will be read
+- `target-org` - The target organization name to which teams will be updated OR created
+- `create parent(s) if not exist` - OPTIONAL (default `false`) if set to true at the teams have parents that do not exist in the target org, they will be created. (also creates parents of parents) otherwise it will print a message parent doesn't exist and it will skipped.
 
 ### remove-branch-protection-status-checks.sh
 
