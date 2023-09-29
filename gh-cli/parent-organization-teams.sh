@@ -65,7 +65,7 @@ GH_TOKEN=$TARGET_TOKEN gh api --paginate "orgs/$target_org/teams" --jq '.[] | [.
                 if [ "$create_parent" = "true" ]; then
                     echo "  Parent [$source_parent_slug] does not exist at target"
                     create_logs=$(mktemp)
-                    parent_id=$(DEBUG=$DEBUG "$script_path/__copy_team_if_not_exists_at_target.sh" "$source_org" "$target_org" "$source_parent_slug" "$create_logs")
+                    parent_id=$(DEBUG=$DEBUG "$script_path/__copy_team_and_parents_if_not_exists_at_target.sh" "$source_org" "$target_org" "$source_parent_slug" "$create_logs")
                     cat "$create_logs"
                     rm "$create_logs"
                 else

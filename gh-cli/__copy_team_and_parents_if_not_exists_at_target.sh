@@ -39,7 +39,7 @@ function log() {
     fi
 }
 
-debug "__copy_team_if_not_exists_at_target.sh $source_org $target_org [$slug]"
+debug "__copy_team_and_parents_if_not_exists_at_target.sh $source_org $target_org [$slug]"
 
 # Get team details from source
 JSON=$(GH_TOKEN=$SOURCE_TOKEN gh api "orgs/$source_org/teams/$slug" --jq '{name, description, privacy, notification_setting, parent_id:. .parent.id  ,parent_slug: .parent.slug}')
@@ -57,7 +57,7 @@ if ! target_team_id=$(GH_TOKEN=$TARGET_TOKEN gh api "orgs/$target_org/teams/$slu
 
         debug "$slug has a parent [$source_parent_id] will create or using existing one at target"
         
-        target_parent_id=$("$script_path/__copy_team_if_not_exists_at_target.sh" "$source_org" "$target_org" "$source_parent_slug" "$LOGFILE")
+        target_parent_id=$("$script_path/__copy_team_and_parents_if_not_exists_at_target.sh" "$source_org" "$target_org" "$source_parent_slug" "$LOGFILE")
         
         # Set parent for the team to be created
         JSON=$(echo "$JSON" | jq --argjson parent_id "$target_parent_id" '. + {parent_team_id: $parent_id}')
