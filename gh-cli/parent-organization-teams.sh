@@ -33,7 +33,8 @@ echo "Create parent if not exists: $create_parent"
 echo ""
 
 # Cache running user for the helper script
-export __ghuser=$(GH_TOKEN=$TARGET_TOKEN gh api user --jq '.login')
+__ghuser=$(GH_TOKEN=$TARGET_TOKEN gh api user --jq '.login')
+export __ghuser
 
 # read all target teams and loop
 GH_TOKEN=$TARGET_TOKEN gh api --paginate "orgs/$target_org/teams" --jq '.[] | [.slug, .parent.id] | @tsv' | while read -r slug target_parent_id; do
