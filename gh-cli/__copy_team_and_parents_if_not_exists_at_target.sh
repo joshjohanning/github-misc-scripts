@@ -23,8 +23,6 @@ target_org=$2
 slug=$3
 LOGFILE=$4
 
-script_path=$(dirname "$0")
-
 RED='\033[0;31m'
 function debug() {
     if [ "$DEBUG" = "true" ]; then
@@ -57,7 +55,8 @@ if ! target_team_id=$(GH_TOKEN=$TARGET_TOKEN gh api "orgs/$target_org/teams/$slu
 
         debug "$slug has a parent [$source_parent_id] will create or using existing one at target"
         
-        target_parent_id=$("$script_path/__copy_team_and_parents_if_not_exists_at_target.sh" "$source_org" "$target_org" "$source_parent_slug" "$LOGFILE")
+        # Call script recursively to create parent(s)
+        target_parent_id=$("DEBUG=$DEBUG $0" "$source_org" "$target_org" "$source_parent_slug" "$LOGFILE")
         
         # Set parent for the team to be created
         JSON=$(echo "$JSON" | jq --argjson parent_id "$target_parent_id" '. + {parent_team_id: $parent_id}')
