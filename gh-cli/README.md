@@ -830,7 +830,7 @@ Example output:
 
 ### parent-organization-teams.sh
 
-Sets the parents of teams in an target organization based on existing child/parent relantion ship on a source organization teams.
+Sets the parents of teams in an target organization based on existing child/parent relationship on a source organization teams.
 
 This is useful to mirror a parent child/relationship between teams on two organizations.
 
@@ -843,7 +843,7 @@ The script has three parameters:
 
 - `source-org` - The source organization name from which team hiercarchy will be read
 - `target-org` - The target organization name to which teams will be updated OR created
-- `create parent(s) if not exist` - OPTIONAL (default `false`) if set to true at the teams have parents that do not exist in the target org, they will be created. (also creates parents of parents) otherwise it will print a message parent doesn't exist and it will skipped.
+- `create parent(s) if not exist` - OPTIONAL (default `false`) if set to true, the teams which have parents that do not exist in the target org, they will be created. (also creates parents of parents) otherwise it will print a message parent doesn't exist and it will skipped.
 
 ### remove-branch-protection-status-checks.sh
 
