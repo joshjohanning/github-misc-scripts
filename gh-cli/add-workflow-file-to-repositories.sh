@@ -16,7 +16,9 @@
 # 1. Install gh (brew install gh)
 # 2. Authenticate with gh (gh auth login)
 # 3. Have the following extension installed: gh extension install lindluni/gh-token
-# 4. Create a GitHub App, grab its App ID, Installation ID, and generate a private key (App will need contents: write, workflow: write, and be installed in the repo(s) you want to add the workflow file to)
+# 4. Create a GitHub App, grab its App ID, Installation ID, and generate a private key
+#   - App will need "administration: read & write", "contents: read & write", "workflow: read & write", and be installed in the repo(s) you want to add the workflow file to
+#   - TODO: If Pull Request functionality is added, will also need "pull requests: read & write"
 # 5. Run the script
 #
 
@@ -91,6 +93,7 @@ do
     else
         error=$(echo $response | jq -r ".message")
         echo " ... failed to commit $path; $error"
+        # TODO: Create PR if error is "Changes must be made through a pull request."
     fi
 
     echo ""
