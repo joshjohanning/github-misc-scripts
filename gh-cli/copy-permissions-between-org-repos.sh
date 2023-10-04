@@ -63,7 +63,7 @@ GH_TOKEN=$SOURCE_TOKEN gh api "repos/$source_org/$repo/collaborators?affiliation
 
     echo "Adding user: $login with $role to $target_org/$target_repo"
 
-    GH_TOKEN=$TARGET_TOKEN ./add-collaborator-to-repository.sh "$target_org" "$target_repo" "$login" "$role"
+    GH_TOKEN=$TARGET_TOKEN "$script_path/add-collaborator-to-repository.sh" "$target_org" "$target_repo" "$login" "$role"
 done
 
 echo -e "\nGranting Permissions to teams:\n"
@@ -76,7 +76,7 @@ GH_TOKEN=$SOURCE_TOKEN gh api "repos/$source_org/$repo/teams" --jq '.[] | [.name
     # copy team from source if not exists at target. This will include also children teams
     DEBUG=$DEBUG "$script_path/__copy_team_and_children_if_not_exists_at_target.sh" "$source_org" "$target_org" "$slug"
 
-    GH_TOKEN=$TARGET_TOKEN ./add-team-to-repository.sh "$target_org" "$target_repo" "$slug" "$permission"
+    GH_TOKEN=$TARGET_TOKEN "$script_path/add-team-to-repository.sh" "$target_org" "$target_repo" "$slug" "$permission"
 done
 
 echo -e "\n"
