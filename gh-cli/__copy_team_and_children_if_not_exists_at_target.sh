@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# NOTE: this script is called from parent-organization-teams.sh it's not meant to be called directly
+# NOTE: this script is called from copy-permissions-between-org-repos.sh it's not meant to be called directly
 
 if [ $# -lt 3 ]; then
     echo "usage: $0 <source org> <target org> <slug> <parent slug> <parent id> [logfilename]"
