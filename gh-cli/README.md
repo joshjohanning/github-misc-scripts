@@ -603,6 +603,22 @@ Gets a list of members in an organization using the REST API (able to get their 
 
 Gets a list of members (via GraphQL) and their role in an organization
 
+### get-organization-migrations-tsv.sh
+
+Gets a TSV with a list of migrations performed (or being performed) on a given organization with [GitHub Enterprise Importer](https://docs.github.com/en/migrations/using-github-enterprise-importer)
+
+It contains the following data:
+
+- Migration Id
+- Source URL of the migration source repo
+- Created At
+- Migration State
+- Failure Reason
+- Warnings Count in case the migration succeeded with warnings
+- Migration Log URL to download the migration logs, you can use [gh-gei](https://github.com/github/gh-gei) to download the logs (note the logs are only available 24h)
+
+By default, it returns all migrations, but there is an optional `max-migrations` parameter to limit the number of migrations returned (must lower or equal to 100)).
+
 ### get-organization-repository-count.sh
 
 Gets the repository count in an organization
