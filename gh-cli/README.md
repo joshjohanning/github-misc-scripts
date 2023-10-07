@@ -558,6 +558,14 @@ Gets the usage of a label in a repository. Returns data in table format.
 
 Gets a list of repositories in an organization that have had code pushed to it in the last X days.
 
+### get-organization-codeowner-errors-tsv.sh
+
+Gets a TSV with a list of [CODEOWNERS](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners) files that have errors in them, this will allow to identify which CODEOWNERS requires fixing.
+
+The list will contain the repository name, source (CODEOWNERS file), and kind of error.
+
+Repositories with no CODEONWERS files or CODEOWNERS errors will not be listed.
+
 ### get-organization-id.sh
 
 Get the organization ID used for other GraphQL calls. Use the login of the Organization as the input.
