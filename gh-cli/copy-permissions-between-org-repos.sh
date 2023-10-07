@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ $# -ne 4 ]
+if [ $# -lt 3 ]
   then
     echo "usage: $0 <source org> <repo> <target org> [target repo]"
     echo "If target repo is skipped the name will be same as the source repo"
@@ -24,6 +24,8 @@ repo=$2
 target_org=$3
 target_repo=${4:-$repo}
 
+script_path=$(dirname "$0")
+
 if [ -z "$MAP_USER_SCRIPT" ]; then
     echo "WARNING: MAP_USER_SCRIPT is not set. No mapping will be performed."
     echo "Add a script to the environment variable MAP_USER_SCRIPT to map users from $source_org to $target_org"
@@ -46,25 +48,9 @@ function map_role() {
     fi
 }
 
-function createTeamIfNotExists() {
-    source_org=$1
-    target_org=$2
-    slug=$3
-
-    # https://docs.github.com/en/rest/teams/teams?apiVersion=2022-11-28#get-a-team-by-name
-    GH_TOKEN=$TARGET_TOKEN gh api "orgs/$target_org/teams/$slug" --silent
-    if [ $? != 0  ]; then
-        JSON=$(GH_TOKEN=$SOURCE_TOKEN gh api "orgs/$source_org/teams/$slug" --jq '{name, description, privacy,notification_setting}')
-
-        # https://docs.github.com/en/rest/teams/teams?apiVersion=2022-11-28#create-a-team
-        GH_TOKEN=$TARGET_TOKEN gh api --method POST "orgs/$target_org/teams" --input - <<< "$JSON" --silent
-
-        # Remove us from the team, so the team is empty
-        ghuser=$(GH_TOKEN=$TARGET_TOKEN gh api user --jq '.login')
-        GH_TOKEN=$TARGET_TOKEN gh api --method DELETE  "orgs/$target_org/teams/$slug/memberships/$ghuser" --silent
-
-    fi
-}
+# Cache running user for the helper script
+__ghuser=$(GH_TOKEN=$TARGET_TOKEN gh api user --jq '.login')
+export __ghuser
 
 echo -e "\nGranting Permissions to users:\n"
 
@@ -77,7 +63,7 @@ GH_TOKEN=$SOURCE_TOKEN gh api "repos/$source_org/$repo/collaborators?affiliation
 
     echo "Adding user: $login with $role to $target_org/$target_repo"
 
-    GH_TOKEN=$TARGET_TOKEN ./add-collaborator-to-repository.sh "$target_org" "$target_repo" "$login" "$role"
+    GH_TOKEN=$TARGET_TOKEN "$script_path/add-collaborator-to-repository.sh" "$target_org" "$target_repo" "$login" "$role"
 done
 
 echo -e "\nGranting Permissions to teams:\n"
@@ -87,9 +73,10 @@ GH_TOKEN=$SOURCE_TOKEN gh api "repos/$source_org/$repo/teams" --jq '.[] | [.name
     permission=${fields[2]}
     echo "Adding team: [$name] ($slug) with $permission to $target_org/$target_repo"
 
-    createTeamIfNotExists "$source_org" "$target_org" "$slug"
+    # copy team from source if not exists at target. This will include also children teams
+    DEBUG=$DEBUG "$script_path/internal/__copy_team_and_children_if_not_exists_at_target.sh" "$source_org" "$target_org" "$slug"
 
-    GH_TOKEN=$TARGET_TOKEN ./add-team-to-repository.sh "$target_org" "$target_repo" "$slug" "$permission"
+    GH_TOKEN=$TARGET_TOKEN "$script_path/add-team-to-repository.sh" "$target_org" "$target_repo" "$slug" "$permission"
 done
 
 echo -e "\n"

@@ -197,10 +197,10 @@ Copy user and team repository member permissions to another repository (it can b
 
 External collaborators are not copied intentionally.
 
-If the team on the target organization doesn't exist, one will be created (same name, description, privacy, and notification settings ONLY).
+If the team (or children of that team) on the target organization doesn't exist, one will be created (same name, description, privacy, and notification settings ONLY),if the team has children teams those will also be created (full tree, not only direct children).
 
 > **Note** 
-> The created team will not be a full copy, **Only** name and description are honored. If the team is part of a child/parent relationship, or it's associated with an IDP group it will not be honored. If you want to change this behavior, you can modify the `createTeamIfNotExists` function.
+> The created team will not be a full copy, **Only** name, description and visibilility are honored. If the team is is associated with an IDP group it will not be honored. If you want to change this behavior, you can modify the `internal/__copy_team_and_children_if_not_exists_at_target.sh` script.
 
 This script requires 2 environment variables (with another optional one):
 
@@ -557,6 +557,14 @@ Gets the usage of a label in a repository. Returns data in table format.
 ### get-organization-active-repositories.sh
 
 Gets a list of repositories in an organization that have had code pushed to it in the last X days.
+
+### get-organization-codeowner-errors-tsv.sh
+
+Gets a TSV with a list of [CODEOWNERS](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners) files that have errors in them, this will allow to identify which CODEOWNERS requires fixing.
+
+The list will contain the repository name, source (CODEOWNERS file), and kind of error.
+
+Repositories with no CODEONWERS files or CODEOWNERS errors will not be listed.
 
 ### get-organization-id.sh
 
