@@ -841,7 +841,7 @@ This script requires 2 environment variables;
 
 The script has three parameters:
 
-- `source-org` - The source organization name from which team hiercarchy will be read
+- `source-org` - The source organization name from which team hierarchy will be read
 - `target-org` - The target organization name to which teams will be updated OR created
 - `create parent(s) if not exist` - OPTIONAL (default `false`) if set to true, the teams which have parents that do not exist in the target org, they will be created. (also creates parents of parents) otherwise it will print a message parent doesn't exist and it will skipped.
 

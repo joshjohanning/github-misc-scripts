@@ -37,7 +37,7 @@ function log() {
     fi
 }
 
-debug "__copy_team_and_parents_if_not_exists_at_target.sh $source_org $target_org [$slug]"
+debug "internal/__copy_team_and_parents_if_not_exists_at_target.sh $source_org $target_org [$slug]"
 
 # Get team details from source
 JSON=$(GH_TOKEN=$SOURCE_TOKEN gh api "orgs/$source_org/teams/$slug" --jq '{name, description, privacy, notification_setting, parent_id:. .parent.id  ,parent_slug: .parent.slug}')
