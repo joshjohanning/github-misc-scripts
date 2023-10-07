@@ -200,7 +200,7 @@ External collaborators are not copied intentionally.
 If the team (or children of that team) on the target organization doesn't exist, one will be created (same name, description, privacy, and notification settings ONLY),if the team has children teams those will also be created (full tree, not only direct children).
 
 > **Note** 
-> The created team will not be a full copy, **Only** name, description and visibilility are honored. If the team is is associated with an IDP group it will not be honored. If you want to change this behavior, you can modify the `__copy_team_and_children_if_not_exists_at_target.sh` script.
+> The created team will not be a full copy, **Only** name, description and visibilility are honored. If the team is is associated with an IDP group it will not be honored. If you want to change this behavior, you can modify the `internal/__copy_team_and_children_if_not_exists_at_target.sh` script.
 
 This script requires 2 environment variables (with another optional one):
 

@@ -74,7 +74,7 @@ GH_TOKEN=$SOURCE_TOKEN gh api "repos/$source_org/$repo/teams" --jq '.[] | [.name
     echo "Adding team: [$name] ($slug) with $permission to $target_org/$target_repo"
 
     # copy team from source if not exists at target. This will include also children teams
-    DEBUG=$DEBUG "$script_path/__copy_team_and_children_if_not_exists_at_target.sh" "$source_org" "$target_org" "$slug"
+    DEBUG=$DEBUG "$script_path/internal/__copy_team_and_children_if_not_exists_at_target.sh" "$source_org" "$target_org" "$slug"
 
     GH_TOKEN=$TARGET_TOKEN "$script_path/add-team-to-repository.sh" "$target_org" "$target_repo" "$slug" "$permission"
 done
