@@ -609,7 +609,7 @@ It contains the following data:
 - Warnings Count in case the migration succeeded with warnings
 - Migration Log URL to download the migration logs, you can use [gh-gei](https://github.com/github/gh-gei) to download the logs (note the logs are only available 24h)
 
-By default it returns all migrations, but there is a optional `max-migrations` parameter to limit the number of migrations returned (must lower or equal to 100)).
+By default, it returns all migrations, but there is an optional `max-migrations` parameter to limit the number of migrations returned (must lower or equal to 100)).
 
 ### get-organization-repository-count.sh
 
