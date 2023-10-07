@@ -197,10 +197,10 @@ Copy user and team repository member permissions to another repository (it can b
 
 External collaborators are not copied intentionally.
 
-If the team on the target organization doesn't exist, one will be created (same name, description, privacy, and notification settings ONLY).
+If the team (or children of that team) on the target organization doesn't exist, one will be created (same name, description, privacy, and notification settings ONLY),if the team has children teams those will also be created (full tree, not only direct children).
 
 > **Note** 
-> The created team will not be a full copy, **Only** name and description are honored. If the team is part of a child/parent relationship, or it's associated with an IDP group it will not be honored. If you want to change this behavior, you can modify the `createTeamIfNotExists` function.
+> The created team will not be a full copy, **Only** name, description and visibilility are honored. If the team is is associated with an IDP group it will not be honored. If you want to change this behavior, you can modify the `internal/__copy_team_and_children_if_not_exists_at_target.sh` script.
 
 This script requires 2 environment variables (with another optional one):
 
@@ -840,12 +840,18 @@ Example output:
 
 Sets the parents of teams in an target organization based on existing child/parent relantion ship on a source organization teams.
 
-This is uself to mirror a parent child/relantionship between teams on two organizations.
+This is useful to mirror a parent child/relationship between teams on two organizations.
 
 This script requires 2 environment variables;
 
 - SOURCE_TOKEN - A GitHub Token to access data from the source organization. Requires `org:read` scopes.
 - TARGET_TOKEN - A GitHub Token to set data on the target organization. Requires `org:admin` and `repo` scopes.
+
+The script has three parameters:
+
+- `source-org` - The source organization name from which team hiercarchy will be read
+- `target-org` - The target organization name to which teams will be updated OR created
+- `create parent(s) if not exist` - OPTIONAL (default `false`) if set to true at the teams have parents that do not exist in the target org, they will be created. (also creates parents of parents) otherwise it will print a message parent doesn't exist and it will skipped.
 
 ### remove-branch-protection-status-checks.sh
 
