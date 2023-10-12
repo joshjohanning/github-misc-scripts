@@ -21,8 +21,6 @@ filename="$1"
 org="$2"
 team="$3"
 
-filename="$1"
-
 while read -r repofull ; 
 do
     IFS='/' read -ra data <<< "$repofull"
