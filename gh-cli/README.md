@@ -132,6 +132,30 @@ FluffyCarlton
 
 ```
 
+### Archive repositories
+
+Archives/unarchives repositories in bulk.
+
+Given a file with a list of repository names, it will archive/unarchive the repositories.
+
+The repos files list should be a file with the reposity names, one per line in the format `owner/repo`.
+
+By default it archives the repository, but if you pass `false` as the second argument it will unarchive the repositories.
+
+usage: :
+
+```shell
+archive-repositories.sh <file> <archive state (true|false)>`
+```
+
+Example input file:
+
+```csv
+mona/octocat
+mona/lisa
+octocat/octocat
+```
+
 ### change-repository-visibility.sh
 
 Change a repository visibility to internal, for example
