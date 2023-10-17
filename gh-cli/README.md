@@ -619,6 +619,26 @@ It contains the following data:
 
 By default, it returns all migrations, but there is an optional `max-migrations` parameter to limit the number of migrations returned (must lower or equal to 100)).
 
+## get-organization-repositories-by-property.sh
+
+Gets a list of repositories in an organization that have one or more given [custom properties](https://docs.github.com/en/enterprise-cloud@latest/organizations/managing-organization-settings/managing-custom-properties-for-repositories-in-your-organization) values.
+
+There are two mandatory parameters. The organization name and one property (with value).
+
+The property is defined with the format PROPERTYNAME=VALUE (the property name is case insensitive, but the value is case sensitive), you can specify more than one property. If you specify more than one property, repos with the conjuntion of all properties will be returned.
+
+prints all repo names that have a property with name `production` and value `true`:
+
+```shell
+./get-organization-repositories-by-property.sh octocat production=true
+```
+
+prints all repo names that have a property with name `production` and value `true` and a property wth name `cloud` and value `true`:
+
+```shell
+./get-organization-repositories-by-property.sh octocat production=true cloud=true
+```
+
 ### get-organization-repository-count.sh
 
 Gets the repository count in an organization
