@@ -603,6 +603,25 @@ Gets a list of members in an organization using the REST API (able to get their 
 
 Gets a list of members (via GraphQL) and their role in an organization
 
+### get-organization-migrations-summary.sh
+
+Gets a summary of all migrations against a given organization with [GitHub Enterprise Importer](https://docs.github.com/en/migrations/using-github-enterprise-importer)
+
+example:
+
+```bash
+$ ./get-organization-migrations-summary.sh  octocat
+Not started          0
+Pending validation   0
+Failed validation    0
+Queued               0
+In progress          0
+Succeeded            3
+Failed               7
+========================
+Total                10
+```
+
 ### get-organization-migrations-tsv.sh
 
 Gets a TSV with a list of migrations performed (or being performed) on a given organization with [GitHub Enterprise Importer](https://docs.github.com/en/migrations/using-github-enterprise-importer)
