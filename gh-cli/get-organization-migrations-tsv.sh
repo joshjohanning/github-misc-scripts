@@ -20,6 +20,8 @@ if [ "$max_migrations" -gt 100 ]; then
     exit 1
 fi
 
+echo -e "id\tcreatedAt\tsource Url\trepository name\tstate\tfailure reason\twarnings count\tmigration log Url"
+
 # shellcheck disable=SC2086,SC2016
 gh api graphql $paginate -f org="$organization" -F page_size="$max_migrations" -f query='query ($org: String!, $page_size: Int $endCursor: String) {
 	organization(login: $org) {
@@ -27,8 +29,9 @@ gh api graphql $paginate -f org="$organization" -F page_size="$max_migrations" -
             pageInfo { hasNextPage endCursor }
 			nodes {
 				id
+				createdAt				
 				sourceUrl
-				createdAt
+				repositoryName
 				state
 				failureReason
 				warningsCount
