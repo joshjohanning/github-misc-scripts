@@ -132,13 +132,13 @@ FluffyCarlton
 
 ```
 
-### Archive repositories
+### archive-repositories.sh
 
 Archives/unarchives repositories in bulk.
 
 Given a file with a list of repository names, it will archive/unarchive the repositories.
 
-The repos files list should be a file with the reposity names, one per line in the format `owner/repo`.
+The repos files list should be a file with the repository names, one per line in the format `owner/repo`.
 
 By default it archives the repository, but if you pass `false` as the second argument it will unarchive the repositories.
 
