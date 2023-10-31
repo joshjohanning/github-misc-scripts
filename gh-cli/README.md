@@ -625,7 +625,7 @@ Gets a list of repositories in an organization that have one or more given [cust
 
 There are two mandatory parameters. The organization name and one property (with value).
 
-The property is defined with the format PROPERTYNAME=VALUE (the property name is case insensitive, but the value is case sensitive), you can specify more than one property. If you specify more than one property, repos with the conjuntion of all properties will be returned.
+The property is defined with the format PROPERTYNAME=VALUE (the property name is case insensitive, but the value is case sensitive), you can specify more than one property. If you specify more than one property, repos with the conjunction of all properties will be returned.
 
 prints all repo names that have a property with name `production` and value `true`:
 
