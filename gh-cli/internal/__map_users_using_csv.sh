@@ -2,13 +2,13 @@
 
 # ./__map_users_using_csv.sh oldusername csvfile.csv.
 
-# CSV File
+# CSV File - mappings.csv, should exist in same folder as this script
 # oldusername,newusername
 
 # NOTE: not meant to be called directly
 
 oldusername=$1
-csvfile=$2
+csvfile="mappings.csv"
 
 newusername=$(grep "^$oldusername," $csvfile | awk -F ',' '{print $2}')
 
