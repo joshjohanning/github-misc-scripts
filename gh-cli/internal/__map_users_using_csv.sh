@@ -8,12 +8,13 @@
 # NOTE: not meant to be called directly
 
 oldusername=$1
-csvfile="mappings.csv"
+csvfile="internal/mappings.csv"
 
 newusername=$(grep "^$oldusername," $csvfile | awk -F ',' '{print $2}')
 
 if [ -z "$newusername" ]; then
     echo "Error: oldusername not found in csvfile"
+    echo  "oldusername: $oldusername"
     exit 1
 fi
 
