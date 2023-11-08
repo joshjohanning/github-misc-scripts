@@ -17,6 +17,7 @@
     # MAP_USER_SCRIPT - environment variable that points to a script that will map users from the source org to the target org. For this you should use ../../gh-cli/internal/__map_users_using_csv.sh
 
   # create a team mapping file, such as team_mappings.csv, and place it in the gh-cli/internal folder.
+  # You can put it in a different folder.
   
     # The format of the file should be as follows:
       # source_team1,target_team1
@@ -25,6 +26,7 @@
     # you can run gh api orgs/YOURORGHERE/team | jq -r '.[].login' to get a list of users in the org to help with creating the file
 
   # create a repo mapping file, such as repo_mappings.csv, and place it in the gh-cli/internal folder.
+  # You can put it in a different folder.
     
     # The format of the file should be as follows:
       # source_repo1,target_repo1
@@ -33,6 +35,7 @@
     # you can run gh api /orgs/YOURORGHERE/repos | jq -r '.[].name' to get a list of repos in the org to help with creating the file
 
   # create a user mapping file, such as user_mappings.csv, and place it in the gh-cli/internal folder.
+  # Currently it MUST exist in this folder.
     
     # The format of the file should be as follows:
       # source_user1,target_user1
