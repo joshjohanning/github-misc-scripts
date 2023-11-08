@@ -8,7 +8,7 @@
 # NOTE: not meant to be called directly
 
 oldusername=$1
-csvfile="internal/mappings.csv"
+csvfile="../../gh-cli/internal/user_mappings.csv"
 
 newusername=$(grep "^$oldusername," $csvfile | awk -F ',' '{print $2}')
 
