@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#./recreate-security-in-repos-and-teams.sh --source-org mickeygoussetorg --target-org mickeygoussetpleaseworkmigrationorg --team-mapping-file  ../../gh-cli/internal/team-mappings.csv --repo-mapping-file ../../gh-cli/internal/repo-mappings.csv
+#./recreate-security-in-repos-and-teams.sh --source-org mickeygoussetorg --target-org mickeygoussetpleaseworkmigrationorg --team-mapping-file  team_mappings.csv --repo-mapping-file repo_mappings.csv
 
 # Purpose
   # This script should be run after performing a migration from GHEC to GHEC/EMU. It may
@@ -14,10 +14,9 @@
 
     # SOURCE_TOKEN - Personal Access Token for the source org
     # TARGET_TOKEN - Personal Access Token for the target org
-    # MAP_USER_SCRIPT - environment variable that points to a script that will map users from the source org to the target org. For this you should use ../../gh-cli/internal/__map_users_using_csv.sh
+    # MAP_USER_SCRIPT - environment variable that points to a script that will map users from the source org to the target org. For this you should use __map_users_using_csv.sh
 
-  # create a team mapping file, such as team_mappings.csv, and place it in the gh-cli/internal folder.
-  # You can put it in a different folder.
+  # create a team mapping file, such as team_mappings.csv
   
     # The format of the file should be as follows:
       # source_team1,target_team1
@@ -25,8 +24,7 @@
       # source_team3,target_team3
     # you can run gh api orgs/YOURORGHERE/team | jq -r '.[].login' to get a list of users in the org to help with creating the file
 
-  # create a repo mapping file, such as repo_mappings.csv, and place it in the gh-cli/internal folder.
-  # You can put it in a different folder.
+  # create a repo mapping file, such as repo_mappings.csv
     
     # The format of the file should be as follows:
       # source_repo1,target_repo1
@@ -34,8 +32,8 @@
       # source_repo3,target_repo3
     # you can run gh api /orgs/YOURORGHERE/repos | jq -r '.[].name' to get a list of repos in the org to help with creating the file
 
-  # create a user mapping file, such as user_mappings.csv, and place it in the gh-cli/internal folder.
-  # Currently it MUST exist in this folder.
+  # create a user mapping file, such as user_mappings.csv. This file is used by the MAP_USER_SCRIPT script
+  # and should be in the same folder as the MAP_USER_SCRIPT script
     
     # The format of the file should be as follows:
       # source_user1,target_user1
