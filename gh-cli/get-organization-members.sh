@@ -3,7 +3,7 @@
 # need at least
 # gh auth refresh -h github.com -s read:user
 
-gh api graphql --paginate -f owner='mickeygoussetorg' -f query='
+gh api graphql --paginate -f owner='joshjohanning-org' -f query='
 query ($owner: String!, $endCursor: String) {
   organization(login: $owner) {
     membersWithRole(first: 100, after: $endCursor) {
