@@ -1,6 +1,10 @@
 #!/bin/bash
 
-#./recreate-security-in-repos-and-teams.sh --source-org mickeygoussetorg --target-org mickeygoussetpleaseworkmigrationorg --team-mapping-file  team_mappings.csv --repo-mapping-file repo_mappings.csv
+# Usage
+# ./recreate-security-in-repos-and-teams.sh --source-org mickeygoussetorg --target-org mickeygoussetpleaseworkmigrationorg --team-mapping-file team_mappings.csv --repo-mapping-file repo_mappings.csv
+
+# Author
+# @mickeygousset
 
 # Purpose
   # This script should be run after performing a migration from GHEC to GHEC/EMU. It may
@@ -100,9 +104,9 @@ done
 echo "Adding Users To Teams"
 source_teams=$(cut -d ',' -f 1 $team_mapping_file)
 for team in $source_teams; do
-  #if $verbose; then
-  #  echo $team
-  #fi
+  if $verbose; then
+   echo $team
+  fi
   # STEP 1.1: Get the target team from the mapping file
   target_team=$(grep "^$team," $team_mapping_file | awk -F ',' '{print $2}')
   echo "Source Team: $team"
