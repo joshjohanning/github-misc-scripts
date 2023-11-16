@@ -473,8 +473,8 @@ Generates a JWT for a GitHub app and use that JWT to generate installation token
 
 > [!NOTE]
 > - Not using `gh-cli` since we have to pass in JWT using `curl` (but otherwise no PAT required)
-> - Similar script to [get-apps-installed-in-organization.sh](./../scripts/> get-app-tokens-for-each-installation.sh), but this one doesn't have a python dependency
-> - Thanks [@kenmuse](https://github.com/kenmuse) for the [starter](https://gist.github.com/kenmuse/> 9429221d6944c087deaed2ec5075d0bf)! 
+> - Similar script to [get-apps-installed-in-organization.sh](./../scripts/get-app-tokens-for-each-installation.sh), but this one doesn't have a python dependency
+> - Thanks [@kenmuse](https://github.com/kenmuse) for the [starter](https://gist.github.com/kenmuse/9429221d6944c087deaed2ec5075d0bf)! 
 
 ### get-apps-installed-in-organization.sh
 
