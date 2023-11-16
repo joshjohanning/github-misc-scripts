@@ -81,7 +81,7 @@ Adds a `CODEOWNERS` file to a list of repositories.
     - For the 3rd argument, pass `true` if you want to overwrite existing file, otherwise it appends to existing
 
 > [!NOTE]
-> This is currently only checking for CODEOWNERS files in the root
+> This checks for a `CODEOWNERS` file in the 3 possible locations (root, `.github`, and `docs`)
 
 ### add-collaborator-to-repository.sh
 
@@ -385,6 +385,9 @@ test11-team/test11111-team
 test11-team/test11111-team/textxxx-team
 
 ```
+
+> [!IMPORTANT]
+> If deleting a team with child teams, all of the child teams will be deleted as well
 
 ### delete-workflow-runs-for-workflow.sh
 
