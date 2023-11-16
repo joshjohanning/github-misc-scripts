@@ -252,7 +252,7 @@ It copies all [environments](https://docs.github.com/en/actions/deployment/targe
 - [Wait Timer](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#wait-timer)
 - [Deployment Branches](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#deployment-branches)
 
-> **Note**
+> [!NOTE]
 > The following settings are **not** copied:
 >  - [Environment Variables](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#environment-variables)
 >  - [Custom Deployment Protection Rules](https://docs.github.com/en/actions/deployment/protecting-deployments/configuring-custom-deployment-protection-rules#using-existing-custom-deployment-protection-rules)
@@ -446,7 +446,7 @@ Or (`count-by-action` option to count by action as opposed to action@version):
 21 actions/setup-node
 ```
 
-> **Note**
+> [!NOTE]
 > The count returned is the # of repositories that use the action - if single a repository uses the action 2x times, it will only be counted 1x
 
 ### get-actions-usage-in-repository.sh
@@ -471,11 +471,10 @@ Gets all users who have created an issue, pull request, issue comment, or pull r
 
 Generates a JWT for a GitHub app and use that JWT to generate installation tokens for each org installation. The installation tokens, returned as `ghs_abc`, can then be used for normal API calls. It requires the App ID and Private Key `pem` file as input.
 
-Notes:
-
-- Not using `gh-cli` since we have to pass in JWT using `curl` (but otherwise no PAT required)
-- Similar script to [get-apps-installed-in-organization.sh](./../scripts/get-app-tokens-for-each-installation.sh), but this one doesn't have a python dependency
-- Thanks [@kenmuse](https://github.com/kenmuse) for the [starter](https://gist.github.com/kenmuse/9429221d6944c087deaed2ec5075d0bf)! 
+> [!NOTE]
+> - Not using `gh-cli` since we have to pass in JWT using `curl` (but otherwise no PAT required)
+> - Similar script to [get-apps-installed-in-organization.sh](./../scripts/> get-app-tokens-for-each-installation.sh), but this one doesn't have a python dependency
+> - Thanks [@kenmuse](https://github.com/kenmuse) for the [starter](https://gist.github.com/kenmuse/> 9429221d6944c087deaed2ec5075d0bf)! 
 
 ### get-apps-installed-in-organization.sh
 
@@ -714,7 +713,7 @@ Get outside collaborators added to a repository
 
 Retrieve the download URL for the latest version of a package in GitHub Packages. See: [Documentation](https://docs.github.com/en/graphql/reference/objects#package)
 
-> **Note**
+> [!NOTE]
 > No longer works for GitHub.com and deprecated for GHES 3.7+. See [Changelog post](https://github.blog/changelog/2022-08-18-deprecation-notice-graphql-for-packages/), [GraphQL breaking changes](https://docs.github.com/en/graphql/overview/breaking-changes#changes-scheduled-for-2022-11-21-1), and [GHES 3.7 deprecations](https://docs.github.com/en/enterprise-server@3.7/admin/release-notes#3.7.0-deprecations)
 
 ### get-package-download-url-for-specific-version-maven.sh
@@ -733,7 +732,7 @@ Retrieve the download URL for a specific version of an Maven package in GitHub P
 
 Retrieve the download URL for a specific version of a package in GitHub Packages. See: [Documentation](https://docs.github.com/en/graphql/reference/objects#package)
 
-> **Note**
+> [!NOTE]
 > No longer works for GitHub.com and deprecated for GHES 3.7+. See [Changelog post](https://github.blog/changelog/2022-08-18-deprecation-notice-graphql-for-packages/), [GraphQL breaking changes](https://docs.github.com/en/graphql/overview/breaking-changes#changes-scheduled-for-2022-11-21-1), and [GHES 3.7 deprecations](https://docs.github.com/en/enterprise-server@3.7/admin/release-notes#3.7.0-deprecations)
 
 ### get-pull-requests-in-organization.sh
@@ -1016,7 +1015,7 @@ The file with the rules should be in the following format:
 }
 ```
 
-> **Note**
+> [!NOTE]
 > The script logic is independent of the rules format since the file is normalized before comparisons are performed. If you want to use a different format, a surgical change to the rules normalization can be made (see script source code,search for `CUSTOMIZE` keyword)
 
 Run the script in `dry-run` to get a preview of the changes without actually applying them.
