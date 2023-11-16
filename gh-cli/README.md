@@ -574,6 +574,10 @@ Queries the enterprise for all organizations given the specified role (e.g.: whi
 
 Gets info about an enterprise using the [EnterpriseOwnerInfo](https://docs.github.com/en/graphql/reference/objects#enterpriseownerinfo) GraphQL object.
 
+### get-gei-migration-status.sh
+
+Gets the status of a [GitHub Enterprise Importer (GEI) migration](https://docs.github.com/en/enterprise-cloud@latest/migrations/using-github-enterprise-importer/migrating-organizations-with-github-enterprise-importer/migrating-organizations-from-githubcom-to-github-enterprise-cloud?tool=api#step-3-check-the-status-of-your-migration).
+
 ### get-label-usage-in-repository.sh
 
 Gets the usage of a label in a repository. Returns data in table format.
