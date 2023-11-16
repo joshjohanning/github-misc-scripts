@@ -80,7 +80,7 @@ Adds a `CODEOWNERS` file to a list of repositories.
 2. Run: `./add-codeowners-file-to-repositories.sh repos.csv ./CODEOWNERS false`
     - For the 3rd argument, pass `true` if you want to overwrite existing file, otherwise it appends to existing
 
-> **Note** 
+> [!NOTE]
 > This is currently only checking for CODEOWNERS files in the root
 
 ### add-collaborator-to-repository.sh
@@ -168,7 +168,7 @@ On Enterprise Managed Users organizations the users are only added if they are p
 
 On GitHub Enterprise Cloud the added users will get an invitation to join the organization.
 
-> **Warning** 
+> [!WARNING]
 > For GitHub Enterprise Cloud the number of users you can copy in a day is limited per target org. See [API note on rate limits](https://docs.github.com/en/enterprise-cloud@latest/rest/orgs/members?apiVersion=2022-11-28#set-organization-membership-for-a-user) for the limit values.
 
 This script requires 2 environment variables (with another optional one):
@@ -205,7 +205,8 @@ echo "$1"_SHORTCODE
 
 You can have more complex mappings this just a basic example, where a copy is being done between a GHEC and a GHEC EMU instance where the logins are going to be exactly the same, but the EMU instance has a suffix on the logins.
 
-> **Warning** If users are not members of the target organizations they will not be added to the target team but may receive an invite to join the org.
+> [!WARNING]
+> If users are not members of the target organizations they will not be added to the target team but may receive an invite to join the org.
 
 ### copy-organization-variables.sh
 
@@ -213,7 +214,8 @@ Copy organization variables from one organization to another.
 
 If the variable already exists on the target organization it will be updated.
 
-> **Warning** If the variable is available to selected repositories and a repository with the same doesn't exist on the target organization that association is ignored.
+> [!WARNING]
+> If the variable is available to selected repositories and a repository with the same doesn't exist on the target organization that association is ignored.
 
 ### copy-permissions-between-org-repos.sh
 
@@ -223,7 +225,7 @@ External collaborators are not copied intentionally.
 
 If the team (or children of that team) on the target organization doesn't exist, one will be created (same name, description, privacy, and notification settings ONLY),if the team has children teams those will also be created (full tree, not only direct children).
 
-> **Note** 
+> [!NOTE]
 > The created team will not be a full copy, **Only** name, description and visibilility are honored. If the team is is associated with an IDP group it will not be honored. If you want to change this behavior, you can modify the `internal/__copy_team_and_children_if_not_exists_at_target.sh` script.
 
 This script requires 2 environment variables (with another optional one):
@@ -271,7 +273,7 @@ The user running the command needs to be a repo admin or an organization owner o
 
 Copy team member from one team to another, it respect source role type (maintainer, member).
 
-> **Note** 
+> [!NOTE]
 > Only direct members are copied, child team members are not copied.
 
 If the target team already has user they will be preserved, this **doesn't** synch members between teams, it merely copies them. If you want a synch then you need to delete the existem team members in the target team before running this script.
@@ -290,7 +292,8 @@ echo "$1"_SHORTCODE
 
 You can have more complex mappings this just a basic example, where a copy is being done between a GHEC and a GHEC EMU instance where the logins are going to be exactly the same, but the EMU instance has a suffix on the logins.
 
-> **Warning** If users are not members of the target organizations they will not be added to the target team but may receive an invite to join the org.
+> [!WARNING]
+> If users are not members of the target organizations they will not be added to the target team but may receive an invite to join the org.
 
 ### create-enterprise-organization.sh
 
@@ -331,7 +334,7 @@ test11-team/test11111-team/textxxx-team
 
 Deletes all packages in an organization for a given package type.
 
-> **Warning**
+> [!WARNING]
 > This is a destructive operation and cannot be undone.
 
 ### delete-release.sh
@@ -361,7 +364,8 @@ gh auth refresh -h github.com -s delete_repo
 
 Deletes all webhooks from a repository.
 
-> **Warning** This operation is not reversible.
+> [!WARNING]
+> This operation is not reversible.
 
 ### delete-teams-from-list.sh
 
@@ -986,7 +990,7 @@ In order to ensure availability of the service, the script first adds all necess
 
 Optionally, you can opt-in in to save a backup of rules on GitHub before the changes are applied.
 
-> **Warning**
+> [!WARNING]
 > The script doesn't take into account if existing rules are active. If changes are made to an inactive rule it will be become active. If no changes are made, then active status will be ignored.
 
 This script requires `org:admin` scope.
