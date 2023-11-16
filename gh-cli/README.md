@@ -80,8 +80,8 @@ Adds a `CODEOWNERS` file to a list of repositories.
 2. Run: `./add-codeowners-file-to-repositories.sh repos.csv ./CODEOWNERS false`
     - For the 3rd argument, pass `true` if you want to overwrite existing file, otherwise it appends to existing
 
-> **Note** 
-> This is currently only checking for CODEOWNERS files in the root
+> [!NOTE]
+> This checks for a `CODEOWNERS` file in the 3 possible locations (root, `.github`, and `docs`)
 
 ### add-collaborator-to-repository.sh
 
@@ -168,7 +168,7 @@ On Enterprise Managed Users organizations the users are only added if they are p
 
 On GitHub Enterprise Cloud the added users will get an invitation to join the organization.
 
-> **Warning** 
+> [!WARNING]
 > For GitHub Enterprise Cloud the number of users you can copy in a day is limited per target org. See [API note on rate limits](https://docs.github.com/en/enterprise-cloud@latest/rest/orgs/members?apiVersion=2022-11-28#set-organization-membership-for-a-user) for the limit values.
 
 This script requires 2 environment variables (with another optional one):
@@ -205,7 +205,8 @@ echo "$1"_SHORTCODE
 
 You can have more complex mappings this just a basic example, where a copy is being done between a GHEC and a GHEC EMU instance where the logins are going to be exactly the same, but the EMU instance has a suffix on the logins.
 
-> **Warning** If users are not members of the target organizations they will not be added to the target team but may receive an invite to join the org.
+> [!WARNING]
+> If users are not members of the target organizations they will not be added to the target team but may receive an invite to join the org.
 
 ### copy-organization-variables.sh
 
@@ -213,7 +214,8 @@ Copy organization variables from one organization to another.
 
 If the variable already exists on the target organization it will be updated.
 
-> **Warning** If the variable is available to selected repositories and a repository with the same doesn't exist on the target organization that association is ignored.
+> [!WARNING]
+> If the variable is available to selected repositories and a repository with the same doesn't exist on the target organization that association is ignored.
 
 ### copy-permissions-between-org-repos.sh
 
@@ -223,7 +225,7 @@ External collaborators are not copied intentionally.
 
 If the team (or children of that team) on the target organization doesn't exist, one will be created (same name, description, privacy, and notification settings ONLY),if the team has children teams those will also be created (full tree, not only direct children).
 
-> **Note** 
+> [!NOTE]
 > The created team will not be a full copy, **Only** name, description and visibilility are honored. If the team is is associated with an IDP group it will not be honored. If you want to change this behavior, you can modify the `internal/__copy_team_and_children_if_not_exists_at_target.sh` script.
 
 This script requires 2 environment variables (with another optional one):
@@ -250,7 +252,7 @@ It copies all [environments](https://docs.github.com/en/actions/deployment/targe
 - [Wait Timer](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#wait-timer)
 - [Deployment Branches](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#deployment-branches)
 
-> **Note**
+> [!NOTE]
 > The following settings are **not** copied:
 >  - [Environment Variables](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#environment-variables)
 >  - [Custom Deployment Protection Rules](https://docs.github.com/en/actions/deployment/protecting-deployments/configuring-custom-deployment-protection-rules#using-existing-custom-deployment-protection-rules)
@@ -271,7 +273,7 @@ The user running the command needs to be a repo admin or an organization owner o
 
 Copy team member from one team to another, it respect source role type (maintainer, member).
 
-> **Note** 
+> [!NOTE]
 > Only direct members are copied, child team members are not copied.
 
 If the target team already has user they will be preserved, this **doesn't** synch members between teams, it merely copies them. If you want a synch then you need to delete the existem team members in the target team before running this script.
@@ -290,7 +292,8 @@ echo "$1"_SHORTCODE
 
 You can have more complex mappings this just a basic example, where a copy is being done between a GHEC and a GHEC EMU instance where the logins are going to be exactly the same, but the EMU instance has a suffix on the logins.
 
-> **Warning** If users are not members of the target organizations they will not be added to the target team but may receive an invite to join the org.
+> [!WARNING]
+> If users are not members of the target organizations they will not be added to the target team but may receive an invite to join the org.
 
 ### create-enterprise-organization.sh
 
@@ -331,7 +334,7 @@ test11-team/test11111-team/textxxx-team
 
 Deletes all packages in an organization for a given package type.
 
-> **Warning**
+> [!WARNING]
 > This is a destructive operation and cannot be undone.
 
 ### delete-release.sh
@@ -361,7 +364,8 @@ gh auth refresh -h github.com -s delete_repo
 
 Deletes all webhooks from a repository.
 
-> **Warning** This operation is not reversible.
+> [!WARNING]
+> This operation is not reversible.
 
 ### delete-teams-from-list.sh
 
@@ -381,6 +385,9 @@ test11-team/test11111-team
 test11-team/test11111-team/textxxx-team
 
 ```
+
+> [!IMPORTANT]
+> If deleting a team with child teams, all of the child teams will be deleted as well
 
 ### delete-workflow-runs-for-workflow.sh
 
@@ -442,7 +449,7 @@ Or (`count-by-action` option to count by action as opposed to action@version):
 21 actions/setup-node
 ```
 
-> **Note**
+> [!NOTE]
 > The count returned is the # of repositories that use the action - if single a repository uses the action 2x times, it will only be counted 1x
 
 ### get-actions-usage-in-repository.sh
@@ -467,11 +474,10 @@ Gets all users who have created an issue, pull request, issue comment, or pull r
 
 Generates a JWT for a GitHub app and use that JWT to generate installation tokens for each org installation. The installation tokens, returned as `ghs_abc`, can then be used for normal API calls. It requires the App ID and Private Key `pem` file as input.
 
-Notes:
-
-- Not using `gh-cli` since we have to pass in JWT using `curl` (but otherwise no PAT required)
-- Similar script to [get-apps-installed-in-organization.sh](./../scripts/get-app-tokens-for-each-installation.sh), but this one doesn't have a python dependency
-- Thanks [@kenmuse](https://github.com/kenmuse) for the [starter](https://gist.github.com/kenmuse/9429221d6944c087deaed2ec5075d0bf)! 
+> [!NOTE]
+> - Not using `gh-cli` since we have to pass in JWT using `curl` (but otherwise no PAT required)
+> - Similar script to [get-apps-installed-in-organization.sh](./../scripts/get-app-tokens-for-each-installation.sh), but this one doesn't have a python dependency
+> - Thanks [@kenmuse](https://github.com/kenmuse) for the [starter](https://gist.github.com/kenmuse/9429221d6944c087deaed2ec5075d0bf)! 
 
 ### get-apps-installed-in-organization.sh
 
@@ -710,7 +716,7 @@ Get outside collaborators added to a repository
 
 Retrieve the download URL for the latest version of a package in GitHub Packages. See: [Documentation](https://docs.github.com/en/graphql/reference/objects#package)
 
-> **Note**
+> [!NOTE]
 > No longer works for GitHub.com and deprecated for GHES 3.7+. See [Changelog post](https://github.blog/changelog/2022-08-18-deprecation-notice-graphql-for-packages/), [GraphQL breaking changes](https://docs.github.com/en/graphql/overview/breaking-changes#changes-scheduled-for-2022-11-21-1), and [GHES 3.7 deprecations](https://docs.github.com/en/enterprise-server@3.7/admin/release-notes#3.7.0-deprecations)
 
 ### get-package-download-url-for-specific-version-maven.sh
@@ -729,7 +735,7 @@ Retrieve the download URL for a specific version of an Maven package in GitHub P
 
 Retrieve the download URL for a specific version of a package in GitHub Packages. See: [Documentation](https://docs.github.com/en/graphql/reference/objects#package)
 
-> **Note**
+> [!NOTE]
 > No longer works for GitHub.com and deprecated for GHES 3.7+. See [Changelog post](https://github.blog/changelog/2022-08-18-deprecation-notice-graphql-for-packages/), [GraphQL breaking changes](https://docs.github.com/en/graphql/overview/breaking-changes#changes-scheduled-for-2022-11-21-1), and [GHES 3.7 deprecations](https://docs.github.com/en/enterprise-server@3.7/admin/release-notes#3.7.0-deprecations)
 
 ### get-pull-requests-in-organization.sh
@@ -986,7 +992,7 @@ In order to ensure availability of the service, the script first adds all necess
 
 Optionally, you can opt-in in to save a backup of rules on GitHub before the changes are applied.
 
-> **Warning**
+> [!WARNING]
 > The script doesn't take into account if existing rules are active. If changes are made to an inactive rule it will be become active. If no changes are made, then active status will be ignored.
 
 This script requires `org:admin` scope.
@@ -1012,7 +1018,7 @@ The file with the rules should be in the following format:
 }
 ```
 
-> **Note**
+> [!NOTE]
 > The script logic is independent of the rules format since the file is normalized before comparisons are performed. If you want to use a different format, a surgical change to the rules normalization can be made (see script source code,search for `CUSTOMIZE` keyword)
 
 Run the script in `dry-run` to get a preview of the changes without actually applying them.
