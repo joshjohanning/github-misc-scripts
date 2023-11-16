@@ -79,6 +79,37 @@ Migrate NuGet packages in GitHub Packages from one GitHub organization to anothe
 2. Define the target GitHub PAT env var: `export GH_TARGET_PAT=ghp_abc` (must have at least `write:packages`, `read:org` scope)
 3. Run: `./migrate-maven-packages-between-github-instances.sh joshjohanning-org github.com joshjohanning-emu`
 
+## update-codeowners-mappings.js
+
+Update CODEOWNERS mappings of teams in a GitHub repository (e.g.: after a migration if the team/org names change). This script will update the CODEOWNERS file in a GitHub repository with the mappings provided in the `codeowners-mappings.csv` file.
+
+The script is expecting:
+
+- an environment variable named `GITHUB_TOKEN` with a GitHub PAT that has `repo` scope
+- an environment variable named `REPOSITORIES` with a list of repositories to update (separated by a new line)
+- dependencies installed via `npm i octokit fs papaparse`
+
+Using/testing the script:
+
+```bash
+export GITHUB_TOKEN=ghp_abc
+export REPOSITORIES="https://github.com/joshjohanning-org/codeowners-scripting-test\
+https://github.com/joshjohanning-org/codeowners-scripting-test-2
+"
+npm i octokit fs papaparse
+node ./call-codeowners.js
+
+```
+
+The `codeowners-mappings.csv` (hardcoded file name) should be in the following format:
+
+```csv
+oldValue,newValue
+approvers-team,compliance-team
+admin-team,compliance-team
+joshjohanning-org,joshjohanning-new-org
+```
+
 ## update-repo-visibility-from-server-to-cloud.ps1
 
 Compares the repo visibility of a repo in GitHub Enterprise Server and update the visibility in GitHub Enterprise Cloud. This is useful since migrated repos are always brought into cloud as private.

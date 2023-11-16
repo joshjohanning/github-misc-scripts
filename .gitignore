@@ -3,3 +3,4 @@
 **/.DS_Store
 *.pem
 *.json
+node_modules*
