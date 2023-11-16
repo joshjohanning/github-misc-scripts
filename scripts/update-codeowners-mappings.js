@@ -2,14 +2,18 @@ const { Octokit } = require("octokit");
 const fs = require('fs');
 const Papa = require('papaparse');
 
-
 let octokit = new Octokit({
-  auth: process.env.TARGET_ADMIN_TOKEN,
+  auth: process.env.GITHUB_TOKEN,
   baseUrl: 'https://api.github.com'
 });
 
+const repositories = process.env.REPOSITORIES;
 
-module.exports = async ({repositories}) => {
+async function main() {
+    await findCodeowners({repositories});
+}
+
+const findCodeowners = async ({repositories}) => {
     const repos = repositories
         .split("\n")
         .map((s) => s.trim())
@@ -20,11 +24,7 @@ module.exports = async ({repositories}) => {
         let repo = parts[parts.length-1];
         let path;
         let codeownersPath;
-
-        const response = await octokit.rest.repos.get({
-            owner: 'joshjohanning-org',
-            repo: 'composite-action-sample-dependabot',
-        });
+        console.log(`\n>>> Processing ${org}/${repo} ... `)
 
         try {
             path='CODEOWNERS';
@@ -39,7 +39,6 @@ module.exports = async ({repositories}) => {
             codeownersPath=res.data.path;
             content=res.data.content;
             sha=res.data.sha;
-            await processCodeowners(codeownersPath, content, sha, org, repo);
         }
         catch (error) {
             console.debug(`Could not find CODEOWNERS file in ${path}`);
@@ -58,7 +57,6 @@ module.exports = async ({repositories}) => {
             codeownersPath=res.data.path;
             content=res.data.content;
             sha=res.data.sha;
-            await processCodeowners(codeownersPath, content, sha, org, repo);
         }
         catch (error) {
             console.debug(`Could not find CODEOWNERS file in ${path}`);
@@ -77,23 +75,24 @@ module.exports = async ({repositories}) => {
             codeownersPath=res.data.path;
             content=res.data.content;
             sha=res.data.sha;
-            await processCodeowners(codeownersPath, content, sha, org, repo);
         }
         catch (error) {
             console.debug(`Could not find CODEOWNERS file in ${path}`);
         }
 
+        await updateCodeowners(codeownersPath, content, sha, org, repo);
+
     };
 }
 
-async function processCodeowners(codeownersPath, content, sha, org, repo) {
+async function updateCodeowners(codeownersPath, content, sha, org, repo) {
     console.log(`Processing CODEOWNERS file at ${codeownersPath}`);
     // Decode the content from base64
     const buff = Buffer.from(content, 'base64');
     let newContent = buff.toString('ascii');
 
     // Read the CSV file
-    let csvData = fs.readFileSync('codeowners-map.csv', 'utf8');
+    let csvData = fs.readFileSync('codeowners-mappings.csv', 'utf8');
 
     // Parse the CSV data
     let parsedData = Papa.parse(csvData, {
@@ -138,5 +137,7 @@ async function processCodeowners(codeownersPath, content, sha, org, repo) {
     }
 
     // we want to make sure we exit as to not run the other API calls
-    process.exit(0);
+    // process.exit(0);
 }
+
+main();
