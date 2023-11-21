@@ -93,7 +93,7 @@ Using/testing the script:
 
 ```bash
 export GITHUB_TOKEN=ghp_abc
-export REPOSITORIES="https://github.com/joshjohanning-org/codeowners-scripting-test\
+export REPOSITORIES="https://github.com/joshjohanning-org/codeowners-scripting-test
 https://github.com/joshjohanning-org/codeowners-scripting-test-2
 "
 npm i octokit fs papaparse

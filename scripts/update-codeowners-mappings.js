@@ -79,8 +79,13 @@ const findCodeowners = async ({repositories}) => {
         catch (error) {
             console.debug(`Could not find CODEOWNERS file in ${path}`);
         }
-
-        await updateCodeowners(codeownersPath, content, sha, org, repo);
+        
+        // if path is not empty
+        if (codeownersPath) {
+            await updateCodeowners(codeownersPath, content, sha, org, repo);
+        } else {
+            console.log(`Could not find CODEOWNERS file in ${org}/${repo}`)
+        }
 
     };
 }
