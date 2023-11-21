@@ -405,6 +405,10 @@ Using `curl`, `wget`, or `gh release download` to download public release assets
 
 Enable actions on repository - similar to [API example](./../api/enable-actions-on-repository.sh), but using `gh cli`
 
+### find-attachments-in-repositories.sh
+
+Finds attachments in issues, pull requests, and optionally, issue/pull request comments. This finds both screenshots and file attachments.
+
 ### generate-release-notes-from-tags.sh
 
 Generates release notes between two tags. See the [release notes docs](https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes) on further customizations and the [API docs](https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#generate-release-notes-content-for-a-release) for info on the API.
