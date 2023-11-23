@@ -7,17 +7,20 @@ fi
 
 organization=$1
 
-response=$(gh api graphql -f org="$organization" -f query='query ($cursor: String, $org: String!) {
+if ! response=$(gh api graphql -f org="$organization" -f query='query ($org: String!) {
   organization(login: $org) {
-   queued : repositoryMigrations(after: $cursor, state: QUEUED) { totalCount	}
-   notstarted: repositoryMigrations(after: $cursor, state: NOT_STARTED) {totalCount}
-   inprogress: repositoryMigrations(after: $cursor, state: IN_PROGRESS) {totalCount}
-   suceeded: repositoryMigrations(after: $cursor, state: SUCCEEDED) {totalCount}
-   failed: repositoryMigrations(after: $cursor, state: FAILED) {totalCount}
-   pendingvalidation: repositoryMigrations(after: $cursor, state: PENDING_VALIDATION) {totalCount}
-   failedvalidation: repositoryMigrations(after: $cursor, state: FAILED_VALIDATION) {totalCount}
+   queued : repositoryMigrations(state: QUEUED) { totalCount	}
+   notstarted: repositoryMigrations(state: NOT_STARTED) {totalCount}
+   inprogress: repositoryMigrations(state: IN_PROGRESS) {totalCount}
+   suceeded: repositoryMigrations(state: SUCCEEDED) {totalCount}
+   failed: repositoryMigrations(state: FAILED) {totalCount}
+   pendingvalidation: repositoryMigrations(state: PENDING_VALIDATION) {totalCount}
+   failedvalidation: repositoryMigrations(state: FAILED_VALIDATION) {totalCount}
  }
-}')
+}') ; then
+    echo "Error getting organization data from $organization"
+    exit 1
+fi
 
 printf "%-20s %s\n" "Not started" "$(echo "$response" | jq -r '.data.organization .notstarted.totalCount')"
 printf "%-20s %s\n" "Pending validation" "$(echo "$response" | jq -r '.data.organization .pendingvalidation.totalCount')"
