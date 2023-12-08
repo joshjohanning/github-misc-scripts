@@ -44,13 +44,45 @@ Useful for force pushing / updating a tag so that you can update the tag atomica
 
 Get the full SHA from a short SHA
 
+## git-amend-commit-author-and-time.sh
+
+Amends the most recent commit with a new author and timestamp
+
+## git-amend-commit-to-include-new-changes.sh
+
+Amends the most recent commit by adding newly staged changes
+
+## git-amend-commit.sh
+
+Amends the most recent commit's message
+
+## git-commit-empty-commit.sh
+
+Commits empty commit (useful for triggering CI builds)
+
+## git-count-committers-in-last-x-days.sh
+
+Counts committers in the last 90 days
+
 ## git-merge-base.sh
 
 Finds the best common ancestor(s) between two commits (you can use it to compare commits at the tip of comparing branches)
 
+## git-reorder-last-2-commits.sh
+
+Reorders the last 2 commits
+
 ## git-show-branch.sh
 
 Shows commits that are common for branches being compared
+
+## git-show-files-changed-in-last-x-commits.sh
+
+Shows files that have been changed (added, modified, etc.) in the last x commits
+
+## git-squash-last-x-commits.sh
+
+Resets the last x commits and squashes them into one commit
 
 ## git-when-merged.sh
 
