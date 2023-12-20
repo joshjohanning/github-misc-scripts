@@ -720,10 +720,6 @@ prints all repo names that have a property with name `production` and value `tru
 
 Gets the repository count in an organization
 
-### get-organizations-projects-count.sh
-
-Gets the count of projects in all organizations in a given enterprise
-
 ### get-organization-team-members.sh
 
 Gets the members of a team
@@ -736,6 +732,9 @@ Gets a team
 
 Gets the list of organizations a user is a member of. This only returns organizations accessible to the person running the script, i.e.: organizations they are also a member of, or public organizations
 
+### get-organizations-projects-count.sh
+
+Gets the count of projects (ProjectsV2) in all organizations in a given enterprise
 
 ### get-outside-collaborators-added-to-repository.sh
 
