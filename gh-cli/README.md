@@ -566,6 +566,18 @@ Gets the current IP allow list for an enterprise.
 
 See the [docs](https://docs.github.com/en/graphql/reference/objects#enterpriseownerinfo) for further information.
 
+### get-enterprise-members.sh
+
+Get a list of all members in an enterprise
+
+### get-enterprise-organizations-for-user.sh
+
+Get a list of organizations in an enterprise the user is a member of
+
+### get-enterprise-organizations-members-count.sh
+
+Gets the organizations in an enterprise and the returns number of members in each organization. If the user calling the script isn't a member of a particular organization, it will return 0 members.
+
 ### get-enterprise-organizations.sh
 
 Gets all organizations for a given enterprise, requires the enterprise slug. Handles pagination and returns the organization id and login.
@@ -575,6 +587,10 @@ To get the list of all org names you can use `jq` to parse the JSON output:
 ```shell
 ./get-enterprise-organizations.sh octocat-corp | jq -r '.data.enterprise.organizations.nodes[].login'
 ```
+
+### get-enterprise-owners.sh
+
+Get a list of all owners (administrators) in an enterprise
 
 ### get-enterprise-roles-in-organizations-all-roles.sh
 
@@ -704,10 +720,6 @@ prints all repo names that have a property with name `production` and value `tru
 
 Gets the repository count in an organization
 
-### get-organizations-projects-count.sh
-
-Gets the count of projects in all organizations in a given enterprise
-
 ### get-organization-team-members.sh
 
 Gets the members of a team
@@ -715,6 +727,14 @@ Gets the members of a team
 ### get-organization-team.sh
 
 Gets a team
+
+### get-organizations-for-user.sh
+
+Gets the list of organizations a user is a member of. This only returns organizations accessible to the person running the script, i.e.: organizations they are also a member of, or public organizations
+
+### get-organizations-projects-count.sh
+
+Gets the count of projects (ProjectsV2) in all organizations in a given enterprise
 
 ### get-outside-collaborators-added-to-repository.sh
 
@@ -1037,7 +1057,7 @@ Sets the IP allow list to enabled/disable for an enterprise or organization. You
 
 See the [docs](https://docs.github.com/en/graphql/reference/mutations#updateipallowlistenabledsetting) for further information.
 
-### set-organization-membership-for-a-user.sh
+### set-organization-membership-for-user.sh
 
 Sets (or adds) a user to an organization with a specified role
 
