@@ -1054,7 +1054,7 @@ Sets the IP allow list to enabled/disable for an enterprise or organization. You
 
 See the [docs](https://docs.github.com/en/graphql/reference/mutations#updateipallowlistenabledsetting) for further information.
 
-### set-organization-membership-for-a-user.sh
+### set-organization-membership-for-user.sh
 
 Sets (or adds) a user to an organization with a specified role
 
