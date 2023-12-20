@@ -584,6 +584,10 @@ To get the list of all org names you can use `jq` to parse the JSON output:
 ./get-enterprise-organizations.sh octocat-corp | jq -r '.data.enterprise.organizations.nodes[].login'
 ```
 
+### get-enterprise-owners.sh
+
+Get a list of all owners (administrators) in an enterprise
+
 ### get-enterprise-roles-in-organizations-all-roles.sh
 
 Queries every organization in an enterprise and returns whether the user is a member or a member + admin of the organization.
