@@ -566,6 +566,10 @@ Gets the current IP allow list for an enterprise.
 
 See the [docs](https://docs.github.com/en/graphql/reference/objects#enterpriseownerinfo) for further information.
 
+### get-enterprise-members.sh
+
+Get a list of all members in an enterprise
+
 ### get-enterprise-organizations-for-user.sh
 
 Get a list of organizations in an enterprise the user is a member of
