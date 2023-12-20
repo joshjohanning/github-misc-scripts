@@ -566,6 +566,14 @@ Gets the current IP allow list for an enterprise.
 
 See the [docs](https://docs.github.com/en/graphql/reference/objects#enterpriseownerinfo) for further information.
 
+### get-enterprise-organizations-for-user.sh
+
+Get a list of organizations in an enterprise the user is a member of
+
+### get-enterprise-organizations-members-count.sh
+
+Gets the organizations in an enterprise and the returns number of members in each organization. If the user calling the script isn't a member of a particular organization, it will return 0 members.
+
 ### get-enterprise-organizations.sh
 
 Gets all organizations for a given enterprise, requires the enterprise slug. Handles pagination and returns the organization id and login.
@@ -715,6 +723,11 @@ Gets the members of a team
 ### get-organization-team.sh
 
 Gets a team
+
+### get-organizations-for-user.sh
+
+Gets the list of organizations a user is a member of. This only returns organizations accessible to the person running the script, i.e.: organizations they are also a member of, or public organizations
+
 
 ### get-outside-collaborators-added-to-repository.sh
 
