@@ -1,5 +1,31 @@
 # scripts
 
+## add-dependabot-file-to-repositories.js
+
+Add `dependabot.yml` file to a list of repositories.
+
+The script is expecting:
+
+- an environment variable named `GITHUB_TOKEN` with a GitHub PAT that has `repo` scope
+- dependencies installed via `npm i octokit fs`
+- Update the `gitUsername`, `gitEmail`, and `overwrite` const at the top of the script accordingly
+
+Script usage:
+
+```bash
+export GITHUB_TOKEN=ghp_abc
+npm i octokit fs papaparse
+node ./add-dependabot-file-to-repositories.js ./repos.txt ./dependabot.yml
+```
+
+The `repos.txt` should be in the following format:
+
+```
+joshjohanning-org/test-repo-1
+joshjohanning-org/test-repo-2
+joshjohanning-org/test-repo-3
+```
+
 ## ado_workitems_to_github_issues.ps1
 
 Migrate work items from Azure DevOps to GitHub issues - this just links out to a [separate repo](https://github.com/joshjohanning/ado_workitems_to_github_issues)
@@ -97,7 +123,7 @@ export REPOSITORIES="https://github.com/joshjohanning-org/codeowners-scripting-t
 https://github.com/joshjohanning-org/codeowners-scripting-test-2
 "
 npm i octokit fs papaparse
-node ./call-codeowners.js
+node ./update-codeowners-mappings.js
 
 ```
 
