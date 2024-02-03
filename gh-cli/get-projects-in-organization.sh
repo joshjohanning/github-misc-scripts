@@ -13,33 +13,33 @@ org=$1
 gh api graphql --paginate -f organization="$org" -f query='
   query ($organization: String!) {
     organization (login: $organization) {
-			login
+      login
       projectsV2 (first: 100) {
-				totalCount
+      	totalCount
         nodes {
-					title
-					shortDescription
-					id
-					url
-					number
-					updatedAt
-					creator {
-						login
-					}
-					closed
-					closedAt
-					repositories (first: 100) {
-						totalCount
-						nodes {
-							name
-						}
+          title
+          shortDescription
+          id
+          url
+          number
+          updatedAt
+          creator {
+            login
           }
-					items {
-						totalCount
-					}
-					views {
-						totalCount
-					}
+          closed
+          closedAt
+          repositories (first: 100) {
+            totalCount
+            nodes {
+            	name
+            }
+          }
+          items {
+            totalCount
+          }
+          views {
+            totalCount
+          }
         }
       }
     }
