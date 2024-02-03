@@ -14,7 +14,7 @@
 
 function print_usage {
   echo "Usage: $0 <enterprise> <org> <user> <role>"
-  echo "Example: ./get-enterprise-id.sh avocado-corp joshjohanning-org joshjohanning admin"
+  echo "Example: ./add-enterprise-organization-member.sh avocado-corp joshjohanning-org joshjohanning admin"
   echo "Valid roles: MEMBER, ADMIN"
   exit 1
 }
