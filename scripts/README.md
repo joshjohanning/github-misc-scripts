@@ -26,6 +26,12 @@ joshjohanning-org/test-repo-2
 joshjohanning-org/test-repo-3
 ```
 
+Configuration values to change in the script:
+
+- `gitUsername`: If using a GitHub App, use the name of GitHub App with `[bot]` appended, e.g.: `josh-issueops-bot[bot]`
+- `gitEmail` = If using a GitHub App, combine the App's user ID (⚠️ this is different than App ID!) and name to form an email like: `149130343+josh-issueops-bot[bot]@users.noreply.github.com`. You can find the App's user ID number by calling: `gh api '/users/josh-issueops-bot[bot]' --jq .id`
+- `overwrite`: use `false` or `true` on whether it should overwrite the existing `dependabot.yml` file
+
 ## ado_workitems_to_github_issues.ps1
 
 Migrate work items from Azure DevOps to GitHub issues - this just links out to a [separate repo](https://github.com/joshjohanning/ado_workitems_to_github_issues)

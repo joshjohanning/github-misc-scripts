@@ -14,8 +14,8 @@ const fs = require('fs');
 
 // TODO: USER CONFIG - CHANGE THESE VALUES
 const gitUsername = 'josh-issueops-bot[bot]'; // name of GitHub App with [bot] appended
-const gitEmail = '149130343+josh-issueops-bot[bot]@users.noreply.github.com'; // if using GitHub App, find the user ID number by calling: gh api '/users/josh-issueops-bot[bot]'
-const overwrite = false; // if true, will overwrite existing CODEOWNERS file
+const gitEmail = '149130343+josh-issueops-bot[bot]@users.noreply.github.com'; // if using GitHub App, find the user ID number by calling: gh api '/users/josh-issueops-bot[bot]' --jq .id
+const overwrite = false; // if true, will overwrite existing dependabot.yml file
 //
 
 // const - do not change these values
