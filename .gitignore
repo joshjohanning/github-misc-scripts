@@ -4,3 +4,4 @@
 *.pem
 *.json
 node_modules*
+local-test.sh

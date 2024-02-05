@@ -1,0 +1,66 @@
+name: "Migrate Pacakges"
+description: "Migrate packages from one org to another"
+inputs:
+  GH_SOURCE_PAT:
+    description: The PAT for the source repo
+    required: true
+  GH_TARGET_PAT:
+    description: The PAT for the source repo
+    required: true
+  source_host:
+    description: The source instance to migrate from
+    required: false
+    default: github.com
+  source_org:
+    description: The source org to migrate from
+    required: true
+  target_host:
+    description: The target instance to migrate to
+    required: false
+    default: github.com
+  target_org:
+    description: The target org to migrate to
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: set up action
+      run: chmod +x scripts/*.sh
+      shell: bash
+
+    - name: migrate maven packages
+      run: |
+        ./scripts/migrate-maven-packages-between-github-instances.sh ${{ inputs.source_org }} ${{ inputs.source_host }} ${{ inputs.target_org }} ${{ inputs.target_host }}
+      id: migrate-mvn
+      shell: bash
+      env:
+        GH_SOURCE_PAT: ${{ inputs.GH_SOURCE_PAT }}
+        GH_TARGET_PAT: ${{ inputs.GH_TARGET_PAT }}
+
+    - name: migrate npm packages
+      run: |
+        ./scripts/migrate-npm-packages-between-github-instances.sh ${{ inputs.source_org }} ${{ inputs.source_host }} ${{ inputs.target_org }} ${{ inputs.target_host }}
+      id: migrate-npm
+      shell: bash
+      env:
+        GH_SOURCE_PAT: ${{ inputs.GH_SOURCE_PAT }}
+        GH_TARGET_PAT: ${{ inputs.GH_TARGET_PAT }}
+
+    - name: migrate nuget packages
+      run: |
+        ./scripts/migrate-nuget-packages-between-orgs.sh ${{ inputs.source_org }} ${{ inputs.source_host }} ${{ inputs.target_org }} ${{ inputs.target_host }}
+      id: migrate-nuget
+      shell: bash
+      env:
+        GH_SOURCE_PAT: ${{ inputs.GH_SOURCE_PAT }}
+        GH_TARGET_PAT: ${{ inputs.GH_TARGET_PAT }}
+
+    - name: migrate containers
+      run: |
+        ./scripts/migrate-container-packages-between-orgs.sh ${{ inputs.source_org }} ${{ inputs.source_host }} ${{ inputs.target_org }} ${{ inputs.target_host }}
+      id: migrate-containers
+      shell: bash
+      env:
+        GH_SOURCE_PAT: ${{ inputs.GH_SOURCE_PAT }}
+        GH_TARGET_PAT: ${{ inputs.GH_TARGET_PAT }}
