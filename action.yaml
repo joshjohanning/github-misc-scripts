@@ -26,12 +26,12 @@ runs:
   using: "composite"
   steps:
     - name: set up action
-      run: chmod +x scripts/*.sh
+      run: chmod +x ${{ github.action_path }}/scripts/*.sh
       shell: bash
 
     - name: migrate maven packages
       run: |
-        ./scripts/migrate-maven-packages-between-github-instances.sh ${{ inputs.source_org }} ${{ inputs.source_host }} ${{ inputs.target_org }} ${{ inputs.target_host }}
+        ${{ github.action_path }}/scripts/migrate-maven-packages-between-github-instances.sh ${{ inputs.source_org }} ${{ inputs.source_host }} ${{ inputs.target_org }} ${{ inputs.target_host }}
       id: migrate-mvn
       shell: bash
       env:
@@ -40,7 +40,7 @@ runs:
 
     - name: migrate npm packages
       run: |
-        ./scripts/migrate-npm-packages-between-github-instances.sh ${{ inputs.source_org }} ${{ inputs.source_host }} ${{ inputs.target_org }} ${{ inputs.target_host }}
+        ${{ github.action_path }}/scripts/migrate-npm-packages-between-github-instances.sh ${{ inputs.source_org }} ${{ inputs.source_host }} ${{ inputs.target_org }} ${{ inputs.target_host }}
       id: migrate-npm
       shell: bash
       env:
@@ -49,7 +49,7 @@ runs:
 
     - name: migrate nuget packages
       run: |
-        ./scripts/migrate-nuget-packages-between-orgs.sh ${{ inputs.source_org }} ${{ inputs.source_host }} ${{ inputs.target_org }} ${{ inputs.target_host }}
+        ${{ github.action_path }}/scripts/migrate-nuget-packages-between-orgs.sh ${{ inputs.source_org }} ${{ inputs.source_host }} ${{ inputs.target_org }} ${{ inputs.target_host }}
       id: migrate-nuget
       shell: bash
       env:
@@ -58,7 +58,7 @@ runs:
 
     - name: migrate containers
       run: |
-        ./scripts/migrate-container-packages-between-orgs.sh ${{ inputs.source_org }} ${{ inputs.source_host }} ${{ inputs.target_org }} ${{ inputs.target_host }}
+        ${{ github.action_path }}/scripts/migrate-container-packages-between-orgs.sh ${{ inputs.source_org }} ${{ inputs.source_host }} ${{ inputs.target_org }} ${{ inputs.target_host }}
       id: migrate-containers
       shell: bash
       env:
