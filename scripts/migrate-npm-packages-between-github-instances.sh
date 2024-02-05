@@ -46,7 +46,7 @@ cd ./temp
 temp_dir=$(pwd)
 
 # set up .npmrc for target org
-echo @$TARGET_ORG:https://npm.pkg.$TARGET_HOST/ > $temp_dir/.npmrc && echo "//npm.pkg.$TARGET_HOST/:_authToken=$GH_TARGET_PAT" >> $temp_dir/.npmrc
+echo @$TARGET_ORG:registry=https://npm.pkg.$TARGET_HOST/ > $temp_dir/.npmrc && echo "//npm.pkg.$TARGET_HOST/:_authToken=$GH_TARGET_PAT" >> $temp_dir/.npmrc
 
 packages=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages?package_type=npm" -q '.[] | .name + " " + .repository.name')
 
@@ -80,6 +80,8 @@ echo "$packages" | while IFS= read -r response; do
     tar xzf $package_name-$version.tgz -C $package_name-$version
     cd $package_name-$version/package
     perl -pi -e "s/$SOURCE_ORG/$TARGET_ORG/g" package.json
+
+    # Publish the package to the new registry
     npm publish --userconfig $temp_dir/.npmrc
     cd ./../../
 
