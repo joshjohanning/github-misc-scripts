@@ -11,7 +11,7 @@ function print_usage {
   exit 1
 }
 
-if [ -z "$2" ]; then
+if [ -z "$4" ]; then
   print_usage
 fi
 
