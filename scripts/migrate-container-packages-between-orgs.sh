@@ -1,5 +1,7 @@
 #!/bin/bash
 
+## NOTE: ONLY MIGRATES TAGS, NOT SHAs. UNTAGGED IMAGES WILL BE LEFT BEHIND
+#
 # Usage: ./migrate-npm-packages-between-github-instances.sh <source-org> <source-host> <target-org> <target-host>
 #
 #
@@ -40,4 +42,41 @@ SOURCE_HOST=$2
 TARGET_ORG=$3
 TARGET_HOST=$4
 
-echo nothing yet
+export SOURCE_REGISTRY="ghcr.io" 
+if [[ $SOURCE_HOST != "github.com" ]]; then
+  export SOURCE_REGISTRY="containers.${SOURCE_HOST}"
+fi
+
+export TARGET_REGISTRY="ghcr.io" 
+if [[ $TARGET_HOST != "github.com" ]]; then
+  export TARGET_REGISTRY="containers.${TARGET_HOST}"
+fi
+
+packages=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages?package_type=container" -q '.[] | .name + " " + .repository.name')
+
+echo "$packages" | while IFS= read -r response; do
+
+  package_name=$(echo "$response" | cut -d ' ' -f 1)
+  repo_name=$(echo "$response" | cut -d ' ' -f 2)
+ 
+  echo "org: $SOURCE_ORG repo: $repo_name --> package name $package_name"
+  
+  # Yum yum, get all source packages　美味しい、ね？
+  echo ${GH_SOURCE_PAT} | docker login ${SOURCE_REGISTRY} --username USERNAME --password-stdin
+  echo docker image pull --all-tags  ${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}
+  docker image pull --all-tags  ${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}
+
+  # retag what we got  
+  versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages/container/$package_name/versions" -q '.[] | .metadata.container.tags[]' | sort -V)
+  for version in $versions
+  do
+    docker tag ${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}:${version} ${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}:${version}
+  done
+  
+  # Push all the tags to the target
+  echo ${GH_TARGET_PAT} | docker login ${TARGET_REGISTRY} --username USERNAME --password-stdin
+  docker push ${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}
+  
+  # If we want to push all untagged SHAs fix this up and do something like this
+  #versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages/container/$package_name/versions" -q '.[] | .name' | sort -V)
+done
