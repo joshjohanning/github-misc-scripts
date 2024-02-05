@@ -29,14 +29,15 @@ runs:
       run: chmod +x ${{ github.action_path }}/scripts/*.sh
       shell: bash
 
-    - name: migrate maven packages
-      run: |
-        ${{ github.action_path }}/scripts/migrate-maven-packages-between-github-instances.sh ${{ inputs.source_org }} ${{ inputs.source_host }} ${{ inputs.target_org }} ${{ inputs.target_host }}
-      id: migrate-mvn
-      shell: bash
-      env:
-        GH_SOURCE_PAT: ${{ inputs.GH_SOURCE_PAT }}
-        GH_TARGET_PAT: ${{ inputs.GH_TARGET_PAT }}
+    # Skipping -- Not part of initial reqs
+    # - name: migrate maven packages
+    #   run: |
+    #     ${{ github.action_path }}/scripts/migrate-maven-packages-between-github-instances.sh ${{ inputs.source_org }} ${{ inputs.source_host }} ${{ inputs.target_org }} ${{ inputs.target_host }}
+    #   id: migrate-mvn
+    #   shell: bash
+    #   env:
+    #     GH_SOURCE_PAT: ${{ inputs.GH_SOURCE_PAT }}
+    #     GH_TARGET_PAT: ${{ inputs.GH_TARGET_PAT }}
 
     - name: migrate npm packages
       run: |
@@ -47,14 +48,15 @@ runs:
         GH_SOURCE_PAT: ${{ inputs.GH_SOURCE_PAT }}
         GH_TARGET_PAT: ${{ inputs.GH_TARGET_PAT }}
 
-    - name: migrate nuget packages
-      run: |
-        ${{ github.action_path }}/scripts/migrate-nuget-packages-between-orgs.sh ${{ inputs.source_org }} ${{ inputs.source_host }} ${{ inputs.target_org }} ${{ inputs.target_host }}
-      id: migrate-nuget
-      shell: bash
-      env:
-        GH_SOURCE_PAT: ${{ inputs.GH_SOURCE_PAT }}
-        GH_TARGET_PAT: ${{ inputs.GH_TARGET_PAT }}
+    # Skipping -- Not part of initial reqs
+    # - name: migrate nuget packages
+    #   run: |
+    #     ${{ github.action_path }}/scripts/migrate-nuget-packages-between-orgs.sh ${{ inputs.source_org }} ${{ inputs.source_host }} ${{ inputs.target_org }} ${{ inputs.target_host }}
+    #   id: migrate-nuget
+    #   shell: bash
+    #   env:
+    #     GH_SOURCE_PAT: ${{ inputs.GH_SOURCE_PAT }}
+    #     GH_TARGET_PAT: ${{ inputs.GH_TARGET_PAT }}
 
     - name: migrate containers
       run: |
