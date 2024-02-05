@@ -70,12 +70,14 @@ echo "$packages" | while IFS= read -r response; do
   versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages/container/$package_name/versions" -q '.[] | .metadata.container.tags[]' | sort -V)
   for version in $versions
   do
+    echo docker tag ${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}:${version} ${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}:${version}
     docker tag ${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}:${version} ${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}:${version}
   done
   
   # Push all the tags to the target
   echo ${GH_TARGET_PAT} | docker login ${TARGET_REGISTRY} --username USERNAME --password-stdin
-  docker push ${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}
+  echo docker push --all-tags ${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}
+  docker push --all-tags ${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}
   
   # If we want to push all untagged SHAs fix this up and do something like this
   #versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages/container/$package_name/versions" -q '.[] | .name' | sort -V)
