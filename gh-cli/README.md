@@ -122,6 +122,16 @@ Example usage:
 ./add-user-to-project.sh joshjohanning-org 1234 joshjohanning ADMIN"
 ```
 
+### add-user-to-repository.sh
+
+Adds a user to a repository with a given permission
+
+Example usage:
+
+```bash
+./add-user-to-repository.sh joshjohanning-org my-repo joshjohanning write"
+```
+
 ### add-user-to-team.sh
 
 Adds (invites) a user to an organization team
