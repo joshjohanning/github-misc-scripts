@@ -78,7 +78,7 @@ echo "$packages" | while IFS= read -r response; do
   rm ~/.mvnfeed/mvnfeed.ini
   mvnfeed config repo list >/dev/null 2>&1
   echo "[repository.githubsource]" >> ~/.mvnfeed/mvnfeed.ini
-  echo "url = https://maven.pkg.github.com/$SOURCE_ORG/$repo_name" >> ~/.mvnfeed/mvnfeed.ini
+  echo "url = https://maven.pkg.github.com/${GH_SOURCE_ORG}/download" >> ~/.mvnfeed/mvnfeed.ini
   echo "authorization = Basic $auth_source" >> ~/.mvnfeed/mvnfeed.ini
   echo "" >> ~/.mvnfeed/mvnfeed.ini
   echo "[repository.githubtarget]" >> ~/.mvnfeed/mvnfeed.ini
@@ -105,7 +105,7 @@ echo "$packages" | while IFS= read -r response; do
     name=$(echo $package_com.$package_group:$package_artifact:$version)
     echo "   pushing: $name"
 
-    mvnfeed artifact transfer --from=githubsource --to=githubtarget --name=$package_com.$package_group:$package_artifact:$version
+    mvnfeed artifact transfer --from=githubsource --to=githubtarget --name="${package_com}:${package_artifact}:${VERSION}"
 
   done
 
