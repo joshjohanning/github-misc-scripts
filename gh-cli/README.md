@@ -1004,11 +1004,17 @@ The script has three parameters:
 - `target-org` - The target organization name to which teams will be updated OR created
 - `create parent(s) if not exist` - OPTIONAL (default `false`) if set to true, the teams which have parents that do not exist in the target org, they will be created. (also creates parents of parents) otherwise it will print a message parent doesn't exist and it will skipped.
 
+### remove-branch-protection-status-check-contexts.sh
+
+Removes specific branch protection status check(s) from a branch protection rule
+
+See the [docs](https://docs.github.com/en/rest/branches/branch-protection?apiVersion=2022-11-28#remove-status-check-contexts) for more information
+
 ### remove-branch-protection-status-checks.sh
 
-Removes a status check from the branch protection status check contexts.
+Unsets the required status checks setting on a branch protection policy (and removes all checks with it)
 
-See the [docs](https://docs.github.com/en/rest/branches/branch-protection?apiVersion=2022-11-28#remove-status-check-contexts) for more information.
+See the [docs](https://docs.github.com/en/rest/branches/branch-protection?apiVersion=2022-11-28#remove-status-check-protection) for more information
 
 ### remove-enterprise-user.sh
 
@@ -1042,10 +1048,10 @@ See the [docs](https://docs.github.com/en/rest/search?apiVersion=2022-11-28#sear
 
 ### set-branch-protection-status-checks.sh
 
-Set the branch protection status checks.
+Set the branch protection status checks - and optionally create a branch protection rule if it doesn't exist or set the required status checks setting on an existing branch protection rule if it isn't set
 
 > [!NOTE]
-> Set the App ID for GitHub Actions (`15368`), GitHub Advanced Security (`57789`), or Azure Pipelines (`9426`) if you are using those as a source for status checks for best security.
+> Set the App ID for GitHub Actions (`15368`), GitHub Advanced Security (`57789`), Azure Pipelines (`9426`), or CircleCI (`302869`) if you are using those as a source for status checks as a best practice (so the check can't be spoofed by another source/app).
 
 See the [docs](https://docs.github.com/en/rest/branches/branch-protection?apiVersion=2022-11-28#update-status-check-protection) for more information.
 
