@@ -8,7 +8,7 @@
 # Step 1: Run ./generate-repositories-list.sh <org> > repos.csv 
 #   - Or create a list of repos in a csv file, 1 per line, with a trailing empty line at the end of the file
 #   - DO NOT REMOVE TRAILING NEW LINE IN THE INPUT CSV FILE
-# Step 2: ./delete-repos-from-list.sh repos.csv
+# Step 2: ./delete-repositories-from-list.sh repos.csv
 
 if [ $# -lt "1" ]; then
     echo "Usage: $0 <reposfilename>"

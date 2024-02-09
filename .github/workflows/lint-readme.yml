@@ -1,4 +1,4 @@
-name: Lint README
+name: Lint
 
 on:
   pull_request:

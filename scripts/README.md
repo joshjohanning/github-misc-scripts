@@ -111,6 +111,10 @@ Migrate NuGet packages in GitHub Packages from one GitHub organization to anothe
 2. Define the target GitHub PAT env var: `export GH_TARGET_PAT=ghp_abc` (must have at least `write:packages`, `read:org` scope)
 3. Run: `./migrate-maven-packages-between-github-instances.sh joshjohanning-org github.com joshjohanning-emu`
 
+## recreate-security-in-repositories-and-teams
+
+See: [recreate-security-in-repositories-and-teams](./recreate-security-in-repositories-and-teams/README.md)
+
 ## update-codeowners-mappings.js
 
 Update CODEOWNERS mappings of teams in a GitHub repository (e.g.: after a migration if the team/org names change). This script will update the CODEOWNERS file in a GitHub repository with the mappings provided in the `codeowners-mappings.csv` file.
@@ -142,6 +146,6 @@ admin-team,compliance-team
 joshjohanning-org,joshjohanning-new-org
 ```
 
-## update-repo-visibility-from-server-to-cloud.ps1
+## update-repository-visibility-from-server-to-cloud.ps1
 
 Compares the repo visibility of a repo in GitHub Enterprise Server and update the visibility in GitHub Enterprise Cloud. This is useful since migrated repos are always brought into cloud as private.
