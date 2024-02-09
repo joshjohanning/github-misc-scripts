@@ -1,24 +1,30 @@
 #!/bin/bash
 
-permissions=("pull" "triage" "push" "maintain" "admin")
+# Adds a team to a repo
 
-if [ $# -ne 4 ]
-  then
-    echo "usage: $0 <org> <repo> <team slug> <permission>"
-    echo "permission can be one of: ${permissions[*]}"
-    exit 1
+function print_usage {
+  echo "Usage: $0 <org> <repo> <team_slug> <role>"
+  echo "Example: ./add-team-to-repository.sh joshjohanning-org my-repo my-team push"
+  echo "Valid roles: admin, maintain, push (write), triage, pull (read)"
+  exit 1
+}
+
+if [ -z "$4" ]; then
+  print_usage
 fi
 
 org=$1
 repo=$2
 team=$3
-permission=$4
+permission=$(echo "$4" | tr '[:upper:]' '[:lower:]')
 
-if [[ ! " ${permissions[*]} " =~  ${permission}  ]]
-  then
-    echo "permission must be one of: ${permissions[*]}"
-    exit 1
-fi
+case "$permission" in
+  "admin" | "maintain" | "push" | "triage" | "pull")
+    ;;
+  *)
+    print_usage
+    ;;
+esac
 
 # https://docs.github.com/en/rest/teams/teams?apiVersion=2022-11-28#add-or-update-team-repository-permissions
 

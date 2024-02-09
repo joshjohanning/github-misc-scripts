@@ -112,14 +112,30 @@ See the [docs](https://docs.github.com/en/graphql/reference/mutations#createipal
 
 Adds a team to a repository with a given permission level
 
+Example usage:
+
+```bash
+./add-team-to-repository.sh joshjohanning-org my-repo my-team push"
+```
+
 ### add-user-to-project.sh
 
-Adds a user to a ProjectV2
+Adds a user to a ProjectV2 with a given role
 
 Example usage:
 
 ```bash
 ./add-user-to-project.sh joshjohanning-org 1234 joshjohanning ADMIN"
+```
+
+### add-user-to-repository.sh
+
+Adds a user to a repository with a given permission
+
+Example usage:
+
+```bash
+./add-user-to-repository.sh joshjohanning-org my-repo joshjohanning write"
 ```
 
 ### add-user-to-team.sh
