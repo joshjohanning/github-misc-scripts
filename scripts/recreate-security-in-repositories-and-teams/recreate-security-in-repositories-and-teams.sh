@@ -136,10 +136,10 @@ for repo in $source_repos; do
       exit 1
   fi
   echo "Target Repo: $target_repo"
-  # STEP 2.2: Run the copy-permissions-between-org-repos.sh script
+  # STEP 2.2: Run the copy-permissions-between-organization-repositories.sh script
   # don't forget to set the MAP_USER_SCRIPT environment variable and create the user mapping file
-  echo "Run copy-permissions-between-org-repos.sh $source_org $repo $target_org $target_repo"
-  ../../gh-cli/copy-permissions-between-org-repos.sh $source_org $repo $target_org $target_repo
+  echo "Run copy-permissions-between-organization-repositories.sh $source_org $repo $target_org $target_repo"
+  ../../gh-cli/copy-permissions-between-organization-repositories.sh $source_org $repo $target_org $target_repo
   echo "Done adding Source Repo: $repo to Target Repo: $target_repo"
   echo "**********"
 done

@@ -9,7 +9,7 @@ This script will:
 ### Usage
 
 ```bash
-./recreate-security-in-repos-and-teams.sh --source-org mickeygoussetorg --target-org mickeygoussetpleaseworkmigrationorg --team-mapping-file team_mappings.csv --repo-mapping-file repo_mappings.csv
+./recreate-security-in-repositories-and-teams.sh --source-org mickeygoussetorg --target-org mickeygoussetpleaseworkmigrationorg --team-mapping-file team_mappings.csv --repo-mapping-file repo_mappings.csv
 ```
 
 ### Notes

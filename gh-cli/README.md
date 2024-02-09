@@ -85,7 +85,7 @@ Adds a `CODEOWNERS` file to a list of repositories.
 
 ### add-collaborator-to-repository.sh
 
-Adds a user with a specified role to a repository. Used in the `./copy-permissions-between-org-repos.sh` script.
+Adds a user with a specified role to a repository. Used in the `./copy-permissions-between-organization-repositories.sh` script.
 
 ### add-enterprise-organization-member.sh
 
@@ -254,7 +254,7 @@ If the variable already exists on the target organization it will be updated.
 > [!WARNING]
 > If the variable is available to selected repositories and a repository with the same doesn't exist on the target organization that association is ignored.
 
-### copy-permissions-between-org-repos.sh
+### copy-permissions-between-organization-repositories.sh
 
 Copy user and team repository member permissions to another repository (it can be in the same or on different organizations).
 
@@ -456,7 +456,7 @@ Generates release notes between two tags. See the [release notes docs](https://d
 
 ### generate-repositories-list.sh
 
-Generates a list of repos in the organization - has many uses, but the exported repos can be used in the `delete-repos-from-list.sh` script.
+Generates a list of repos in the organization - has many uses, but the exported repos can be used in the `delete-repositories-from-list.sh` script.
 
 Credits to @tspascoal from this repo: https://github.com/tspascoal/dependabot-alerts-helper
 
@@ -1036,11 +1036,7 @@ Removes an enterprise user. See notes:
     1. List org members and get the id from there: `./get-organization-members.sh`
     2. Get user id: `./get-user-id.sh`
 
-### remove-sso-enabled-pat.sh
-
-Revokes an SSO-enabled PAT that a user created in an organization.
-
-### remove-users-from-org.sh
+### remove-users-from-organization.sh
 
 Removes a list of users from the organization.
 

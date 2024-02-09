@@ -6,8 +6,8 @@
 
 if [ $# -lt "2" ]; then
     echo "Usage: $0 <org/repo> <admin|maintain|push|triage|read> <cumulative-true-or-false>"
-    echo "Example: ./get-repo-permissions.sh joshjohanning-org/ghas-demo admin false"
-    echo "Optionally pipe the output to a file: ./get-repo-permissions.sh joshjohanning-org/ghas-demo admin false > output.csv"
+    echo "Example: ./get-repository-permissions.sh joshjohanning-org/ghas-demo admin false"
+    echo "Optionally pipe the output to a file: ./get-repository-permissions.sh joshjohanning-org/ghas-demo admin false > output.csv"
     exit 1
 fi
 

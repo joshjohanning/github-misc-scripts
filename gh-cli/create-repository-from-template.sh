@@ -8,4 +8,4 @@ gh api \
  -F include_all_branches=false \
  -F private=true # either do true for private or false for public
 
-# use change-repo-visibility.sh to change visibility to internal if needed
+# use change-repository-visibility.sh to change visibility to internal if needed
