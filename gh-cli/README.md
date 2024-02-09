@@ -1026,9 +1026,12 @@ See the [docs](https://docs.github.com/en/rest/search?apiVersion=2022-11-28#sear
 
 ### set-branch-protection-status-checks.sh
 
-Set the branch protection status check contexts.
+Set the branch protection status checks.
 
-See the [docs](https://docs.github.com/en/rest/branches/branch-protection?apiVersion=2022-11-28#set-status-check-contexts) for more information.
+> [!NOTE]
+> Set the App ID for GitHub Actions (`15368`), GitHub Advanced Security (`57789`), or Azure Pipelines (`9426`) if you are using those as a source for status checks for best security.
+
+See the [docs](https://docs.github.com/en/rest/branches/branch-protection?apiVersion=2022-11-28#update-status-check-protection) for more information.
 
 ### set-ip-allow-list-rules.sh
 
