@@ -4,10 +4,6 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - '.github/scripts/lint-gh-cli-readme.js'
-      - './gh-cli/**.sh'
-      - './gh-cli/README.md'
 
 jobs:
   lint-gh-cli-readme:
