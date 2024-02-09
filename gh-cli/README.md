@@ -8,14 +8,14 @@ This directory contains scripts for interacting with the GitHub API / GraphQL us
 
 #### macOS
 
-```bash
+```shell
 $ brew install gh # install gh cli on mac with brew
 $ brew upgrade gh # upgrade
 ```
 
 #### Windows
 
-```bash
+```shell
 $ choco install gh # install gh cli on windows with chocolatey
 $ choco upgrade gh # upgrade
 ```
@@ -30,7 +30,7 @@ Other operating systems and install methods can be found [here](https://github.c
 
 #### Authenticate in the CLI
 
-```bash
+```shell
 # start interactive authentication
 $ gh auth login
 
@@ -114,7 +114,7 @@ Adds a team to a repository with a given permission level
 
 Example usage:
 
-```bash
+```shell
 ./add-team-to-repository.sh joshjohanning-org my-repo my-team push"
 ```
 
@@ -124,7 +124,7 @@ Adds a user to a ProjectV2 with a given role
 
 Example usage:
 
-```bash
+```shell
 ./add-user-to-project.sh joshjohanning-org 1234 joshjohanning ADMIN"
 ```
 
@@ -134,7 +134,7 @@ Adds a user to a repository with a given permission
 
 Example usage:
 
-```bash
+```shell
 ./add-user-to-repository.sh joshjohanning-org my-repo joshjohanning write"
 ```
 
@@ -157,6 +157,17 @@ joshjohanning
 FluffyCarlton
 
 ```
+
+### add-workflow-file-to-repositories.sh
+
+Adds a workflow file to the default branch in a CSV list of repositories
+
+Usage:
+
+1: Run `./generate-repositories-list.sh <org> > repos.csv`
+    - Or create a list of repos in a csv file, 1 per line, with a trailing empty line at the end of the file
+    - DO NOT REMOVE TRAILING NEW LINE IN THE INPUT CSV FILE
+2. Run: `./add-workflow-file-to-repositories.sh repos.csv ./docker-image.yml true 390793 41851701 ./my-app.2023-09-15.private-key.pem`
 
 ### archive-repositories.sh
 
@@ -367,7 +378,7 @@ Deletes all packages in an organization for a given package type.
 
 Deletes a release from a repository - need the [ID](#get-releasessh) of the release
 
-### delete-repos-from-list.sh
+### delete-repositories-from-list.sh
 
 Deletes a list of repositories.
 
@@ -376,22 +387,22 @@ Deletes a list of repositories.
 3. Run `./delete-repositories-from-list.sh repos.csv`
 4. If you need to restore, [you have 90 days to restore](https://docs.github.com/en/repositories/creating-and-managing-repositories/restoring-a-deleted-repository)
 
-### delete-repository.sh
-
-Deletes a repo - also works if the repository is locked from a failed migration, etc.
-
-May need to run this first in order for the gh cli to be able to have delete repo permissions:
-
-```
-gh auth refresh -h github.com -s delete_repo
-```
-
 ### delete-repository-webhooks.sh
 
 Deletes all webhooks from a repository.
 
 > [!WARNING]
 > This operation is not reversible.
+
+### delete-repository.sh
+
+Deletes a repo - also works if the repository is locked from a failed migration, etc.
+
+May need to run this first in order for the gh cli to be able to have delete repo permissions:
+
+```shell
+gh auth refresh -h github.com -s delete_repo
+```
 
 ### delete-teams-from-list.sh
 
@@ -671,7 +682,7 @@ Get a total count of the primary language of repositories in an organization.
 
 Example output:
 
-```
+```text
   21 Shell
   11 JavaScript
   11 Dockerfile
@@ -693,7 +704,7 @@ Gets a summary of all migrations against a given organization with [GitHub Enter
 
 example:
 
-```bash
+```shell
 $ ./get-organization-migrations-summary.sh  octocat
 Not started          0
 Pending validation   0
@@ -722,7 +733,7 @@ It contains the following data:
 
 By default, it returns all migrations, but there is an optional `max-migrations` parameter to limit the number of migrations returned (must lower or equal to 100)).
 
-## get-organization-repositories-by-property.sh
+### get-organization-repositories-by-property.sh
 
 Gets a list of repositories in an organization that have one or more given [custom properties](https://docs.github.com/en/enterprise-cloud@latest/organizations/managing-organization-settings/managing-custom-properties-for-repositories-in-your-organization) values.
 
@@ -766,7 +777,7 @@ Gets the count of projects (ProjectsV2) in all organizations in a given enterpri
 
 Get outside collaborators added to a repository
 
-### get-package-download-url-for-latest-version
+### get-package-download-url-for-latest-version.sh
 
 Retrieve the download URL for the latest version of a package in GitHub Packages. See: [Documentation](https://docs.github.com/en/graphql/reference/objects#package)
 
@@ -812,6 +823,17 @@ Gets the pull requests in a repository
 
 Gets a list of releases for a repository
 
+### get-repositories-autolinks-csv.sh
+
+Gets a CSV with the list of repository autolinks in a GitHub organization.
+
+Generates a CSV with 4 columns:
+
+- repo name - The repository name
+- preffix - The autolink prefix
+- url template - The autolink url template
+- autonumeric - If the autolink is autonumeric or not (true/false)
+
 ### get-repositories-not-using-actions.sh
 
 Get repositories not using actions, by files committed in the `.github/workflows` directory
@@ -829,6 +851,19 @@ Get repositories that have a CircleCI configuration file `.circleci/config.yml`
 ### get-repositories-using-codeql.sh
 
 Get repositories that have a CodeQL configuration file `.github/workflows/codeql.yml`
+
+### get-repositories-webhooks-csv.sh
+
+Gets a CSV with the list of repository webhooks in a GitHub organization.
+
+Generates a CSV with 4 columns:
+
+- repo name - The repository name
+- is active - If the webhook is active or not
+- webhook url - The url of the weehook
+- secret - Webhook secret, it will be masked since the API doesn't return the actual secret.
+
+This script is useful when doing migrations, to determine the kind of actions that might be needed based on the webhooks inventory.
 
 ### get-repository-languages-for-organization.sh
 
@@ -881,30 +916,6 @@ joshjohanning,admin
 
 Returns the permission for everyone who can access the repo and how they access it (direct, team, org)
 
-### get-repositories-webhooks-csv.sh
-
-Gets a CSV with the list of repository webhooks in a GitHub organization.
-
-Generates a CSV with 4 columns:
-
-- repo name - The repository name
-- is active - If the webhook is active or not
-- webhook url - The url of the weehook
-- secret - Webhook secret, it will be masked since the API doesn't return the actual secret.
-
-This script is useful when doing migrations, to determine the kind of actions that might be needed based on the webhooks inventory.
-
-### get-repositories-autolinks-csv.sh
-
-Gets a CSV with the list of repository autolinks in a GitHub organization.
-
-Generates a CSV with 4 columns:
-
-- repo name - The repository name
-- preffix - The autolink prefix
-- url template - The autolink url template
-- autonumeric - If the autolink is autonumeric or not (true/false)
-
 ### get-repository.sh
 
 Gets details about a repo
@@ -915,7 +926,7 @@ Retrieves the SAML linked identity of a user in a GitHub Enterprise.
 
 May need to run this first in order for the gh cli to be able to retrieve the SAML information for organizations:
 
-```
+```shell
 gh auth refresh -h github.com -s admin:enterprise
 ```
 
@@ -925,7 +936,7 @@ Retrieves the SAML linked identity of a user in a GitHub organization.
 
 May need to run this first in order for the gh cli to be able to retrieve the SAML information for organizations:
 
-```
+```shell
 gh auth refresh -h github.com -s admin:org
 ```
 
@@ -937,9 +948,9 @@ Gets the SBOM for a repository.
 
 Uses the search API for code search.
 
-### sso-credential-authorizations.sh
+### get-sso-credential-authorizations.sh
 
-Retrieves a list of users who have SSO-enabled personal access tokens in an organization.
+Retrieves a list of both "personal access token" and "SSH key" credential types, the users associated with them, and their expiration (if applicable).
 
 ### get-sso-enabled-pats.sh
 
@@ -1039,6 +1050,10 @@ Removes a list of users from the organization.
 ### rename-repository.sh
 
 Renaming a repo
+
+### revoke-sso-enabled-pat.sh
+
+Revokes the SSO authorization for a PAT to an organization.
 
 ### search-organization-for-code.sh
 

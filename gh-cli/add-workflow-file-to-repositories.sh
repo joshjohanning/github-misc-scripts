@@ -3,12 +3,12 @@
 # Adds a workflow file to the default branch in a CSV list of repositories
 
 # Usage: 
-# Step 1: Run ./generate-repositories-list.sh <org> > repos.csv 
+# Step 1: Run ./generate-repositories-list.sh <org> > repos.csv
 #   - Or create a list of repos in a csv file, 1 per line, with a trailing empty line at the end of the file
 #   - DO NOT REMOVE TRAILING NEW LINE IN THE INPUT CSV FILE
 # Step 2: ./add-workflow-file-to-repositories.sh repos.csv ./docker-image.yml true 390793 41851701 ./my-app.2023-09-15.private-key.pem
 #
-# Overwrite or append: 
+# Overwrite or append:
 # - Defaults to append
 # - If you want to overwrite the workflow file, pass true as the 3rd argument, otherwise, it will skip
 #
