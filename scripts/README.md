@@ -32,7 +32,7 @@ Configuration values to change in the script:
 - `gitEmail` = If using a GitHub App, combine the App's user ID (⚠️ this is different than App ID!) and name to form an email like: `149130343+josh-issueops-bot[bot]@users.noreply.github.com`. You can find the App's user ID number by calling: `gh api '/users/josh-issueops-bot[bot]' --jq .id`
 - `overwrite`: use `false` or `true` on whether it should overwrite the existing `dependabot.yml` file
 
-## ado_workitems_to_github_issues.ps1
+## ado-workitems-to-github-issues.ps1
 
 Migrate work items from Azure DevOps to GitHub issues - this just links out to a [separate repo](https://github.com/joshjohanning/ado_workitems_to_github_issues)
 
@@ -87,7 +87,7 @@ My use case is to use this list to determine who needs to be added to a organiza
 1. Run: `./new-users-to-add-to-project.sh <org> <repo> <file>`
 2. Don't delete the `<file>` as it functions as your user database
 
-## migrate-maven-packages-between-github-instances
+## migrate-maven-packages-between-github-instances.sh
 
 Migrate Maven packages in GitHub Packages from one GitHub organization to another.
 
@@ -103,7 +103,7 @@ Migrate npm packages in GitHub Packages from one GitHub organization to another.
 2. Define the target GitHub PAT env var: `export GH_TARGET_PAT=ghp_abc` (must have at least `write:packages`, `read:org`, `repo` scope)
 3. Run: `./migrate-maven-packages-between-github-instances.sh joshjohanning-org github.com joshjohanning-emu github.com`
 
-## migrate-nuget-packages-between-github-instances
+## migrate-nuget-packages-between-github-instances.sh
 
 Migrate NuGet packages in GitHub Packages from one GitHub organization to another. Runs script from upstream [source](https://github.com/joshjohanning/github-packages-migrate-nuget-packages-between-github-instances). 
 
