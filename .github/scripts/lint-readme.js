@@ -1,11 +1,17 @@
-// Call manually via: node ./.github/scripts/lint-gh-cli-readme.js
+// Call manually via: node ./.github/scripts/lint-readme.js
+// Defaults to the `./gh-cli` directory
+// Check `./scripts` directory by calling: node ./.github/scripts/lint-readme.js ./scripts '##' '# scripts'
+
 // note this is only looking in files committed / staged, not all files in the directory
 
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const directoryPath = './gh-cli';
+const directoryPath = process.argv[2] || './gh-cli';
+const headingLevel = process.argv[3] || '###';
+const parentHeading = process.argv[4] || '## Scripts';
+
 const readmePath = path.join(directoryPath, 'README.md');
 
 // Read README.md content
@@ -18,29 +24,49 @@ const gitFiles = execSync('git ls-files', { cwd: directoryPath, encoding: 'utf-8
 const files = gitFiles.split('\n');
 
 // Filter out .sh files in the root directory (excluding those in subdirectories)
-const shFiles = files.filter(file => file.endsWith('.sh') && !file.includes('/'));
+const fileExtensions = ['.sh', '.ps1', '.js', '.mjs', '.py'];
+
+const filteredFiles = files.filter(file => {
+  return fileExtensions.some(extension => file.endsWith(extension)) && !file.includes('/');
+});
+
+const subdirectories = files.reduce((acc, file) => {
+  if (file.includes('/')) {
+    const subdirectory = file.split('/')[0];
+    if (subdirectory !== 'internal' && !acc.includes(subdirectory)) {
+      acc.push(subdirectory);
+    }
+  }
+  return acc;
+}, []);
+
+const allScripts = filteredFiles.concat(subdirectories);
 
 // Initialize a counter for the number of issues
 let issueCount = 0;
 
 // Check if each .sh file is mentioned in the README.md
-shFiles.forEach(file => {
-  if (!readme.includes(`### ${file}`)) {
+allScripts.forEach(file => {
+  if (!readme.includes(`${headingLevel} ${file}`)) {
     console.log(`The file ${file} is not mentioned in the README.md`);
     issueCount++;
   }
 });
 
-// Check that all .sh files follow the kebab-case naming convention
-shFiles.forEach(file => {
-  if (!/^([a-z0-9]+-)*[a-z0-9]+\.sh$/.test(file)) {
+// Check that all files follow the kebab-case naming convention
+allScripts.forEach(file => {
+  if (!/^([a-z0-9]+-)*[a-z0-9]+(\.[a-z0-9]+)*$/.test(file)) {
     console.log(`The file ${file} does not follow the kebab-case naming convention`);
     issueCount++;
   }
 });
 
 // Check that all .sh files have execution permissions
-shFiles.forEach(file => {
+allScripts.forEach(file => {
+  if (!file.endsWith('.sh')) {
+    return;
+  }
+
   const filePath = path.join(directoryPath, file);
   const stats = fs.statSync(filePath);
   const isExecutable = (stats.mode & fs.constants.X_OK) !== 0;
@@ -52,15 +78,16 @@ shFiles.forEach(file => {
 });
 
 // Extract the part of the README under the ## Scripts heading
-const scriptsSection = readme.split('## Scripts\n')[1];
+const scriptsSection = readme.split(`${parentHeading}\n`)[1];
 
 // Extract all ### headings from the scripts section
-const headings = scriptsSection.match(/### .*/g);
+const regex = new RegExp(`${headingLevel} .*`, 'g');
+const headings = scriptsSection.match(regex);
 
 // Check that all scripts mentioned in the README.md actually exist in the repository
 headings.forEach(heading => {
-  const script = heading.slice(4); // Remove the '### ' prefix
-  if (!shFiles.includes(script)) {
+  const script = heading.slice(headingLevel.length + 1); // Remove the '### ' prefix
+  if (!allScripts.includes(script)) {
     console.log(`The script ${script} is mentioned in the README.md but does not exist in the repository`);
     issueCount++;
   }
@@ -74,7 +101,7 @@ const shortWords = {
   'orgs': 'organizations'
 };
 
-shFiles.forEach(file => {
+allScripts.forEach(file => {
   Object.keys(shortWords).forEach(word => {
     const regex = new RegExp(`\\b${word}\\b`, 'g');
     if (regex.test(file)) {
