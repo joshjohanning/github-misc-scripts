@@ -68,9 +68,13 @@ echo "$packages" | while IFS= read -r response; do
 
   packageName=$(echo "$response" | cut -d ' ' -f 1)
   repoName=$(echo "$response" | cut -d ' ' -f 2)
-
-  echo "$repoName --> $packageName"
   
+  # If the package is not attached to a repo just use the package name
+  if [ -z "$repoName"]; then
+    repoName=$packageName
+  fi
+  echo "$repoName --> $packageName"
+
   versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api "/orgs/$SOURCE_ORG/packages/nuget/$packageName/versions" --paginate -q '.[] | .name')
   for version in $versions
   do
@@ -81,7 +85,8 @@ echo "$packages" | while IFS= read -r response; do
 
     # must do this otherwise there is errors (multiple of each file)
     zip -d "${packageName}_${version}.nupkg" "_rels/.rels" "\[Content_Types\].xml" # there seemed to be duplicate of these files in the nupkg that led to errors in gpr
-    eval $GPR_PATH push ./"${packageName}_${version}.nupkg" --repository https://github.com/$TARGET_ORG/$repoName -k $GH_TARGET_PAT
+    
+    eval $GPR_PATH push ./"${packageName}_${version}.nupkg" --repository https://github.com/$TARGET_ORG/$repoName -k $GH_TARGET_PAT || echo "ERROR: Could not publish version $version of $package_name. Skipping version."
   done
 
   echo "..."
