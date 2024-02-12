@@ -125,8 +125,16 @@ Adds a user to a ProjectV2 with a given role
 Example usage:
 
 ```shell
-./add-user-to-project.sh joshjohanning-org 1234 joshjohanning ADMIN"
+./add-user-to-project.sh <organization> <repository> <project-number> <user> <role>
+./add-user-to-project.sh joshjohanning-org my-repo 1234 joshjohanning ADMIN"
 ```
+
+Example roles:
+
+- ADMIN
+- WRITER
+- READER
+- NONE
 
 ### add-user-to-repository.sh
 

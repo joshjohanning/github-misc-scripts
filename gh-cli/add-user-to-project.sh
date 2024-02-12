@@ -5,8 +5,8 @@
 # needs: gh auth login -s project
 
 function print_usage {
-  echo "Usage: $0 <org> <project-number> <user> <role>"
-  echo "Example: ./add-user-to-project.sh joshjohanning-org 1234 joshjohanning ADMIN"
+  echo "Usage: $0 <organization> <repository> <project-number> <user> <role>"
+  echo "Example: ./add-user-to-project.sh joshjohanning-org my-repo 1234 joshjohanning ADMIN"
   echo "Valid roles: ADMIN, WRITER, READER, NONE"
   exit 1
 }
@@ -15,10 +15,11 @@ if [ -z "$4" ]; then
   print_usage
 fi
 
-org="$1"
-project_number="$2"
-user="$3"
-role=$(echo "$4" | tr '[:lower:]' '[:upper:]')
+organization="$1"
+repository="$2"
+project_number="$3"
+user="$4"
+role=$(echo "$5" | tr '[:lower:]' '[:upper:]')
 
 case "$role" in
   "ADMIN" | "WRITER" | "READER" | "NONE")
@@ -29,10 +30,10 @@ case "$role" in
 esac
 
 # get project id
-project_id=$(gh api graphql --paginate -f organization="$org" -f repository="$repo" -f query='
-  query ($organization: String!) {
+project_id=$(gh api graphql --paginate -f organization="$organization" -f repository="$repository" -f query='
+  query ($organization: String!, $repository: String!) {
     organization (login: $organization) {
-      repository (name: "cisco-cxepi") {
+      repository (name: $repository) {
         name
         projectsV2 (first: 100) {
           nodes {
@@ -47,6 +48,8 @@ project_id=$(gh api graphql --paginate -f organization="$org" -f repository="$re
   }
 ' --jq ".data.organization.repository.projectsV2.nodes[] | select(.number == $project_number) | .id")
 
+echo "project_id: $project_id"
+
 # get user id
 user_id=$(gh api graphql -H X-Github-Next-Global-ID:1 -f user="$user" -f query='
 query ($user: String!)
@@ -57,6 +60,8 @@ query ($user: String!)
   }
 }
 ' --jq '.data.user.id')
+
+echo "user_id: $user_id"
 
 # get epoch time
 epoch=$(date +%s)
