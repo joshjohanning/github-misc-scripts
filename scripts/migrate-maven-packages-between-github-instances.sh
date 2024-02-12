@@ -94,7 +94,7 @@ echo "$packages" | while IFS= read -r response; do
   mvnfeed config stage_dir set --path $temp_dir/artifacts
 
   # check if $TARGET_ORG/$repo_name exists in GitHub - if not, create it
-  if ! GH_HOST="$TARGET_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api "/repos/$TARGET_ORG/$repo_name" >/dev/null 2>&1
+  if ! GH_HOST="$TARGET_HOST" GH_TOKEN=$GH_TARGET_PAT gh api "/repos/$TARGET_ORG/$repo_name" >/dev/null 2>&1
   then
     echo "creating repo $TARGET_ORG/$repo_name"
     GH_HOST="$TARGET_HOST" GH_TOKEN=$GH_TARGET_PAT gh repo create "$TARGET_ORG/$repo_name" --private --confirm
