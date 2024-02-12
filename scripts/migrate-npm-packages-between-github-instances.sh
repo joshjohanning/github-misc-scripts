@@ -87,7 +87,7 @@ echo "$packages" | while IFS= read -r response; do
     perl -pi -e "s/$SOURCE_ORG/$TARGET_ORG/g" package.json
 
     # Publish the package to the new registry
-    npm publish --userconfig $temp_dir/.npmrc
+    npm publish --userconfig $temp_dir/.npmrc || echo "ERROR: Could not publish version $version of $package_name. Skipping version."
     cd ./../../
 
   done
