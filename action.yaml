@@ -65,7 +65,7 @@ runs:
 
     - name: migrate nuget packages
       run: |
-        ${{ github.action_path }}/scripts/migrate-nuget-packages-between-orgs.sh ${{ inputs.source_org }} ${{ inputs.source_host }} ${{ inputs.target_org }} ${{ inputs.target_host }}
+        ${{ github.action_path }}/scripts/migrate-nuget-packages-between-orgs.sh ${{ inputs.source_org }} ${{ inputs.source_host }} ${{ inputs.target_org }}
       id: migrate-nuget
       shell: bash
       env:
