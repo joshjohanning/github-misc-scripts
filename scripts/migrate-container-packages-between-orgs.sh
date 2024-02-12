@@ -54,6 +54,11 @@ fi
 
 packages=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages?package_type=container" -q '.[] | .name + " " + .repository.name')
 
+if [ -z "$packages" ]; then
+  echo "No container packages found in $SOURCE_ORG"
+  exit 0
+fi
+
 echo "$packages" | while IFS= read -r response; do
 
   package_name=$(echo "$response" | cut -d ' ' -f 1)

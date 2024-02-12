@@ -59,6 +59,11 @@ fi
 
 packages=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api "/orgs/$SOURCE_ORG/packages?package_type=nuget" --paginate -q '.[] | .name + " " + .repository.name')
 
+if [ -z "$packages" ]; then
+  echo "No nuget packages found in $SOURCE_ORG"
+  exit 0
+fi
+
 echo "$packages" | while IFS= read -r response; do
 
   packageName=$(echo "$response" | cut -d ' ' -f 1)
