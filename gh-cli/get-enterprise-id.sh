@@ -18,6 +18,7 @@ query ($enterprise: String!)
     slug
     name
     id
+    databaseId
   }
 }
 '
