@@ -1,13 +1,13 @@
-//
-// This script will add a dependabot.yml file to all repositories in provided in a txt file.
-// Generate a list of repos with ../gh-cli/generate-repositories-list.sh
+// ---
+// title: add-dependabot-file-to-repositories.js
+// description: This script will add a dependabot.yml file to all repositories in provided in a txt file
+// notes: Generate a list of repos with ../gh-cli/generate-repositories-list.sh
+// usage: node add-dependabot-file-to-repositories.js ./repos.txt ./dependabot.yml
+// ---
+
 // input file should look like this:
 //      joshjohanning-org/test-repo-1
 //      joshjohanning-org/test-repo-2
-//
-// Usage:
-//   node add-dependabot-file-to-repositories.js ./repos.txt ./dependabot.yml
-//
 
 const { Octokit } = require("octokit");
 const fs = require('fs');
