@@ -1,6 +1,12 @@
 #!/bin/bash
 
-# use ./get-sso-enabled-pats.sh to get the ID to revoke
+# 
+
+# ---
+# title: revoke-SSO-enabled-pat.sh
+# description: Revokes the SSO organization access for a personal access token
+# notes: use ./get-sso-enabled-pats.sh to get the ID to revoke
+# ---
 
 if [ -z "$2" ]
   then

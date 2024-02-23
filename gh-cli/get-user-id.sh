@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# ---
+# title: get-user-id.sh
+# description: Get the GraphQL user ID for a given username
+# notes: n/a
+# ---
+
 if [ -z "$1" ]; then
   echo "Usage: $0 <user>"
   echo "Example: ./get-enterprise-id.sh joshjohanning"

@@ -1,8 +1,10 @@
 #!/bin/bash
 
-# Adds a user to a ProjectV2
-
-# needs: gh auth login -s project
+# ---
+# title: add-user-to-project.sh
+# description: Adds a user to a ProjectV2
+# notes: needs: gh auth login -s project
+# ---
 
 function print_usage {
   echo "Usage: $0 <organization> <repository> <project-number> <user> <role>"
