@@ -1,5 +1,5 @@
 name: "Migrate Pacakges"
-description: "Migrate packages from one org to another"
+description: "Migrate packages from one org to another, Expects to run under Debian/Ubuntu"
 inputs:
   GH_SOURCE_PAT:
     description: The PAT for the source repo

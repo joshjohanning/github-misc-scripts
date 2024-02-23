@@ -59,31 +59,41 @@ if [ -z "$packages" ]; then
   exit 0
 fi
 
+echo "Checking for Skopeo"
+if ! command -v skopeo &> /dev/null
+then
+  echo "Skopeo could not be found, installing"
+  sudo apt-get update
+  sudo apt-get -y install skopeo
+fi
+
 echo "$packages" | while IFS= read -r response; do
 
   package_name=$(echo "$response" | cut -d ' ' -f 1)
   repo_name=$(echo "$response" | cut -d ' ' -f 2)
- 
-  echo "org: $SOURCE_ORG repo: $repo_name --> package name $package_name"
-  
-  # Yum yum, get all source packages　美味しい、ね？
-  echo ${GH_SOURCE_PAT} | docker login ${SOURCE_REGISTRY} --username USERNAME --password-stdin
-  echo docker image pull --all-tags  ${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}
-  docker image pull --all-tags  ${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}
 
-  # retag what we got  
+  echo "org: $SOURCE_ORG repo: $repo_name --> package name $package_name"
+
+  # Get all the image shas
+  echo "Copying all image shas"
+  image_shas=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/${SOURCE_ORG}/packages/container/${package_name}/versions" -q '.[] | .name')
+  # Pull all the image shas
+  for sha in $image_shas; do
+    echo "skopeo copy --preserve-digest --all --src-creds USERNAME:GH_SOURCE_PAT --dest-creds USERNAME:GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}@${sha} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}@${sha}"
+    skopeo copy --preserve-digest --all --src-creds USERNAME:$GH_SOURCE_PAT --dest-creds USERNAME:$GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}@${sha} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}@${sha}
+  done
+  
+  # Get image tags
+  echo "Copying all image tags"
+
+  # retag what we got
   versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages/container/$package_name/versions" -q '.[] | .metadata.container.tags[]' | sort -V)
   for version in $versions
   do
-    echo docker tag ${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}:${version} ${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}:${version}
-    docker tag ${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}:${version} ${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}:${version}
+    echo "skopeo copy --preserve-digest --all --src-creds USERNAME:GH_SOURCE_PAT --dest-creds USERNAME:GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}:${version} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}:${version}"
+    skopeo copy --preserve-digest --all --src-creds USERNAME:$GH_SOURCE_PAT --dest-creds USERNAME:$GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}:${version} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}:${version}
   done
-  
-  # Push all the tags to the target
-  echo ${GH_TARGET_PAT} | docker login ${TARGET_REGISTRY} --username USERNAME --password-stdin
-  echo docker push --all-tags ${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}
-  docker push --all-tags ${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}
-  
+
   # If we want to push all untagged SHAs fix this up and do something like this
   #versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages/container/$package_name/versions" -q '.[] | .name' | sort -V)
 done
