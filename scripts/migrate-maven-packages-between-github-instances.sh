@@ -54,7 +54,7 @@ function create_settings_xml () {
   USER="${3}"
   PASS="${4}"
   OUTFILE="${5}"
-  cat resources/m2-settings.xml.templ | sed "s/{{.*ORG.*}}\//${ORG}\//g" | sed "s/{{.*REPO.*}}/${REPO}/g" | sed "s/{{.*USER.*}}/${USER}/g" | sed "s/{{.*USER.*}}/${PASS}/g" > ${OUTFILE}
+  cat ${GITHUB_ACTION_PATH}/resources/m2-settings.xml.templ | sed "s/{{.*ORG.*}}\//${ORG}\//g" | sed "s/{{.*REPO.*}}/${REPO}/g" | sed "s/{{.*USER.*}}/${USER}/g" | sed "s/{{.*USER.*}}/${PASS}/g" > ${OUTFILE}
 }
 
 packages=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages?package_type=maven" -q '.[] | .name + " " + .repository.name')
@@ -109,7 +109,7 @@ echo "$packages" | while IFS= read -r response; do
 
     echo "Deploying ${package_name}:${version} to ${TARGET_ORG}/${repo_name}"
     # Find the file to upload if its a jar, war or ear, doesnt need to be a for loop, but easier
-    for file in $(ls ${package_artifact}-${version}.[jwe]ar)
+    for file in $(ls ${package_artifact}-${version}.[jwe]ar); do
       mvn deploy:deploy-file \
         --settings "${temp_dir}/settings-target.xml" \
         -Dfile=${file} \
