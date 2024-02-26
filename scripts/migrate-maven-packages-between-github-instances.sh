@@ -128,7 +128,9 @@ echo "$packages" | while IFS= read -r response; do
   rm -rf ~/.m2/repository/${package_com//./\/}/${package_group//./\/}/
 
   echo "..."
+done
 
+echo "cleaning up temp dir"
 rm -rf ${temp_dir}
 
 # download url if want to download maven artifact manually:
