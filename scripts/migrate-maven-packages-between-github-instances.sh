@@ -38,31 +38,24 @@ fi
 
 echo "..."
 
+
 SOURCE_ORG=$1
 SOURCE_HOST=$2
 TARGET_ORG=$3
 TARGET_HOST=$4
 
-# create temp dir
-mkdir -p ./temp
-cd ./temp
-temp_dir=$(pwd)
-mkdir -p ./artifacts
+SOURCE_USERNAME="user"
+TARGET_USERNAME="user"
+temp_dir=$(mktemp -d)
 
-# check if python3 is installed
-if command -v python3 &> /dev/null; then
-  if [ ! -d "./tool/mvnfeed-cli" ]; then
-    git clone https://github.com/microsoft/mvnfeed-cli.git ./tool/mvnfeed-cli
-    cd ./tool/mvnfeed-cli && python3 ./scripts/dev_setup.py && cd $temp_dir
-  fi
-else
-  echo "Error: python3 could not be found"
-  exit 1
-fi
-
-# base64 encode auth for mvnfeed
-auth_source=$(echo -n "user:$GH_SOURCE_PAT" | base64 -w0)
-auth_target=$(echo -n "user:$GH_TARGET_PAT" | base64 -w0)
+function create_settings_xml () {
+  ORG="${1}"
+  REPO="${2}"
+  USER="${3}"
+  PASS="${4}"
+  OUTFILE="${5}"
+  cat resources/m2-settings.xml.templ | sed "s/{{.*ORG.*}}\//${ORG}\//g" | sed "s/{{.*REPO.*}}/${REPO}/g" | sed "s/{{.*USER.*}}/${USER}/g" | sed "s/{{.*USER.*}}/${PASS}/g" > ${OUTFILE}
+}
 
 packages=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages?package_type=maven" -q '.[] | .name + " " + .repository.name')
 
@@ -72,26 +65,15 @@ if [ -z "$packages" ]; then
 fi
 
 echo "$packages" | while IFS= read -r response; do
-
   package_name=$(echo "$response" | cut -d ' ' -f 1)
   repo_name=$(echo "$response" | cut -d ' ' -f 2)
 
+  # Split package to components on '.'s
+  package_com=$(echo "$package_name" | cut -d '.' -f 1)
+  package_group=$(echo "$package_name" | cut -d '.' -f 2- | rev | cut -d '.' -f 2- | rev)
+  package_artifact=$(echo "$package_name" | rev | cut -d '.' -f 1 | rev)
+
   echo "org: $SOURCE_ORG repo: $repo_name --> package name $package_name"
-
-  # set up source and target registries for mvnfeed
-  mvnfeed config repo list >/dev/null 2>&1
-  rm ~/.mvnfeed/mvnfeed.ini
-  mvnfeed config repo list >/dev/null 2>&1
-  echo "[repository.githubsource]" >> ~/.mvnfeed/mvnfeed.ini
-  echo "url = https://maven.pkg.github.com/$SOURCE_ORG/$repo_name" >> ~/.mvnfeed/mvnfeed.ini
-  echo "authorization = Basic $auth_source" >> ~/.mvnfeed/mvnfeed.ini
-  echo "" >> ~/.mvnfeed/mvnfeed.ini
-  echo "[repository.githubtarget]" >> ~/.mvnfeed/mvnfeed.ini
-  echo "url = https://maven.pkg.github.com/$TARGET_ORG/$repo_name" >> ~/.mvnfeed/mvnfeed.ini
-  echo "authorization = Basic $auth_target" >> ~/.mvnfeed/mvnfeed.ini
-  echo "" >> ~/.mvnfeed/mvnfeed.ini
-
-  mvnfeed config stage_dir set --path $temp_dir/artifacts
 
   # check if $TARGET_ORG/$repo_name exists in GitHub - if not, create it
   if ! GH_HOST="$TARGET_HOST" GH_TOKEN=$GH_TARGET_PAT gh api "/repos/$TARGET_ORG/$repo_name" >/dev/null 2>&1
@@ -100,25 +82,54 @@ echo "$packages" | while IFS= read -r response; do
     GH_HOST="$TARGET_HOST" GH_TOKEN=$GH_TARGET_PAT gh repo create "$TARGET_ORG/$repo_name" --private --confirm
   fi
 
+  #create_settings_xml "$SOURCE_ORG" "$repo_name" "$GH_SOURCE_USERNAME" "$GH_SOURCE_PAT" "$temp_dir/settings-source.xml"
+  echo "Creating settings XML for source and destination"
+  create_settings_xml "$SOURCE_ORG" "$repo_name" "$SOURCE_USERNAME" "$GH_SOURCE_PAT" "$temp_dir/settings-source.xml"
+  create_settings_xml "$TARGET_ORG" "$repo_name" "$TARGET_USERNAME" "$GH_TARGET_PAT" "$temp_dir/settings-target.xml"
+
+  echo "Iterating through all package versions"
   versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages/maven/$package_name/versions" -q '.[] | .name' | sort -V)
   for version in $versions
   do
-    package_com=$(echo "$package_name" | cut -d '.' -f 1)
-    package_group=$(echo "$package_name" | cut -d '.' -f 2- | rev | cut -d '.' -f 2- | rev)
-    package_artifact=$(echo "$package_name" | rev | cut -d '.' -f 1 | rev)
 
+    # Download the artifact
     name=$(echo $package_com.$package_group:$package_artifact:$version)
-    echo "   pushing: $name"
+    echo "Pulling: $name"
+    mvn org.apache.maven.plugins:maven-dependency-plugin:RELEASE:get \
+      --settings "${temp_dir}/settings-source.xml" \
+      -DartifactId="${package_artifact}" \
+      -DgroupId="${package_com}.${package_group}" \
+      -Dversion="${version}"
 
-    mvnfeed artifact transfer --from=githubsource --to=githubtarget --name=$package_com.$package_group:$package_artifact:$version
+    # Move artifact to the temp dir
+    # deploy-file wont let you do this from the cache dir
+    mv ~/.m2/repository/${package_com//./\/}/${package_group//./\/}/${package_artifact}/${version} $temp_dir/${package_artifact}-${version}
+    cd $temp_dir/${package_artifact}-${version}
 
+
+    echo "Deploying ${package_name}:${version} to ${TARGET_ORG}/${repo_name}"
+    # Find the file to upload if its a jar, war or ear, doesnt need to be a for loop, but easier
+    for file in $(ls ${package_artifact}-${version}.[jwe]ar)
+      mvn deploy:deploy-file \
+        --settings "${temp_dir}/settings-target.xml" \
+        -Dfile=${file} \
+        -DpomFile=${package_artifact}-${version}.pom \
+        -DrepositoryId=github \
+        -Durl=https://maven.pkg.github.com/${TARGET_ORG}/${repo_name}
+    done
+
+    # Clean up
+    cd $temp_dir
+    echo "removeing old package"
+    rm -rf "${package_artifact}-${version}"
   done
+
+  # Clean up the package group dir
+  rm -rf ~/.m2/repository/${package_com//./\/}/${package_group//./\/}/
 
   echo "..."
 
-done
-
-echo "Run this to clean up your working dir: rm -rf ./temp"
+rm -rf ${temp_dir}
 
 # download url if want to download maven artifact manually:
 # curl -H "Authorization: token $GH_SOURCE_PAT" -Ls https://maven.pkg.github.com/$SOURCE_ORG/download/$package_com/$package_group/$package_artifact/$version/$package_artifact-$version.jar
