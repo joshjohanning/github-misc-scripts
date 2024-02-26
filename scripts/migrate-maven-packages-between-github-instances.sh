@@ -97,9 +97,11 @@ echo "$packages" | while IFS= read -r response; do
     echo "Pulling: $name"
     mvn org.apache.maven.plugins:maven-dependency-plugin:RELEASE:get \
       --settings "${temp_dir}/settings-source.xml" \
-      -DartifactId="${package_artifact}" \
-      -DgroupId="${package_com}.${package_group}" \
-      -Dversion="${version}"
+      -Dartifact="${name}"
+
+      # -DartifactId="${package_artifact}" \
+      # -DgroupId="${package_com}.${package_group}" \
+      # -Dversion="${version}"
 
     # Move artifact to the temp dir
     # deploy-file wont let you do this from the cache dir
