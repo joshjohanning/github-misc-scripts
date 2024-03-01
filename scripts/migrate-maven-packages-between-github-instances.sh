@@ -115,8 +115,9 @@ echo "$packages" | while IFS= read -r response; do
     #   --settings "${temp_dir}/settings-source.xml"
 
     echo "Pulling: $name"
-    mvn org.apache.maven.plugins:maven-dependency-plugin:RELEASE:get \
+    mvn org.apache.maven.plugins:maven-dependency-plugin:3.6.1:get \
       --settings "${temp_dir}/settings-source.xml" \
+      -Dtransitive=false \
       -Dartifact="${name}"
 
       # -DartifactId="${package_artifact}" \
