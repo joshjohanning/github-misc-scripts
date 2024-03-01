@@ -106,6 +106,11 @@ echo "$packages" | while IFS= read -r response; do
 
     # Download the artifact
     name=$(echo $package_com.$package_group:$package_artifact:$version)
+
+    echo "Getting all profiles for: $name"
+    mvn help:all-profiles \
+      --settings "${temp_dir}/settings-source.xml"
+
     echo "Pulling: $name"
     mvn org.apache.maven.plugins:maven-dependency-plugin:RELEASE:get \
       --settings "${temp_dir}/settings-source.xml" \
