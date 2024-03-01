@@ -46,15 +46,21 @@ TARGET_HOST=$4
 
 SOURCE_USERNAME="user"
 TARGET_USERNAME="user"
-temp_dir=$(mktemp -d)
 
+# For local testing
+if [ -z "$GITHUB_ACTION_PATH" ]; then
+  GITHUB_ACTION_PATH="."
+fi
+
+temp_dir=$(mktemp -d)
+echo "temp_dir: $temp_dir"
 function create_settings_xml () {
   ORG="${1}"
   REPO="${2}"
   USER="${3}"
   PASS="${4}"
   OUTFILE="${5}"
-  cat ${GITHUB_ACTION_PATH}/resources/m2-settings.xml.tmpl | sed "s/{{.*ORG.*}}\//${ORG}\//g" | sed "s/{{.*REPO.*}}/${REPO}/g" | sed "s/{{.*USER.*}}/${USER}/g" | sed "s/{{.*USER.*}}/${PASS}/g" > ${OUTFILE}
+  cat ${GITHUB_ACTION_PATH}/resources/m2-settings.xml.tmpl | sed "s/{{.*ORG.*}}\//${ORG}\//g" | sed "s/{{.*REPO.*}}/${REPO}/g" | sed "s/{{.*USER.*}}/${USER}/g" | sed "s/{{.*PASS.*}}/${PASS}/g" > ${OUTFILE}
 }
 
 packages=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages?package_type=maven" -q '.[] | .name + " " + .repository.name')
