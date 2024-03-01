@@ -93,12 +93,11 @@ echo "$packages" | while IFS= read -r response; do
   create_settings_xml "$SOURCE_ORG" "$repo_name" "$SOURCE_USERNAME" "$GH_SOURCE_PAT" "$temp_dir/settings-source.xml"
   create_settings_xml "$TARGET_ORG" "$repo_name" "$TARGET_USERNAME" "$GH_TARGET_PAT" "$temp_dir/settings-target.xml"
 
-  if [ "${ACTIONS_STEP_DEBUG}" == "true" ]; then
-    echo "settings-source.xml (cat $temp_dir/settings-source.xml)"
-    cat $temp_dir/settings-source.xml
-    echo "settings-target.xml (cat $temp_dir/settings-target.xml)"
-    cat $temp_dir/settings-target.xml
-  fi
+  
+  echo "settings-source.xml (cat $temp_dir/settings-source.xml)"
+  cat $temp_dir/settings-source.xml
+  echo "settings-target.xml (cat $temp_dir/settings-target.xml)"
+  cat $temp_dir/settings-target.xml
 
   echo "Iterating through all package versions"
   versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages/maven/$package_name/versions" -q '.[] | .name' | sort -V)
