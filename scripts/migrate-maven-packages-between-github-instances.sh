@@ -54,6 +54,9 @@ fi
 
 temp_dir=$(mktemp -d)
 echo "temp_dir: $temp_dir"
+echo "maven version"
+mvn --version
+
 function create_settings_xml () {
   ORG="${1}"
   REPO="${2}"
@@ -107,9 +110,9 @@ echo "$packages" | while IFS= read -r response; do
     # Download the artifact
     name=$(echo $package_com.$package_group:$package_artifact:$version)
 
-    echo "Getting all profiles for: $name"
-    mvn help:all-profiles \
-      --settings "${temp_dir}/settings-source.xml"
+    # echo "Getting all profiles for: $name"
+    # mvn help:all-profiles \
+    #   --settings "${temp_dir}/settings-source.xml"
 
     echo "Pulling: $name"
     mvn org.apache.maven.plugins:maven-dependency-plugin:RELEASE:get \
