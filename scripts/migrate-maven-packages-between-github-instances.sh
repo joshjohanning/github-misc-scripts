@@ -11,11 +11,9 @@
 # Example: ./migrate-maven-packages-between-github-instances.sh joshjohanning-org github.com joshjohanning-emu github.com
 #
 # Notes:
-# - Until Maven supports the new GitHub Packages type, mvnfeed requires the target repo to exist 
-# - This scripts creates the repo if it doesn't exist
-# - Otherwise, if the repo doesn't exist, receive "example-1.0.5.jar was not found in the repository" error
-# - Link to [GitHub public roadmap item](https://github.com/github/roadmap/issues/578)
-# - The `mvnfeed-cli` tool doesn't appear to support copying `.war` files (only `.jar`)
+# - Only supports JARs right now
+# - Only grabs the latest SNAPSHOT version, not all versions
+# - Kinda cursed
 #
 
 set -e
@@ -54,8 +52,6 @@ fi
 
 temp_dir=$(mktemp -d)
 echo "temp_dir: $temp_dir"
-echo "maven version"
-mvn --version
 
 function create_settings_xml () {
   ORG="${1}"
@@ -71,6 +67,14 @@ packages=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/or
 if [ -z "$packages" ]; then
   echo "No maven packages found in $SOURCE_ORG"
   exit 0
+fi
+
+echo "Checking for XMLlint"
+if ! command -v xmllint &> /dev/null
+then
+  echo "XMLlint could not be found, installing"
+  sudo apt-get update
+  sudo apt-get -y install ibxml2-utils
 fi
 
 echo "$packages" | while IFS= read -r response; do
@@ -91,16 +95,8 @@ echo "$packages" | while IFS= read -r response; do
     GH_HOST="$TARGET_HOST" GH_TOKEN=$GH_TARGET_PAT gh repo create "$TARGET_ORG/$repo_name" --private --confirm
   fi
 
-  #create_settings_xml "$SOURCE_ORG" "$repo_name" "$GH_SOURCE_USERNAME" "$GH_SOURCE_PAT" "$temp_dir/settings-source.xml"
   echo "Creating settings XML for source and destination"
-  create_settings_xml "$SOURCE_ORG" "$repo_name" "$SOURCE_USERNAME" "$GH_SOURCE_PAT" "$temp_dir/settings-source.xml"
   create_settings_xml "$TARGET_ORG" "$repo_name" "$TARGET_USERNAME" "$GH_TARGET_PAT" "$temp_dir/settings-target.xml"
-
-  
-  echo "settings-source.xml (cat $temp_dir/settings-source.xml)"
-  cat $temp_dir/settings-source.xml
-  echo "settings-target.xml (cat $temp_dir/settings-target.xml)"
-  cat $temp_dir/settings-target.xml
 
   echo "Iterating through all package versions"
   versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages/maven/$package_name/versions" -q '.[] | .name' | sort -V)
@@ -110,26 +106,53 @@ echo "$packages" | while IFS= read -r response; do
     # Download the artifact
     name=$(echo $package_com.$package_group:$package_artifact:$version)
 
-    # echo "Getting all profiles for: $name"
-    # mvn help:all-profiles \
-    #   --settings "${temp_dir}/settings-source.xml"
-
+    # Maven says: "Be reasonable, resolve dependencies" to which I reply "Where has reason ever gotten me?"
+    # I could _ask_ users for a settings xml with all the repos to resolve dependencies but all I want to do is get files out of the registry
+    # Instead I have build this, a monumnent to my own hubris
+    # I will read your maven-metadata, I will parse the XML in BASH. I will find your snapshots and your releases and I will tell maven "just go for it"
     echo "Pulling: $name"
-    mvn org.apache.maven.plugins:maven-dependency-plugin:3.6.1:get \
-      --settings "${temp_dir}/settings-source.xml" \
-      -Dtransitive=false \
-      -Dartifact="${name}"
+    mkdir -p $temp_dir/${package_artifact}-${version}
 
-      # -DartifactId="${package_artifact}" \
-      # -DgroupId="${package_com}.${package_group}" \
-      # -Dversion="${version}"
+    # For SNAPSHOTs, find the latest snapshot version and download that file (cant download SNAPSHOTs directly, need to know the version)
+    if [[ $version == *"SNAPSHOT" ]]; then
+      # ex https://maven.pkg.github.com/jcantosz-test-org/incubator-baremaps/com/baremaps/baremaps-osm/0.2.0/baremaps-osm-0.2.0.jar
+      #    https://maven.pkg.github.com/jcantosz-test-org/incubator-baremaps/com/baremaps/baremaps-osm/0.1-SNAPSHOT/baremaps-osm-0.1-20240304.162117-1.jar
+      echo "Getting maven-metadata.xml"
+      curl -o $temp_dir/${package_artifact}-${version}/maven-metadata.xml \
+        --retry 5 \
+        --retry-max-time 120 \
+        -sL \
+        -H "Authorization: Token ${GH_SOURCE_PAT}" \
+        -H 'Accept: application/vnd.github.v3.raw' \
+        "https://maven.pkg.github.com/${SOURCE_ORG}/${repo_name}/${package_com//./\/}/${package_group//./\/}/${package_artifact}/${version}/maven-metadata.xml"
 
-    # Move artifact to the temp dir
-    # deploy-file wont let you do this from the cache dir
-    mv ~/.m2/repository/${package_com//./\/}/${package_group//./\/}/${package_artifact}/${version} $temp_dir/${package_artifact}-${version}
+      LATEST_SNAPSHOT=$(xmllint --xpath 'concat(/metadata/versioning/snapshot/timestamp/text(),"-",/metadata/versioning/snapshot/buildNumber/text())' $temp_dir/${package_artifact}-${version}/maven-metadata.xml)
+      echo "LATEST_SNAPSHOT: $LATEST_SNAPSHOT"
+
+      # replace -SNAPSHOT with the latest snapshot
+      FILE_VERSION=${version/SNAPSHOT/$LATEST_SNAPSHOT}
+
+      # XMLlint, find all extensions where version is JAR_VERSION
+      extensions=$(xmllint --xpath "/metadata/versioning/snapshotVersions/snapshotVersion/value[.='${FILE_VERSION}']/../extension/text()" $temp_dir/${package_artifact}-${version}/maven-metadata.xml | grep -v 'md5\|sha1')
+    else # For release`s, just download the file
+      extensions="jar pom"
+      FILE_VERSION=$version
+    fi
+
+    for extension in $extensions; do
+        echo "getting ${package_artifact}-${FILE_VERSION}.${extension}"
+        curl -o $temp_dir/${package_artifact}-${version}/${package_artifact}-${version}.${extension} \
+        --retry 5 \
+        --retry-max-time 120 \
+        -sL \
+        -H "Authorization: Token ${GH_SOURCE_PAT}" \
+        -H 'Accept: application/vnd.github.v3.raw' \
+        "https://maven.pkg.github.com/${SOURCE_ORG}/${repo_name}/${package_com//./\/}/${package_group//./\/}/${package_artifact}/${version}/${package_artifact}-${FILE_VERSION}.${extension}"
+    done
+
     cd $temp_dir/${package_artifact}-${version}
 
-
+    # Deploy the artifact
     echo "Deploying ${package_name}:${version} to ${TARGET_ORG}/${repo_name}"
     # Find the file to upload if its a jar, war or ear, doesnt need to be a for loop, but easier
     for file in $(ls ${package_artifact}-${version}.[jwe]ar); do
@@ -140,15 +163,11 @@ echo "$packages" | while IFS= read -r response; do
         -DrepositoryId=github \
         -Durl=https://maven.pkg.github.com/${TARGET_ORG}/${repo_name}
     done
-
     # Clean up
     cd $temp_dir
-    echo "removeing old package"
+    echo "removing old package"
     rm -rf "${package_artifact}-${version}"
   done
-
-  # Clean up the package group dir
-  rm -rf ~/.m2/repository/${package_com//./\/}/${package_group//./\/}/
 
   echo "..."
 done
@@ -158,3 +177,4 @@ rm -rf ${temp_dir}
 
 # download url if want to download maven artifact manually:
 # curl -H "Authorization: token $GH_SOURCE_PAT" -Ls https://maven.pkg.github.com/$SOURCE_ORG/download/$package_com/$package_group/$package_artifact/$version/$package_artifact-$version.jar
+#com.baremaps:baremaps-osm:jar:0.1-SNAPSHOT
