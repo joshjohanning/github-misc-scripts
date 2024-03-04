@@ -158,6 +158,7 @@ echo "$packages" | while IFS= read -r response; do
     # Find the file to upload if its a jar, war or ear, doesnt need to be a for loop, but easier
     for file in $(ls ${package_artifact}-${version}.[jwe]ar); do
       mvn deploy:deploy-file \
+        --no-transfer-progress \
         --settings "${temp_dir}/settings-target.xml" \
         -Dfile=${file} \
         -DpomFile=${package_artifact}-${version}.pom \
