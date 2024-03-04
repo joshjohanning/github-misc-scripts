@@ -79,8 +79,8 @@ echo "$packages" | while IFS= read -r response; do
   image_shas=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/${SOURCE_ORG}/packages/container/${package_name}/versions" -q '.[] | .name')
   # Pull all the image shas
   for sha in $image_shas; do
-    echo "skopeo copy --preserve-digest --all --src-creds USERNAME:GH_SOURCE_PAT --dest-creds USERNAME:GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}@${sha} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}@${sha}"
-    skopeo copy --preserve-digest --all --src-creds USERNAME:$GH_SOURCE_PAT --dest-creds USERNAME:$GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}@${sha} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}@${sha}
+    echo "skopeo copy --preserve-digests --all --src-creds USERNAME:GH_SOURCE_PAT --dest-creds USERNAME:GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}@${sha} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}@${sha}"
+    skopeo copy --preserve-digests --all --src-creds USERNAME:$GH_SOURCE_PAT --dest-creds USERNAME:$GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}@${sha} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}@${sha}
   done
   
   # Get image tags
@@ -90,8 +90,8 @@ echo "$packages" | while IFS= read -r response; do
   versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages/container/$package_name/versions" -q '.[] | .metadata.container.tags[]' | sort -V)
   for version in $versions
   do
-    echo "skopeo copy --preserve-digest --all --src-creds USERNAME:GH_SOURCE_PAT --dest-creds USERNAME:GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}:${version} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}:${version}"
-    skopeo copy --preserve-digest --all --src-creds USERNAME:$GH_SOURCE_PAT --dest-creds USERNAME:$GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}:${version} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}:${version}
+    echo "skopeo copy --preserve-digests --all --src-creds USERNAME:GH_SOURCE_PAT --dest-creds USERNAME:GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}:${version} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}:${version}"
+    skopeo copy --preserve-digests --all --src-creds USERNAME:$GH_SOURCE_PAT --dest-creds USERNAME:$GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}:${version} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}:${version}
   done
 
   # If we want to push all untagged SHAs fix this up and do something like this
