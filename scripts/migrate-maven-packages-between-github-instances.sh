@@ -13,6 +13,7 @@
 # Notes:
 # - Only supports JARs right now
 # - Only grabs the latest SNAPSHOT version, not all versions
+# - Only grabs the jar named artifactId-version.jar (not sure how to detect more if using a release)
 # - Kinda cursed
 #
 
