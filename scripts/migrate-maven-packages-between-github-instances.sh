@@ -74,7 +74,7 @@ if ! command -v xmllint &> /dev/null
 then
   echo "XMLlint could not be found, installing"
   sudo apt-get update
-  sudo apt-get -y install ibxml2-utils
+  sudo apt-get -y install libxml2-utils
 fi
 
 echo "$packages" | while IFS= read -r response; do
