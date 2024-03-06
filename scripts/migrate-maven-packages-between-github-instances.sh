@@ -52,7 +52,7 @@ mkdir -p ./artifacts
 # check if python3 is installed
 if command -v python3 &> /dev/null; then
   if [ ! -d "./tool/mvnfeed-cli" ]; then
-    git clone https://github.com/microsoft/mvnfeed-cli.git ./tool/mvnfeed-cli
+    git clone https://github.com/kenmuse/mvnfeed-cli.git ./tool/mvnfeed-cli
     cd ./tool/mvnfeed-cli && python3 ./scripts/dev_setup.py && cd $temp_dir
   fi
 else
