@@ -111,6 +111,18 @@ Migrate NuGet packages in GitHub Packages from one GitHub organization to anothe
 2. Define the target GitHub PAT env var: `export GH_TARGET_PAT=ghp_abc` (must have at least `write:packages`, `read:org` scope)
 3. Run: `./migrate-maven-packages-between-github-instances.sh joshjohanning-org github.com joshjohanning-emu`
 
+## multi-gitter-add-dependabot-file-to-repositories.sh
+
+Uses [`multi-gitter`](https://github.com/lindell/multi-gitter) to create a `dependabot.yml` if it doesn't exist, but if it does exist, only check to see if there is a `package-ecosystem: github-actions` section and if not, add it.
+
+## multi-gitter-replace-dependabot-file-in-repositories.sh
+
+Uses [`multi-gitter`](https://github.com/lindell/multi-gitter) to add/replace the `dependabot.yml` file.
+
+## multi-gitter-scripts
+
+These are scripts used with [`multi-gitter`](https://github.com/lindell/multi-gitter) and the scripts here prefixed with `multi-gitter-`. They aren't intended to be run directly, but it could be ran inside a `git` repo standalone for testing.
+
 ## recreate-security-in-repositories-and-teams
 
 See: [recreate-security-in-repositories-and-teams](./recreate-security-in-repositories-and-teams/README.md)
