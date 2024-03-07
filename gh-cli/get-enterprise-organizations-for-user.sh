@@ -7,7 +7,7 @@
 
 if [ -z "$2" ]; then
   echo "Usage: $0 <enterprise> <user>"
-  echo "Example: ./get-enterprise-organizations-for-user.sh joshjohanning"
+  echo "Example: ./get-enterprise-organizations-for-user.sh avocado-corp joshjohanning"
   exit 1
 fi
 
