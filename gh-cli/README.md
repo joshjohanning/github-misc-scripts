@@ -442,6 +442,10 @@ This DELETES *ALL* workflow runs for a particular workflow in a repo. Can pass i
 
 This disables all workflows in a repository; helpful if forking or copying someone else's code and you don't want all of the actions to continuously trigger.
 
+### download-migration-archive-for-repository.sh
+
+Downloads the most recent migration archive/export for a given organization repository.
+
 ### download-private-release-artifact.sh
 
 Downloads a release artifact from a private/internal repository. Can either download latest version or specific version, and supports file pattern matching to download one or multiple files. See [docs](https://cli.github.com/manual/gh_release_download) for more info.
@@ -657,6 +661,14 @@ Gets the status of a [GitHub Enterprise Importer (GEI) migration](https://docs.g
 
 Gets the usage of a label in a repository. Returns data in table format.
 
+### get-most-recent-migration-id-for-organization.sh
+
+Returns the most recent migration ID for a given organization.
+
+### get-most-recent-migration-id-for-repository.sh
+
+Returns the most recent migration ID for a given organization repository.
+
 ### get-organization-active-repositories.sh
 
 Gets a list of repositories in an organization that have had code pushed to it in the last X days.
@@ -740,6 +752,10 @@ It contains the following data:
 - Migration Log URL to download the migration logs, you can use [gh-gei](https://github.com/github/gh-gei) to download the logs (note the logs are only available 24h)
 
 By default, it returns all migrations, but there is an optional `max-migrations` parameter to limit the number of migrations returned (must lower or equal to 100)).
+
+### get-organization-migrations.sh
+
+Returns the migrations (exports) against an organization.
 
 ### get-organization-repositories-by-property.sh
 
@@ -1006,6 +1022,10 @@ Example output:
 ],
 ```
 
+### lock-repository-with-migration.sh
+
+Creates a (mostly) empty migration for a given organization repository so that it can create a lock.
+
 ### parent-organization-teams.sh
 
 Sets the parents of teams in an target organization based on existing child/parent relationship on a source organization teams.
@@ -1127,6 +1147,14 @@ Notable caps on the API:
 - 50 requests per 24 hours for free plans
 - 500 requests per 24 hours for organizations on paid plans
 - these caps do not apply to Enterprise Managed Users (EMU)
+
+### unlock-repository-migration-by-id.sh
+
+Unlocks / deletes the lock for a migrated repository - requires the migration ID to be passed in.
+
+### unlock-repository-migration.sh
+
+Unlocks / deletes the lock for a migrated repository by getting the most recent migration ID and unlocking it.
 
 ### update-branch-protection-rule.sh
 
