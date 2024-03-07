@@ -20,6 +20,6 @@ fi
 # take note of rate limits: Each audit log API endpoint has a rate limit of 1,750 queries per hour for a given combination of user and IP address
 #   - may receive errors and partial results if user does not have admin rights to all organizations / repositories
 
-gh api -X GET --paginate "/enterprises/$enterprise/audit-log" -f "phrase=org:$org+created:>=$date" -f per_page=100 | \
+gh api -X GET --paginate "/enterprises/$enterprise/audit-log" -f "phrase=org:$org+created:>=$date" -F per_page=100 | \
   sed 's/{"message":"Must have admin rights to Repository.","documentation_url":"https:\/\/docs.github.com\/rest\/enterprise-admin\/audit-log#get-the-audit-log-for-an-enterprise"}/]/g' | \
   jq '.[] | select(.action | test("disable[d]?|enable[d]?")) | {action, actor, org, "@timestamp"} | .["@timestamp"] /= 1000 | .["@timestamp"] |= strftime("%Y-%m-%d %H:%M:%S")' 
