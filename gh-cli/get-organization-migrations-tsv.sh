@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# gets a list of organization migration imports in tsv format
+
+# gh cli's token needs to be able to admin org - run this if it fails
+# gh auth refresh -h github.com -s admin:org
+
 if [ $# -lt "1" ]; then
     echo "Usage: $0 <organization> [max migrations]"
     echo "[max migrations] is optional max value is 100. Use if you do not want to get all migrations"

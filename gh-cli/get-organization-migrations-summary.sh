@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# summarizes the most recent migration imports for a given organization
+
+# gh cli's token needs to be able to admin org - run this if it fails
+# gh auth refresh -h github.com -s admin:org
+
 if [ $# -lt "1" ]; then
     echo "Usage: $0 <organization>"
     exit 1
@@ -9,7 +14,7 @@ organization=$1
 
 if ! response=$(gh api graphql -f org="$organization" -f query='query ($org: String!) {
   organization(login: $org) {
-   queued : repositoryMigrations(state: QUEUED) { totalCount	}
+   queued : repositoryMigrations(state: QUEUED) {totalCount}
    notstarted: repositoryMigrations(state: NOT_STARTED) {totalCount}
    inprogress: repositoryMigrations(state: IN_PROGRESS) {totalCount}
    suceeded: repositoryMigrations(state: SUCCEEDED) {totalCount}

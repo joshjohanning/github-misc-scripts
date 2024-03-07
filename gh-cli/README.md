@@ -720,7 +720,7 @@ Gets a list of members (via GraphQL) and their role in an organization
 
 ### get-organization-migrations-summary.sh
 
-Gets a summary of all migrations against a given organization with [GitHub Enterprise Importer](https://docs.github.com/en/migrations/using-github-enterprise-importer)
+Gets a summary of all migrations (imports) against a given organization with [GitHub Enterprise Importer](https://docs.github.com/en/migrations/using-github-enterprise-importer)
 
 example:
 
@@ -739,7 +739,7 @@ Total                10
 
 ### get-organization-migrations-tsv.sh
 
-Gets a TSV with a list of migrations performed (or being performed) on a given organization with [GitHub Enterprise Importer](https://docs.github.com/en/migrations/using-github-enterprise-importer)
+Gets a TSV with a list of migrations (imports) performed (or being performed) on a given organization with [GitHub Enterprise Importer](https://docs.github.com/en/migrations/using-github-enterprise-importer)
 
 It contains the following data:
 
