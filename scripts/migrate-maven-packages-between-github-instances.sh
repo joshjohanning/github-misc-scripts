@@ -51,9 +51,15 @@ mkdir -p ./artifacts
 
 # check if python3 is installed
 if command -v python3 &> /dev/null; then
-  if [ ! -d "./tool/mvnfeed-cli" ]; then
-    git clone https://github.com/kenmuse/mvnfeed-cli.git ./tool/mvnfeed-cli
-    cd ./tool/mvnfeed-cli && python3 ./scripts/dev_setup.py && cd $temp_dir
+  if [ ! -f "./tool/mvnfeed-cli/.marker" ]; then
+
+    # If the tool doesn't exist, clone it 
+    if [ ! -d ./tool/mvnfeed-cli ]; then
+      git clone https://github.com/kenmuse/mvnfeed-cli.git ./tool/mvnfeed-cli
+    fi
+
+    # Build the tool and create a marker file if successful
+    cd ./tool/mvnfeed-cli && python3 ./scripts/dev_setup.py && touch .marker && cd $temp_dir
   fi
 else
   echo "Error: python3 could not be found"
@@ -78,7 +84,7 @@ echo "$packages" | while IFS= read -r response; do
   rm ~/.mvnfeed/mvnfeed.ini
   mvnfeed config repo list >/dev/null 2>&1
   echo "[repository.githubsource]" >> ~/.mvnfeed/mvnfeed.ini
-  echo "url = https://maven.pkg.github.com/${GH_SOURCE_ORG}/download" >> ~/.mvnfeed/mvnfeed.ini
+  echo "url = https://maven.pkg.github.com/${SOURCE_ORG}/download" >> ~/.mvnfeed/mvnfeed.ini
   echo "authorization = Basic $auth_source" >> ~/.mvnfeed/mvnfeed.ini
   echo "" >> ~/.mvnfeed/mvnfeed.ini
   echo "[repository.githubtarget]" >> ~/.mvnfeed/mvnfeed.ini
@@ -98,14 +104,15 @@ echo "$packages" | while IFS= read -r response; do
   versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages/maven/$package_name/versions" -q '.[] | .name' | sort -V)
   for version in $versions
   do
-    package_com=$(echo "$package_name" | cut -d '.' -f 1)
-    package_group=$(echo "$package_name" | cut -d '.' -f 2- | rev | cut -d '.' -f 2- | rev)
+    # GitHub returns <groupId>.<artifactId>. Assuming no dots in artifactId,
+    # cut the components before and after the last dot
+    package_group=$(echo "$package_name" | rev | cut -d '.' -f 2- | rev )
     package_artifact=$(echo "$package_name" | rev | cut -d '.' -f 1 | rev)
-
-    name=$(echo $package_com.$package_group:$package_artifact:$version)
+    
+    name=$(echo $package_group:$package_artifact:$version)
     echo "   pushing: $name"
-
-    mvnfeed artifact transfer --from=githubsource --to=githubtarget --name="${package_com}:${package_artifact}:${VERSION}"
+    
+    mvnfeed artifact transfer --from=githubsource --to=githubtarget --name="${package_group}:${package_artifact}:${version}"
 
   done
 
