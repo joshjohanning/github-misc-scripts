@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage: ./migrate-docker-containers-between-github-instances.sh <source-org> <source-host> <target-org> <target-host>
+# Usage: ./migrate-docker-containers-between-github-instances.sh <source-org> <source-host> <target-org> <target-host> <link-to-repository: true|false>
 #
 #
 # Prereqs:
