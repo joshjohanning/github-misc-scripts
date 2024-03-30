@@ -79,7 +79,7 @@ echo "$packages" | while IFS= read -r response; do
     mkdir -p ./$package_name-$version
     tar xzf $package_name-$version.tgz -C $package_name-$version
     cd $package_name-$version/package
-    perl -pi -e "s/$SOURCE_ORG/$TARGET_ORG/g" package.json
+    perl -pi -e "s/$SOURCE_ORG/$TARGET_ORG/ig" package.json
     npm publish --userconfig $temp_dir/.npmrc
     cd ./../../
 
