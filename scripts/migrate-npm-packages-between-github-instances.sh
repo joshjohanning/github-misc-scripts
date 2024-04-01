@@ -11,9 +11,10 @@
 # Example: ./migrate-npm-packages-between-github-instances.sh joshjohanning-org github.com joshjohanning-emu github.com
 #
 # Notes:
-# - This script assumes that the target org's repo name is the same as the source
-# - If the repo doesn't exist, the package will still import but won't be mapped to a repo
-#
+# - Mapping the npm package to a repo is optional. 
+#   - If there is a repo that exists in the target with the same repo name, it will map it
+#   - If the repo doesn't exist, the package will still import but won't be mapped to a repo
+# - See ./failed-packages.txt for any packages that failed to import
 
 set -e
 
@@ -80,7 +81,7 @@ echo "$packages" | while IFS= read -r response; do
     tar xzf $package_name-$version.tgz -C $package_name-$version
     cd $package_name-$version/package
     perl -pi -e "s/$SOURCE_ORG/$TARGET_ORG/ig" package.json
-    npm publish --userconfig $temp_dir/.npmrc
+    npm publish --userconfig $temp_dir/.npmrc || echo "skipped package due to failure: $package_name-$version.tgz" >> ./failed-packages.txt
     cd ./../../
 
   done
