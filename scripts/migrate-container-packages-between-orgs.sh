@@ -59,10 +59,8 @@ if [ -z "$packages" ]; then
   exit 0
 fi
 
-echo "Installing the latest skopeo"
-sudo apt-get update
-sudo apt-get install -y skopeo
-
+# Ubuntu has a VERY old version of skopeo, it wont work, we can try in a container
+docker pull quay.io/skopeo/stable:latest
 # if ! command -v skopeo &> /dev/null
 # then
 #   echo "Skopeo could not be found, installing"
@@ -87,7 +85,7 @@ echo "$packages" | while IFS= read -r response; do
   # Pull all the image shas
   for sha in $image_shas; do
     echo "skopeo copy --preserve-digests --all --src-creds USERNAME:GH_SOURCE_PAT --dest-creds USERNAME:GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}@${sha} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}@${sha}"
-    skopeo copy --preserve-digests --all --src-creds USERNAME:$GH_SOURCE_PAT --dest-creds USERNAME:$GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}@${sha} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}@${sha}
+    docker run -it --entrypoint /bin/bash quay.io/skopeo/stable:latest  -c "skopeo copy --preserve-digests --all --src-creds USERNAME:$GH_SOURCE_PAT --dest-creds USERNAME:$GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}@${sha} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}@${sha}"
   done
   
   # Get image tags
@@ -98,7 +96,7 @@ echo "$packages" | while IFS= read -r response; do
   for version in $versions
   do
     echo "skopeo copy --preserve-digests --all --src-creds USERNAME:GH_SOURCE_PAT --dest-creds USERNAME:GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}:${version} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}:${version}"
-    skopeo copy --preserve-digests --all --src-creds USERNAME:$GH_SOURCE_PAT --dest-creds USERNAME:$GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}:${version} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}:${version}
+    docker run -it --entrypoint /bin/bash quay.io/skopeo/stable:latest  -c  "skopeo copy --preserve-digests --all --src-creds USERNAME:$GH_SOURCE_PAT --dest-creds USERNAME:$GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}:${version} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}:${version}"
   done
 
   # If we want to push all untagged SHAs fix this up and do something like this
