@@ -59,17 +59,23 @@ if [ -z "$packages" ]; then
   exit 0
 fi
 
-echo "Checking for Skopeo"
-if ! command -v skopeo &> /dev/null
-then
-  echo "Skopeo could not be found, installing"
-  sudo apt-get update
-  sudo apt-get -y install skopeo
-else
-  echo "Checking for newer version of Skopeo"
-  sudo apt-get update
-  sudo apt-get install -y --only-upgrade skopeo
-fi
+echo "Installing the latest skopeo"
+echo 'deb http://download.opensuse.org/repositories/home:/alvistack/xUbuntu_22.04/ /' | sudo tee /etc/apt/sources.list.d/home:alvistack.list
+curl -fsSL https://download.opensuse.org/repositories/home:alvistack/xUbuntu_22.04/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_alvistack.gpg > /dev/null
+sudo apt update
+sudo apt install -y skopeo
+# if ! command -v skopeo &> /dev/null
+# then
+#   echo "Skopeo could not be found, installing"
+#   echo 'deb http://download.opensuse.org/repositories/home:/alvistack/xUbuntu_22.04/ /' | sudo tee /etc/apt/sources.list.d/home:alvistack.list
+#   curl -fsSL https://download.opensuse.org/repositories/home:alvistack/xUbuntu_22.04/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_alvistack.gpg > /dev/null
+#   sudo apt update
+#   sudo apt install -y skopeo
+# else
+#   echo "Checking for newer version of Skopeo"
+#   sudo apt-get update
+#   sudo apt-get install -y --only-upgrade skopeo
+# fi
 
 echo "$packages" | while IFS= read -r response; do
 
