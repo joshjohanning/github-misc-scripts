@@ -60,15 +60,12 @@ if [ -z "$packages" ]; then
 fi
 
 echo "Installing the latest skopeo"
-echo 'deb http://download.opensuse.org/repositories/home:/alvistack/xUbuntu_22.04/ /' | sudo tee /etc/apt/sources.list.d/home:alvistack.list
-curl -fsSL https://download.opensuse.org/repositories/home:alvistack/xUbuntu_22.04/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_alvistack.gpg > /dev/null
-sudo apt update
-sudo apt install -y skopeo
+sudo apt-get update
+sudo apt-get install -y skopeo
+
 # if ! command -v skopeo &> /dev/null
 # then
 #   echo "Skopeo could not be found, installing"
-#   echo 'deb http://download.opensuse.org/repositories/home:/alvistack/xUbuntu_22.04/ /' | sudo tee /etc/apt/sources.list.d/home:alvistack.list
-#   curl -fsSL https://download.opensuse.org/repositories/home:alvistack/xUbuntu_22.04/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_alvistack.gpg > /dev/null
 #   sudo apt update
 #   sudo apt install -y skopeo
 # else
