@@ -65,6 +65,10 @@ then
   echo "Skopeo could not be found, installing"
   sudo apt-get update
   sudo apt-get -y install skopeo
+else
+  echo "Checking for newer version of Skopeo"
+  sudo apt-get update
+  sudo apt-get install -y --only-upgrade skopeo
 fi
 
 echo "$packages" | while IFS= read -r response; do
