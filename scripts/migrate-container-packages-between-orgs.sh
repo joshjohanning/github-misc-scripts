@@ -85,7 +85,7 @@ echo "$packages" | while IFS= read -r response; do
   # Pull all the image shas
   for sha in $image_shas; do
     echo "skopeo copy --preserve-digests --all --src-creds USERNAME:GH_SOURCE_PAT --dest-creds USERNAME:GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}@${sha} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}@${sha}"
-    docker run -it --entrypoint /bin/bash quay.io/skopeo/stable:latest  -c "skopeo copy --preserve-digests --all --src-creds USERNAME:$GH_SOURCE_PAT --dest-creds USERNAME:$GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}@${sha} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}@${sha}"
+    docker run -i --entrypoint /bin/bash quay.io/skopeo/stable:latest  -c "skopeo copy --preserve-digests --all --src-creds USERNAME:$GH_SOURCE_PAT --dest-creds USERNAME:$GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}@${sha} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}@${sha}"
   done
   
   # Get image tags
@@ -96,7 +96,7 @@ echo "$packages" | while IFS= read -r response; do
   for version in $versions
   do
     echo "skopeo copy --preserve-digests --all --src-creds USERNAME:GH_SOURCE_PAT --dest-creds USERNAME:GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}:${version} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}:${version}"
-    docker run -it --entrypoint /bin/bash quay.io/skopeo/stable:latest  -c  "skopeo copy --preserve-digests --all --src-creds USERNAME:$GH_SOURCE_PAT --dest-creds USERNAME:$GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}:${version} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}:${version}"
+    docker run -i --entrypoint /bin/bash quay.io/skopeo/stable:latest  -c  "skopeo copy --preserve-digests --all --src-creds USERNAME:$GH_SOURCE_PAT --dest-creds USERNAME:$GH_TARGET_PAT docker://${SOURCE_REGISTRY}/${SOURCE_ORG}/${package_name}:${version} docker://${TARGET_REGISTRY}/${TARGET_ORG}/${package_name}:${version}"
   done
 
   # If we want to push all untagged SHAs fix this up and do something like this
