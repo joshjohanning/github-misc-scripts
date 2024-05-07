@@ -29,7 +29,7 @@ runs:
   using: "composite"
   steps:
     - name: set up action
-      run: chmod +x ${{ github.action_path }}/scripts/*.s
+      run: chmod +x ${{ github.action_path }}/scripts/*.sh
       shell: bash
 
     - name: Start maven section
