@@ -84,7 +84,10 @@ echo "$packages" | while IFS= read -r response; do
     mkdir -p ./$package_name-$version
     tar xzf $package_name-$version.tgz -C $package_name-$version
     cd $package_name-$version/package
-    perl -pi -e "s/$SOURCE_ORG/$TARGET_ORG/g" package.json
+
+    # If repo was ever renamed, old packages will have the wrong source org, get the org directly from the package's name
+    PACKAGE_SOURCE_ORG=$(jq -r '.name' package.json | tr -d '@' | cut -f1 -d'/')
+    perl -pi -e "s/$PACKAGE_SOURCE_ORG/$TARGET_ORG/g" package.json
 
     # Publish the package to the new registry
     npm publish --userconfig $temp_dir/.npmrc || echo "ERROR: Could not publish version $version of $package_name. Skipping version."
