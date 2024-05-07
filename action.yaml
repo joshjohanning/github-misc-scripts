@@ -22,7 +22,7 @@ inputs:
     description: The target org to migrate to
     required: true
   type:
-    description: type of migration to do: "all", "maven", "npm", "nuget", "container". Ruby gems migration not implemented
+    description: 'type of migration to do: "all", "maven", "npm", "nuget", "container". Ruby gems migration not implemented'
     required: false
     default: "all"
 runs:
