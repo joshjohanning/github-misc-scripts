@@ -21,66 +21,86 @@ inputs:
   target_org:
     description: The target org to migrate to
     required: true
-
+  type:
+    description: type of migration to do: "all", "maven", "npm", "nuget", "container". Ruby gems migration not implemented
+    required: false
+    default: "all"
 runs:
   using: "composite"
   steps:
     - name: set up action
-      run: chmod +x ${{ github.action_path }}/scripts/*.sh
+      run: chmod +x ${{ github.action_path }}/scripts/*.s
       shell: bash
 
-    - name: separate output
+    - name: Start maven section
       shell: bash
       run: echo "--- MAVEN -----------------------------------------------------------------------------------------------------------------"
+      if: ${{ contains(inputs.type, 'all') || contains(input.type, 'maven') }}
 
-    - name: migrate maven packages
+    - name: Migrate maven packages
       run: |
         ${{ github.action_path }}/scripts/migrate-maven-packages-between-github-instances.sh ${{ inputs.source_org }} ${{ inputs.source_host }} ${{ inputs.target_org }} ${{ inputs.target_host }}
       id: migrate-mvn
       shell: bash
+      if: ${{ contains(inputs.type, 'all') || contains(input.type, 'maven') }}
       env:
         GH_SOURCE_PAT: ${{ inputs.GH_SOURCE_PAT }}
         GH_TARGET_PAT: ${{ inputs.GH_TARGET_PAT }}
 
-    - name: separate output
+    - name: End maven section
       shell: bash
-      run: |
-        echo "--- END MAVEN -------------------------------------------------------------------------------------------------------------"
-        echo "--- NPM -------------------------------------------------------------------------------------------------------------------"
+      if: ${{ contains(inputs.type, 'all') || contains(input.type, 'maven') }}
+      run: echo "--- END MAVEN -------------------------------------------------------------------------------------------------------------"
+    
+    - name: Start NPM section
+      shell: bash
+      if: ${{ contains(inputs.type, 'all') || contains(input.type, 'npm') }}
+      run: echo "--- NPM -------------------------------------------------------------------------------------------------------------------"
 
-    - name: migrate npm packages
+    - name: Migrate NPM packages
       run: |
         ${{ github.action_path }}/scripts/migrate-npm-packages-between-github-instances.sh ${{ inputs.source_org }} ${{ inputs.source_host }} ${{ inputs.target_org }} ${{ inputs.target_host }}
       id: migrate-npm
+      if: ${{ contains(inputs.type, 'all') || contains(input.type, 'npm') }}
       shell: bash
       env:
         GH_SOURCE_PAT: ${{ inputs.GH_SOURCE_PAT }}
         GH_TARGET_PAT: ${{ inputs.GH_TARGET_PAT }}
 
-    - name: separate output
+    - name: End NPM section
       shell: bash
-      run: |
-        echo "--- END NPM ---------------------------------------------------------------------------------------------------------------"
-        echo "--- NUGET -----------------------------------------------------------------------------------------------------------------"
+      if: ${{ contains(inputs.type, 'all') || contains(input.type, 'npm') }}
+      run: echo "--- END NPM ---------------------------------------------------------------------------------------------------------------"
 
-    - name: migrate nuget packages
+    - name: Start nuget section
+      shell: bash
+      if: ${{ contains(inputs.type, 'all') || contains(input.type, 'nuget') }}
+      run: echo "--- NUGET -----------------------------------------------------------------------------------------------------------------"
+
+    - name: Migrate nuget packages
       run: |
         ${{ github.action_path }}/scripts/migrate-nuget-packages-between-orgs.sh ${{ inputs.source_org }} ${{ inputs.source_host }} ${{ inputs.target_org }}
       id: migrate-nuget
+      if: ${{ contains(inputs.type, 'all') || contains(input.type, 'nuget') }}
       shell: bash
       env:
         GH_SOURCE_PAT: ${{ inputs.GH_SOURCE_PAT }}
         GH_TARGET_PAT: ${{ inputs.GH_TARGET_PAT }}
 
-    - name: separate output
+    - name: End nuget section
       shell: bash
-      run: |
-        echo "--- END NUGET -------------------------------------------------------------------------------------------------------------"
-        echo "--- CONTAINERS ------------------------------------------------------------------------------------------------------------"
+      if: ${{ contains(inputs.type, 'all') || contains(input.type, 'nuget') }}
+      run: echo "--- END NUGET -------------------------------------------------------------------------------------------------------------"
+
+    - name: End nuget section
+      shell: bash
+      if: ${{ contains(inputs.type, 'all') || contains(input.type, 'container') }}
+      run: echo "--- CONTAINERS ------------------------------------------------------------------------------------------------------------"
 
     - name: migrate containers
       run: |
         ${{ github.action_path }}/scripts/migrate-container-packages-between-orgs.sh ${{ inputs.source_org }} ${{ inputs.source_host }} ${{ inputs.target_org }} ${{ inputs.target_host }}
+      if: ${{ contains(inputs.type, 'all') || contains(input.type, 'container') }}
       id: migrate-containers
       shell: bash
       env:
