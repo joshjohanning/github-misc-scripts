@@ -32,7 +32,7 @@ Get the enterprise ID used for other GraphQL calls. Use the URL slug not the fri
 
 ## get-issue-id.sh
 
-Get an issue ID - needed for transferring an sisue, example
+Get an issue ID - needed for transferring an issue, for example
 
 [Documentation](https://docs.github.com/en/graphql/reference/objects#issue)
 
