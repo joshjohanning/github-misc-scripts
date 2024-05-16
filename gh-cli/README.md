@@ -789,6 +789,13 @@ Gets the members of a team
 
 Gets a team
 
+### get-organization-webhooks.sh
+
+Gets a list of webhooks in an organization
+
+> [!NOTE]
+> Requires a GitHub PAT instead of using the OAuth token with the `gh api` command - the OAuth token can only retrieve webhooks it created
+
 ### get-organizations-for-user.sh
 
 Gets the list of organizations a user is a member of. This only returns organizations accessible to the person running the script, i.e.: organizations they are also a member of, or public organizations
@@ -796,6 +803,13 @@ Gets the list of organizations a user is a member of. This only returns organiza
 ### get-organizations-projects-count.sh
 
 Gets the count of projects (ProjectsV2) in all organizations in a given enterprise
+
+### get-organizations-webhooks-in-enterprise.sh
+
+Gets a list of webhooks in all organizations in an enterprise
+
+> [!NOTE]
+> Requires a GitHub PAT instead of using the OAuth token with the `gh api` - the OAuth token can only retrieve webhooks it created
 
 ### get-outside-collaborators-added-to-repository.sh
 
