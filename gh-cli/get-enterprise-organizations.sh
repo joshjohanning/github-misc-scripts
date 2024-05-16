@@ -21,4 +21,4 @@ query getEnterpriseOrganizations($enterpriseName: String! $endCursor: String) {
       }
     }
   }
-}'
+}' --jq '{organizations: [.data.enterprise.organizations.nodes[].login]}'
