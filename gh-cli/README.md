@@ -872,6 +872,10 @@ Generates a CSV with 4 columns:
 - url template - The autolink url template
 - autonumeric - If the autolink is autonumeric or not (true/false)
 
+### get-repositories-not-using-actions.sh
+
+Get repositories not using actions, by files committed in the `.github/workflows` directory
+
 ### get-repositories-organization-secrets-count.sh
 
 Gets the list of organization secrets that are available by repository (all repositories).
@@ -890,10 +894,6 @@ Secrets count for my-org-name by repo:
 repo1: 102 secrets
 repo2: 103 secrets
 ```
-
-### get-repositories-not-using-actions.sh
-
-Get repositories not using actions, by files committed in the `.github/workflows` directory
 
 ### get-repositories-using-actions.sh
 
