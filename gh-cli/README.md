@@ -861,7 +861,7 @@ Gets the pull requests in a repository
 
 Gets a list of releases for a repository
 
-### get-repo-orgs-secrets-count.sh
+### get-repositories-organization-secrets-count.sh
 
 Gets the list of organization secrets that are available by repository (all repositories).
 
@@ -872,7 +872,7 @@ A repository can only use a max of [100 organization secrets](https://docs.githu
 usage:
 
 ```shell
-get-repo-orgs-secrets-count.sh my-org-name
+get-repositories-organization-secrets-count.sh my-org-name
 Public repo i-am-public Skipping it
 
 Secrets count for my-org-name by repo:
