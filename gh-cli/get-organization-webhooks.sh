@@ -1,15 +1,28 @@
 #!/bin/bash
 
+# gets information for all webhooks for in an organization
+
+# need: `gh auth login -h github.com` and auth with a PAT!
+# since the Oauth token can only receive results for hooks it created for this API call
+
 if [ $# -lt 1 ]
   then
-    echo "usage: $0 <org> <format: tsv|json>" > output.csv/json
+    echo "usage: $0 <org> <hostname> <format: tsv|json> > output.tsv/json"
     exit 1
 fi
 
-# need: `gh auth login -h github.com` and auth with a PAT!
-# sine the Oauth token can only receive results for hooks it created for this API call
+org=$1
+hostname=$2
+format=$3
+export PAGER=""
 
-auth_status=$(gh auth token 2>&1)
+# set hostname to github.com by default
+if [ -z "$hostname" ]
+then
+  hostname="github.com"
+fi
+
+auth_status=$(gh auth token -h $hostname 2>&1)
 
 if [[ $auth_status == gho_* ]]
 then
@@ -17,9 +30,6 @@ then
   exit 1
 fi
 
-export PAGER=""
-org=$1
-format=$2
 if [ -z "$format" ]
 then
   format="tsv"
@@ -30,7 +40,7 @@ if [ "$format" == "tsv" ]; then
 fi
 
 if [ "$format" == "tsv" ]; then
-  gh api "orgs/$org/hooks" --paginate | jq -r --arg org "$org" '.[] | [$org,.active,.config.url, .created_at, .updated_at, (.events | join(","))] | @tsv'
+  gh api "orgs/$org/hooks" --hostname $hostname --paginate --jq ".[] | [\"$org\",.active,.config.url, .created_at, .updated_at, (.events | join(\",\"))] | @tsv"
 else
-  gh api "orgs/$org/hooks" --paginate | jq -r --arg org "$org" '.[] | {organization: $org, active: .active, url: .config.url, created_at: .created_at, updated_at: .updated_at, events: .events}'
+  gh api "orgs/$org/hooks" --hostname $hostname --paginate --jq ".[] | {organization: \"$org\", active: .active, url: .config.url, created_at: .created_at, updated_at: .updated_at, events: .events}"
 fi
