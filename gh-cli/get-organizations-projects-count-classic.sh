@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# gets the projects count for all organizations in an enterprise
+# gets the projects count (classic) for all organizations in an enterprise
 
 # need: `gh auth refresh -h github.com -s read:org -s read:enterprise`
 
@@ -19,7 +19,7 @@ then
   hostname="github.com"
 fi
 
-echo -e "Organization\tProjectv2 Count"
+echo -e "Organization\tProjects Count (classic)"
 
 gh api graphql -f enterprise="$enterprise" --paginate --hostname $hostname -f query='query($enterprise:String!, $endCursor: String) { 
   enterprise(slug:$enterprise) {
@@ -27,8 +27,8 @@ gh api graphql -f enterprise="$enterprise" --paginate --hostname $hostname -f qu
       pageInfo { hasNextPage endCursor }
       nodes {
         name
-        projectsV2(first:1) { totalCount }
+        projects { totalCount }
       }
     }
   }
-}'  --jq '.data.enterprise.organizations.nodes[] | [.name, .projectsV2.totalCount] | @tsv'
+}'  --jq '.data.enterprise.organizations.nodes[] | [.name, .projects.totalCount] | @tsv'
