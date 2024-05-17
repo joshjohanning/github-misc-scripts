@@ -4,6 +4,8 @@
 
 # need: `gh auth refresh -h github.com -s read:org -s read:enterprise`
 
+# note: format is tsv
+
 if [ $# -lt 1 ]; then
     echo "usage: $0 <enterprise slug> <hostname> > output.tsv"
     exit 1

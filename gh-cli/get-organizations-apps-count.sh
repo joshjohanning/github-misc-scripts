@@ -4,8 +4,7 @@
 
 # need: `gh auth refresh -h github.com -s read:org -s read:enterprise`
 
-# note: tsv is the default format
-# tsv is a subset of fields, json is all fields
+# note: format is tsv
 
 if [ $# -lt 1 ]
   then
