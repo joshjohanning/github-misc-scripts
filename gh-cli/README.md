@@ -791,22 +791,48 @@ Gets a team
 
 ### get-organization-webhooks.sh
 
-Gets a list of webhooks in an organization
+Gets a list of webhooks (and webhook information) in an organization
 
 > [!NOTE]
 > Requires a GitHub PAT instead of using the OAuth token with the `gh api` command - the OAuth token can only retrieve webhooks it created
+
+### get-organizations-apps-count.sh
+
+Gets the count of apps in all organizations in a given enterprise
+
+### get-organizations-apps.sh
+
+Gets a list of apps (and app information) in all organizations in a given enterprise
+
+### get-organizations-codeowner-usage.sh
+
+Gets the usage of CODEOWNERS files in all repositories in all organizations in a given enterprise (checks `HEAD` for `./`, `./.github`, and `./docs` and returns `TRUE` or `FALSE` for each repository)
+
+### get-organizations-discussions-count.sh
+
+Gets the usage of discussions in all repositories in all organizations in a given enterprise (org-wide discussions have to be created in a repository, so this covers that as well)
+
+
 
 ### get-organizations-for-user.sh
 
 Gets the list of organizations a user is a member of. This only returns organizations accessible to the person running the script, i.e.: organizations they are also a member of, or public organizations
 
+### get-organizations-projects-count-classic.sh
+
+Gets the count of organization projects (classic projects) in all organizations in a given enterprise
+
 ### get-organizations-projects-count.sh
 
 Gets the count of projects (ProjectsV2) in all organizations in a given enterprise
 
-### get-organizations-webhooks-in-enterprise.sh
+### get-organizations-settings.sh
 
-Gets a list of webhooks in all organizations in an enterprise
+Gets the settings for all organizations in an enterprise
+
+### get-organizations-webhooks.sh
+
+Gets a list of webhooks (and webhook information) in all organizations in an enterprise
 
 > [!NOTE]
 > Requires a GitHub PAT instead of using the OAuth token with the `gh api` - the OAuth token can only retrieve webhooks it created
