@@ -5,6 +5,9 @@
 # need: `gh auth login -h github.com` and auth with a PAT!
 # since the Oauth token can only receive results for hooks it created for this API call
 
+# note: tsv is the default format
+# tsv is a subset of fields, json is all fields
+
 if [ $# -lt 1 ]
   then
     echo "usage: $0 <enterprise slug> <hostname> <format: tsv|json> > output.tsv/json"

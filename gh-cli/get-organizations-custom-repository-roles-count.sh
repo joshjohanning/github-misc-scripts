@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# gets the settings for all organizations in an enterprise
+# gets the custom repository roles for all organizations in an enterprise
 
 # need: `gh auth refresh -h github.com -s read:org -s read:enterprise`
 
@@ -38,9 +38,9 @@ query getEnterpriseOrganizations($enterpriseName: String! $endCursor: String) {
   }
 }' --jq '.data.enterprise.organizations.nodes[].login')
 
-echo -e "Org\tApp Count"
+echo -e "Org\tCustoim Role Count"
 
 for org in $organizations
 do
-  gh api "orgs/$org/installations" --hostname $hostname --jq ". | [\"$org\", .total_count] | @tsv"
+  gh api "orgs/$org/custom-repository-roles" --hostname $hostname --jq ". | [\"$org\", .total_count] | @tsv"
 done
