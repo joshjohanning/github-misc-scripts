@@ -861,6 +861,17 @@ Gets the pull requests in a repository
 
 Gets a list of releases for a repository
 
+### get-repositories-autolinks-csv.sh
+
+Gets a CSV with the list of repository autolinks in a GitHub organization.
+
+Generates a CSV with 4 columns:
+
+- repo name - The repository name
+- preffix - The autolink prefix
+- url template - The autolink url template
+- autonumeric - If the autolink is autonumeric or not (true/false)
+
 ### get-repositories-organization-secrets-count.sh
 
 Gets the list of organization secrets that are available by repository (all repositories).
@@ -879,17 +890,6 @@ Secrets count for my-org-name by repo:
 repo1: 102 secrets
 repo2: 103 secrets
 ```
-
-### get-repositories-autolinks-csv.sh
-
-Gets a CSV with the list of repository autolinks in a GitHub organization.
-
-Generates a CSV with 4 columns:
-
-- repo name - The repository name
-- preffix - The autolink prefix
-- url template - The autolink url template
-- autonumeric - If the autolink is autonumeric or not (true/false)
 
 ### get-repositories-not-using-actions.sh
 
