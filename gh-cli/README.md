@@ -861,6 +861,25 @@ Gets the pull requests in a repository
 
 Gets a list of releases for a repository
 
+### get-repo-orgs-secrets-count.sh
+
+Gets the list of organization secrets that are available by repository (all repositories).
+
+Public repositories are ignored and not listed.
+
+A repository can only use a max of [100 organization secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#limits-for-secrets) that are available to it. The purpose of this script is to get list of repositories and the number of organization secrets available to them mostly to figure out if you are hitting the limit and not all secrets are really available to the repository (only first 100 secrets sorted by secret name are available).
+
+usage:
+
+```shell
+get-repo-orgs-secrets-count.sh my-org-name
+Public repo i-am-public Skipping it
+
+Secrets count for my-org-name by repo:
+repo1: 102 secrets
+repo2: 103 secrets
+```
+
 ### get-repositories-autolinks-csv.sh
 
 Gets a CSV with the list of repository autolinks in a GitHub organization.
