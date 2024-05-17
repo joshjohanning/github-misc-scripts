@@ -55,7 +55,7 @@ else
   TARGET_CONTAINER_REGISTRY="containers.$TARGET_HOST"
 fi
 
-USER=(GH_HOST="$SOURCE_HOST" GH_TOKEN=GH_SOURCE_PAT gh api /user -q '.login')
+USER=(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api /user -q '.login')
 echo $GH_SOURCE_PAT | docker login $SOURCE_CONTAINER_REGISTRY -u $USER --password-stdin
 echo ""
 
