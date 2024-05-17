@@ -808,6 +808,10 @@ Gets a list of apps (and app information) in all organizations in a given enterp
 
 Gets the usage of CODEOWNERS files in all repositories in all organizations in a given enterprise (checks `HEAD` for `./`, `./.github`, and `./docs` and returns `TRUE` or `FALSE` for each repository)
 
+### get-organizations-custom-repository-roles-count.sh
+
+Gets the count of custom repository roles in all organizations in a given enterprise
+
 ### get-organizations-discussions-count.sh
 
 Gets the usage of discussions in all repositories in all organizations in a given enterprise (org-wide discussions have to be created in a repository, so this covers that as well)
