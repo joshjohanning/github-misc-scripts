@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#v1.0.0
+# v1.0.0
 
 # This script checks the GitHub App's rate limit status by generating a JWT (JSON Web Token),
 # obtaining an installation access token, and then querying the GitHub API for the rate limit information.
@@ -9,12 +9,13 @@
 # Inputs:
 # 1. APP_ID: The unique identifier for the GitHub App. This should be passed as the first argument.
 # 2. PRIVATE_KEY_PATH: The file path to the private key of the GitHub App. This should be passed as the second argument.
-# 3. --debug (optional): A flag that can be included to enable debug output. This can be placed anywhere in the command line.
+# 3. INSTALLATION_ID: The installation ID of the GitHub App. This should be passed as the third argument.
+# 4. --debug (optional): A flag that can be included to enable debug output. This can be placed anywhere in the command line.
 
 # How to call:
-# ./checking-github-app-rate-limits.sh [APP_ID] [PRIVATE_KEY_PATH]
-# ./checking-github-app-rate-limits.sh --debug [APP_ID] [PRIVATE_KEY_PATH]
-# ./checking-github-app-rate-limits.sh [APP_ID] [PRIVATE_KEY_PATH] --debug
+# ./checking-github-app-rate-limits.sh [APP_ID] [PRIVATE_KEY_PATH] [INSTALLATION_ID]
+# ./checking-github-app-rate-limits.sh --debug [APP_ID] [PRIVATE_KEY_PATH] [INSTALLATION_ID]
+# ./checking-github-app-rate-limits.sh [APP_ID] [PRIVATE_KEY_PATH] [INSTALLATION_ID] --debug
 
 # Important Notes:
 # - The script requires `openssl`, `curl`, and `jq` to be installed on the system.
@@ -52,9 +53,9 @@ while [ "$#" -gt 0 ]; do
     esac
 done
 
-# Check if we have at least two remaining arguments for APP_ID and PRIVATE_KEY_PATH
-if [ "${#REMAINING_ARGS[@]}" -lt 2 ]; then
-    echo "Usage: $0 [--debug] APP_ID PRIVATE_KEY_PATH"
+# Check if we have at least three remaining arguments for APP_ID, PRIVATE_KEY_PATH, and INSTALLATION_ID
+if [ "${#REMAINING_ARGS[@]}" -lt 3 ]; then
+    echo "Usage: $0 [--debug] APP_ID PRIVATE_KEY_PATH INSTALLATION_ID"
     exit 1
 fi
 
@@ -63,6 +64,8 @@ fi
 APP_ID="${REMAINING_ARGS[0]}"
 # Path to your GitHub App's private key
 PRIVATE_KEY_PATH="${REMAINING_ARGS[1]}"
+# The installation ID of the GitHub App
+INSTALLATION_ID="${REMAINING_ARGS[2]}"
 
 # Generate JWT Header
 header=$(echo -n '{"alg":"RS256","typ":"JWT"}' | openssl base64 -e -A | tr '+/' '-_' | tr -d '=')
@@ -87,7 +90,7 @@ jwt_token="$header.$payload.$signature"
 debug "JWT Token: $jwt_token"
 
 # GitHub API URL to obtain an installation access token
-access_token_url="https://api.github.com/app/installations/51711334/access_tokens"
+access_token_url="https://api.github.com/app/installations/$INSTALLATION_ID/access_tokens"
 debug "Access Token URL: $access_token_url"
 
 # Obtain an installation access token
