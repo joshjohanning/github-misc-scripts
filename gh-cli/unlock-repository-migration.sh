@@ -14,4 +14,4 @@ repo="$2"
 
 id=$(./get-most-recent-migration-id-for-repository.sh $org $repo true)
 
-gh api -X DELETE /orgs/$org/migrations/$id/repos/test-repo-export/lock
+gh api -X DELETE /orgs/$org/migrations/$id/repos/$repo/lock
