@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage: ./migrate-npm-packages-between-github-instances.sh <source-org> <source-host> <target-org> <target-host>
+# Usage: ./migrate-npm-packages-between-github-instances.sh <source-org> <source-host> <target-org> <target-host> | tee output.log
 #
 #
 # Prereqs:
@@ -8,7 +8,7 @@
 # 2. Set the source GitHub PAT env var: `export GH_SOURCE_PAT=ghp_abc` (must have at least `read:packages`, `read:org` scope)
 # 3. Set the target GitHub PAT env var: `export GH_TARGET_PAT=ghp_xyz` (must have at least `write:packages`, `read:org` scope)
 #
-# Example: ./migrate-npm-packages-between-github-instances.sh joshjohanning-org github.com joshjohanning-emu github.com
+# Example: ./migrate-npm-packages-between-github-instances.sh joshjohanning-org github.com joshjohanning-emu github.com | tee output.log
 #
 # Notes:
 # - Mapping the npm package to a repo is optional. 
@@ -74,14 +74,15 @@ echo "$packages" | while IFS= read -r response; do
     fi
 
     # download 
-    curl -H "Authorization: token $GH_SOURCE_PAT" -L -o $package_name-$version.tgz $url
+    curl -sS -H "Authorization: token $GH_SOURCE_PAT" -L -o $package_name-$version.tgz $url
   
     # untar
     mkdir -p ./$package_name-$version
+    # if you run into permissions issue, add a `sudo` here
     tar xzf $package_name-$version.tgz -C $package_name-$version
     cd $package_name-$version/package
     perl -pi -e "s/$SOURCE_ORG/$TARGET_ORG/ig" package.json
-    npm publish --userconfig $temp_dir/.npmrc || echo "skipped package due to failure: $package_name-$version.tgz" >> ./failed-packages.txt
+    npm publish --ignore-scripts --userconfig $temp_dir/.npmrc || echo "skipped package due to failure: $package_name-$version.tgz" >> ./failed-packages.txt
     cd ./../../
 
   done
