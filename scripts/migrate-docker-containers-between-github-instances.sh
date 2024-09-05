@@ -64,11 +64,12 @@ packages=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/or
 echo "$packages" | while IFS= read -r response; do
 
   package_name=$(echo "$response" | cut -d ' ' -f 1)
+  encoded_package_name=$(echo "$package_name" | sed 's/\//%2f/g')
   repo_name=$(echo "$response" | cut -d ' ' -f 2)
 
   echo "org: $SOURCE_ORG repo: $repo_name --> package name $package_name"
-  
-  versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages/container/$package_name/versions" -q '.[].metadata.container.tags[]' | sort -V)
+
+  versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages/container/$encoded_package_name/versions" -q '.[].metadata.container.tags[]' | sort -V)
   for version in $versions
   do
     echo " ... running docker pull $SOURCE_CONTAINER_REGISTRY/$SOURCE_ORG/$package_name:$version"
@@ -80,16 +81,16 @@ echo "$packages" | while IFS= read -r response; do
     if [ "$LINK_TO_REPOSITORY" = "true" ]; then
       echo " ... attempting to re-attach to target repo: $TARGET_ORG/$repo_name"
       # First, create a container from the image
-      container_id=$(docker create $TARGET_CONTAINER_REGISTRY/$TARGET_ORG/$package_name:$version || true)
+      container_id=$(docker create $TARGET_CONTAINER_REGISTRY/$TARGET_ORG/$encoded_package_name:$version || true)
       # Then, commit the container to a new image with the label
-      docker commit --change "LABEL org.opencontainers.image.source=https://$TARGET_HOST/$TARGET_ORG/$repo_name" $container_id $TARGET_CONTAINER_REGISTRY/$TARGET_ORG/$package_name:$version || true
+      docker commit --change "LABEL org.opencontainers.image.source=https://$TARGET_HOST/$TARGET_ORG/$repo_name" $container_id $TARGET_CONTAINER_REGISTRY/$TARGET_ORG/$encoded_package_name:$version || true
       # can also use  --label "org.opencontainers.image.description=My container image" --label "org.opencontainers.image.licenses=MIT"
       # Remove the temporary container
       docker rm $container_id | true
     fi
 
     echo " ... running docker push $TARGET_CONTAINER_REGISTRY/$TARGET_ORG/$package_name:$version"
-    docker push $TARGET_CONTAINER_REGISTRY/$TARGET_ORG/$package_name:$version || echo "$TARGET_CONTAINER_REGISTRY/$TARGET_ORG/$package_name:$version push failed" >> ghcr_target_failures.txt 
+    docker push $TARGET_CONTAINER_REGISTRY/$TARGET_ORG/$package_name:$version || echo "$TARGET_CONTAINER_REGISTRY/$TARGET_ORG/$package_name:$version push failed" >> ghcr_target_failures.txt
     echo ""
   done
 
