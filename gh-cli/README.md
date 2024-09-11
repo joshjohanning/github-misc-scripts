@@ -1035,6 +1035,18 @@ Gets the SBOM for a repository.
 
 Uses the search API for code search.
 
+### get-self-hosted-runners-all-in-organization.sh
+
+Gets a list of all self-hosted runners in an organization, including org-level and repo-level runners.
+
+### get-self-hosted-runners-in-all-repositories.sh
+
+Gets a list of all repo-level self-hosted runners in all repos in an organization.
+
+### get-self-hosted-runners-organization-runners.sh
+
+Gets a list of self-hosted runners configured at the organization level for an organization.
+
 ### get-sso-credential-authorizations.sh
 
 Retrieves a list of both "personal access token" and "SSH key" credential types, the users associated with them, and their expiration (if applicable).
