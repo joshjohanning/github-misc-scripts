@@ -7,7 +7,7 @@
 ## repo3,pull
 ##
 ## Usage:
-##   ./add-team-to-repos-from-list.sh <organization> <team_slug> <repo_list_file>
+##   ./add-team-to-repositories-from-list.sh <organization> <team_slug> <repo_list_file>
 ##
 ## Arguments:
 ##   organization    - The GitHub organization name
@@ -15,14 +15,14 @@
 ##   repo_list_file  - The file containing the list of repositories and permissions
 ##
 ## Example:
-##   ./add-team-to-repos-from-list.sh my-org my-team repos.csv
+##   ./add-team-to-repositories-from-list.sh my-org my-team repos.csv
 ##
 ## Where repos.csv contains:
 ## repo1,admin
 ## repo2,push
 ## repo3,pull
 ##
-## The available permissions for adding a team to repositories using the add-team-to-repos-from-list.sh script are:
+## The available permissions for adding a team to repositories using the add-team-to-repositories-from-list.sh script are:
 ##
 ## pull - Read-only access to the repository.
 ## push - Read and write access to the repository.
