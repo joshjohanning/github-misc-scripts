@@ -808,19 +808,13 @@ Gets the count of apps in all organizations in a given enterprise
 
 Gets a list of apps (and app information) in all organizations in a given enterprise
 
-### get-organizations-codeowner-usage.sh
-
-Gets the usage of CODEOWNERS files in all repositories in all organizations in a given enterprise (checks `HEAD` for `./`, `./.github`, and `./docs` and returns `TRUE` or `FALSE` for each repository)
-
 ### get-organizations-custom-repository-roles-count.sh
 
 Gets the count of custom repository roles in all organizations in a given enterprise
 
 ### get-organizations-discussions-count.sh
 
-Gets the usage of discussions in all repositories in all organizations in a given enterprise (org-wide discussions have to be created in a repository, so this covers that as well)
-
-
+Gets the count of discussions in all organizations in a given enterprise
 
 ### get-organizations-for-user.sh
 
@@ -834,9 +828,24 @@ Gets the count of organization projects (classic projects) in all organizations 
 
 Gets the count of projects (ProjectsV2) in all organizations in a given enterprise
 
+### get-organizations-repositories-codeowner-usage.sh
+
+Gets the usage of CODEOWNERS files in all repositories in all organizations in a given enterprise (checks `HEAD` for `./`, `./.github`, and `./docs` and returns `TRUE` or `FALSE` for each repository)
+
+### get-organizations-repositories-discussions-count.sh
+
+Gets the usage of discussions in all repositories in all organizations in a given enterprise (org-wide discussions have to be created in a repository, so this covers that as well)
+
 ### get-organizations-settings.sh
 
 Gets the settings for all organizations in an enterprise
+
+### get-organizations-webhooks-count.sh
+
+Gets a count of webhooks (and webhook information) in all organizations in an enterprise
+
+> [!NOTE]
+> Requires a GitHub PAT instead of using the OAuth token with the `gh api` - the OAuth token can only retrieve webhooks it created
 
 ### get-organizations-webhooks.sh
 

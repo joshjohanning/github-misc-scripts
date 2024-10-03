@@ -15,27 +15,22 @@ if [ $# -lt 1 ]
 fi
 
 org=$1
-hostname=$2
-format=$3
+hostname=${2:-"github.com"}
+format=${3:-"tsv"}
 export PAGER=""
 
-# set hostname to github.com by default
-if [ -z "$hostname" ]
-then
-  hostname="github.com"
-fi
+# Define color codes
+RED='\033[0;31m'
+NC='\033[0m' # No Color
 
 auth_status=$(gh auth token -h $hostname 2>&1)
 
 if [[ $auth_status == gho_* ]]
 then
-  echo "Token starts with gho_ - use "gh auth login" and authenticate with a PAT with read:org and admin:org_hook scope"
+  echo -e "${RED}Token is an OAuth that starts with \"gho_\" which won't work for this request. To resolve, either:${NC}"
+  echo -e "${RED}  1. use \"gh auth login\" and authenticate with a PAT with \"read:org\" and \"admin:org_hook\" scope${NC}"
+  echo -e "${RED}  2. set an environment variable \"GITHUB_TOKEN=your_PAT\" using a PAT with \"read:org\" and \"admin:org_hook\" scope${NC}"
   exit 1
-fi
-
-if [ -z "$format" ]
-then
-  format="tsv"
 fi
 
 if [ "$format" == "tsv" ]; then

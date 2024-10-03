@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# gets information for all webhooks in all organizations in an enterprise
+# gets count for all webhooks for all organizations in an enterprise
 
 # need: `gh auth login -h github.com` and auth with a PAT!
 # since the Oauth token can only receive results for hooks it created for this API call
@@ -10,13 +10,12 @@
 
 if [ $# -lt 1 ]
   then
-    echo "usage: $0 <enterprise slug> <hostname> <format: tsv|json> > output.tsv/json"
+    echo "usage: $0 <enterprise slug> <hostname> > output.tsv/json"
     exit 1
 fi
 
 enterpriseslug=$1
 hostname=${2:-"github.com"}
-format=${3:-"tsv"}
 export PAGER=""
 
 # Define color codes
@@ -57,24 +56,21 @@ if [ -z "$organizations" ] || [[ "$organizations" == *"INSUFFICIENT_SCOPES"* ]];
   exit 1
 fi
 
-if [ "$format" == "tsv" ]; then
-  echo -e "Organization\tActive\tURL\tCreated At\tUpdated At\tEvents"
-fi
+echo -e "Organization\tWebhook Count"
 
 errors=""
 
 for org in $organizations
 do
-  if [ "$format" == "tsv" ]; then
-    output=$(gh api "orgs/$org/hooks" --hostname $hostname --paginate --jq ".[] | [\"$org\",.active,.config.url, .created_at, .updated_at, (.events | join(\",\"))] | @tsv" 2>&1)
-  else
-    output=$(gh api "orgs/$org/hooks" --hostname $hostname --paginate --jq ".[] | {organization: \"$org\", active: .active, url: .config.url, created_at: .created_at, updated_at: .updated_at, events: .events}" 2>&1)
-  fi
+  total_count=0
+  output=$(gh api "orgs/$org/hooks" --hostname $hostname --paginate --jq ". | length" 2>&1)
 
   if [ $? -ne 0 ]; then
     errors="$errors\nError accessing organization: $org:\n$output"
-  elif [ -n "$output" ]; then
-    echo "$output"
+    echo -e "$org\tn/a"
+  else
+    total_count=$((total_count + output))
+    echo -e "$org\t$total_count"
   fi
 done
 
