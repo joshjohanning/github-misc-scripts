@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # gets a list of 
@@ -11,14 +10,15 @@
 # - BILLING_MANAGER: The user is a billing manager of the enterprise.
 
 if [ -z "$1" ]; then
-  echo "Usage: $0 <enterprise>"
-  echo "Example: ./get-enterprise-owners.sh avocado-corp"
+  echo "Usage: $0 <enterprise> <hostname>"
+  echo "Example: ./get-enterprise-owners.sh avocado-corp github.com"
   exit 1
 fi
 
 enterprise="$1"
+hostname=${2:-"github.com"}
 
-gh api graphql --paginate -f enterpriseSlug=$enterprise  -f query='
+gh api graphql --hostname $hostname --paginate -f enterpriseSlug=$enterprise  -f query='
 query ($enterpriseSlug: String!, $endCursor: String) {
   enterprise(slug: $enterpriseSlug) {
 		ownerInfo {

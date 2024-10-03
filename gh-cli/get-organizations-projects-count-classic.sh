@@ -7,19 +7,13 @@
 # note: format is tsv
 
 if [ $# -lt 1 ]; then
-    echo "usage: $0 <enterprise slug> <hostname> > output.tsv"
+    echo "usage: $0 <enterprise-slug> <hostname> > output.tsv"
     exit 1
 fi
 
 enterprise=$1
-hostname=$2
+hostname=${2:-"github.com"}
 export PAGER=""
-
-# set hostname to github.com by default
-if [ -z "$hostname" ]
-then
-  hostname="github.com"
-fi
 
 echo -e "Organization\tProjects Count (classic)"
 
