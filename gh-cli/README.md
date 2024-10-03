@@ -649,6 +649,10 @@ Queries every organization in an enterprise and returns whether the user is a me
 
 Queries the enterprise for all organizations given the specified role (e.g.: which organizations is the user an admin of)
 
+### get-enterprise-self-hosted-runners.sh
+
+Gets a list of self-hosted runners configured at the enterprise level for an enterprise.
+
 ### get-enterprise-settings.sh
 
 Gets info about an enterprise using the [EnterpriseOwnerInfo](https://docs.github.com/en/graphql/reference/objects#enterpriseownerinfo) GraphQL object.
@@ -781,6 +785,18 @@ prints all repo names that have a property with name `production` and value `tru
 
 Gets the repository count in an organization
 
+### get-organization-self-hosted-runners-all-runners.sh
+
+Gets a list of all self-hosted runners in an organization, including org-level and repo-level runners.
+
+### get-organization-self-hosted-runners-organization-runners.sh
+
+Gets a list of self-hosted runners configured at the organization level for an organization.
+
+### get-organization-self-hosted-runners-repository-runners.sh
+
+Gets a list of all repo-level self-hosted runners in all repos in an organization.
+
 ### get-organization-team-members.sh
 
 Gets the members of a team
@@ -829,6 +845,10 @@ Gets the count of organization projects (classic projects) in all organizations 
 ### get-organizations-projects-count.sh
 
 Gets the count of projects (ProjectsV2) in all organizations in a given enterprise
+
+### get-organizations-self-hosted-runners-organization-runners.sh
+
+Gets a list of self-hosted runners configured at the organization level for all organizations in an enterprise
 
 ### get-organizations-settings.sh
 
@@ -1034,18 +1054,6 @@ Gets the SBOM for a repository.
 ### get-search-results.sh
 
 Uses the search API for code search.
-
-### get-self-hosted-runners-all-in-organization.sh
-
-Gets a list of all self-hosted runners in an organization, including org-level and repo-level runners.
-
-### get-self-hosted-runners-in-all-repositories.sh
-
-Gets a list of all repo-level self-hosted runners in all repos in an organization.
-
-### get-self-hosted-runners-organization-runners.sh
-
-Gets a list of self-hosted runners configured at the organization level for an organization.
 
 ### get-sso-credential-authorizations.sh
 
