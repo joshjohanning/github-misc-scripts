@@ -1,28 +1,26 @@
 #!/bin/bash
 
-# gets the installed apps and their details for all organizations in an enterprise
+# gets the discussions count for all repositories in all organizations in an enterprise
 
 # need: `gh auth refresh -h github.com -s read:org -s read:enterprise`
 
-# note: tsv is the default format
-# tsv is a subset of fields, json is all fields
+# note: format is tsv
 
-if [ $# -lt 1 ]
-  then
-    echo "usage: $0 <enterprise-slug> <hostname> <format: tsv|json> > output.tsv"
+if [ $# -lt 1 ]; then
+    echo "usage: $0 <enterprise slug> <hostname> > output.tsv"
     exit 1
 fi
 
-enterpriseslug=$1
+enterprise=$1
 hostname=${2:-"github.com"}
-format=${3:-"tsv"}
 export PAGER=""
 
 # Define color codes
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-organizations=$(gh api graphql --paginate --hostname $hostname -f enterpriseName="$enterpriseslug" -f query='
+# we can't do everything in a single call b/c we need to paginate orgs and then paginate repos in the next query (can't do double pagination with gh api)
+organizations=$(gh api graphql --paginate --hostname $hostname -f enterpriseName="$enterprise" -f query='
 query getEnterpriseOrganizations($enterpriseName: String! $endCursor: String) {
   enterprise(slug: $enterpriseName) {
     organizations(first: 100, after: $endCursor) {
@@ -47,19 +45,29 @@ if [ -z "$organizations" ] || [[ "$organizations" == *"INSUFFICIENT_SCOPES"* ]];
   exit 1
 fi
 
-errors=""
+echo -e "Repository\tDiscussion Count"
 
-if [ "$format" == "tsv" ]; then
-  echo -e "Org\tApp Slug\tApp ID\tCreated At\tUpdated At\tPermissions\tEvents"
-fi
+errors=""
 
 for org in $organizations
 do
-  if [ "$format" == "tsv" ]; then
-    output=$(gh api "orgs/$org/installations" --hostname $hostname --jq ".installations[] | [\"$org\", .app_slug, .app_id, .created_at, .updated_at, (.permissions | join(\",\")), (if .events | length == 0 then \"null\" else .events | join(\",\") end)] | @tsv" 2>&1)
-  else
-    output=$(gh api "orgs/$org/installations" --hostname $hostname --jq '.installations[]' 2>&1)
-  fi
+  output=$(gh api graphql --paginate --hostname $hostname -f orgName="$org" -f query='
+  query getOrganizationRepositories($orgName: String! $endCursor: String) {
+    organization(login: $orgName) {
+      repositories(first: 100, after: $endCursor) {
+        nodes {
+          nameWithOwner
+          discussions {
+            totalCount
+          }
+        }
+        pageInfo {
+          endCursor
+          hasNextPage
+        }
+      }
+    }
+  }' --jq '.data.organization.repositories.nodes[] | [.nameWithOwner, .discussions.totalCount] | @tsv' 2>&1)
 
   if [ $? -ne 0 ]; then
     errors="$errors\nError accessing organization: $org:\n$output"

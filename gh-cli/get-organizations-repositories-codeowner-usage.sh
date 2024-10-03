@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# gets the discussions count for all organizations in an enterprise
+# gets the codeowner usage for all repositories in all organizations in an enterprise
 
 # need: `gh auth refresh -h github.com -s read:org -s read:enterprise`
 
@@ -12,16 +12,12 @@ if [ $# -lt 1 ]; then
 fi
 
 enterprise=$1
-hostname=$2
+hostname=${2:-"github.com"}
 export PAGER=""
 
-# set hostname to github.com by default
-if [ -z "$hostname" ]
-then
-  hostname="github.com"
-fi
-
-echo -e "Repository\tUses Codeowners"
+# Define color codes
+RED='\033[0;31m'
+NC='\033[0m' # No Color
 
 # we can't do everything in a single call b/c we need to paginate orgs and then paginate repos in the next query (can't do double pagination with gh api)
 organizations=$(gh api graphql --paginate --hostname $hostname -f enterpriseName="$enterprise" -f query='
@@ -41,21 +37,21 @@ query getEnterpriseOrganizations($enterpriseName: String! $endCursor: String) {
 }' --jq '.data.enterprise.organizations.nodes[].login')
 
 # check to see if organizations is null - null error message is confusing otherwise
-if [ -z "$organizations" ] || [ $? -ne 0 ]
-then
-  # Define color codes
-  RED='\033[0;31m'
-  NC='\033[0m' # No Color
-
-  # Print colored messages
+if [ -z "$organizations" ] || [[ "$organizations" == *"INSUFFICIENT_SCOPES"* ]]; then
   echo -e "${RED}No organizations found for enterprise: $enterpriseslug${NC}"
-  echo -e "${RED}Check that you have the proper scopes for enterprise, e.g.: 'gh auth refresh -h github.com -s read:org -s read:enterprise'${NC}"
+  echo -e "${RED}  - Check that you have the proper scopes for enterprise with 'gh auth status' - you need at least 'read:enterprise'${NC}"
+  echo -e "${RED}  - You can run 'gh auth refresh -h github.com -s read:org -s read:enterprise' to add the scopes${NC}"
+  echo -e "${RED}  - Or you can run 'gh auth login -h github.com' and authenticate using a PAT with the proper scopes${NC}"
   exit 1
 fi
 
+echo -e "Repository\tUses Codeowners"
+
+errors=""
+
 for org in $organizations
 do
-  gh api graphql --paginate --hostname $hostname -f orgName="$org" -f query='
+  output=$(gh api graphql --paginate --hostname $hostname -f orgName="$org" -f query='
     query getOrganizationRepositories($orgName: String! $endCursor: String) {
       organization(login: $orgName) {
         repositories(first: 100, after: $endCursor) {
@@ -83,5 +79,15 @@ do
           }
         }
       }
-    }' --jq '.data.organization.repositories.nodes[] | {nameWithOwner: .nameWithOwner, hasCodeowners: if .root.text or .github.text or .docs.text then "TRUE" else "FALSE" end} | [.nameWithOwner, .hasCodeowners] | @tsv'
+    }' --jq '.data.organization.repositories.nodes[] | {nameWithOwner: .nameWithOwner, hasCodeowners: if .root.text or .github.text or .docs.text then "TRUE" else "FALSE" end} | [.nameWithOwner, .hasCodeowners] | @tsv' 2>&1)
+
+  if [ $? -ne 0 ]; then
+    errors="$errors\nError accessing organization: $org:\n$output"
+  elif [ -n "$output" ]; then
+    echo "$output"
+  fi
 done
+
+if [ -n "$errors" ]; then
+  echo -e "${RED}\nErrors encountered:\n$errors${NC}"
+fi
