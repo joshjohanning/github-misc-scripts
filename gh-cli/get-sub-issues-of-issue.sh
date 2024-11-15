@@ -43,6 +43,7 @@ query($issueId: ID!, $endCursor: String) {
           title
           number
           url
+          id
           issueType {
             name
           }
@@ -66,7 +67,7 @@ fi
 combined_result=$(echo "$sub_issues" | jq -s '
   {
     totalCount: .[0].data.node.subIssues.totalCount,
-    issues: (map(.data.node.subIssues.nodes) | add)
+    issues: (map(.data.node.subIssues.nodes) | add | map(.issueType = .issueType.name))
   }')
 
 # Print the combined result as a colorized JSON object

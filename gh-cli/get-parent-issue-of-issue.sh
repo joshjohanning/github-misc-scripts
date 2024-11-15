@@ -41,6 +41,7 @@ query($issueId: ID!) {
         title
         number
         url
+        id
         issueType {
           name
         }
@@ -61,7 +62,8 @@ formatted_parent_issue=$(echo "$parent_issue" | jq -r '
     title: .title,
     number: .number,
     url: .url,
-    issueType: .issueType
+    id: .id,
+    issueType: .issueType.name
   }')
 
 # Print the formatted parent issue details

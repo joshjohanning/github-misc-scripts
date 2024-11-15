@@ -60,6 +60,7 @@ mutation($issueId: ID!, $issueTypeId: ID!) {
       title
       number
       url
+      id
       issueType {
         name
       }
