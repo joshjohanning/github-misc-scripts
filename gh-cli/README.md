@@ -112,6 +112,10 @@ Use the [get-enterprise-id.sh](./get-enterprise-id.sh) or [get-organization-id.s
 
 See the [docs](https://docs.github.com/en/graphql/reference/mutations#createipallowlistentry) for further information.
 
+### add-sub-issue-to-issue.sh
+
+Adds a sub-issue (child) to an issue (parent). See: [Community Discussions Post](https://github.com/orgs/community/discussions/139932)
+
 ### add-team-to-repositories-from-list.sh
 
 This script adds a specified team to a list of repositories with specified permissions.
@@ -1164,6 +1168,14 @@ Removes an enterprise user. See notes:
     1. List org members and get the id from there: `./get-organization-members.sh`
     2. Get user id: `./get-user-id.sh`
 
+### remove-issue-issue-type.sh
+
+Remove the issue type from an issue (set it to `null`). See: [Community Discussions Post](https://github.com/orgs/community/discussions/139933)
+
+### remove-sub-issue-from-issue.sh
+
+Removes a sub-issue (child) from an issue (parent). See: [Community Discussions Post](https://github.com/orgs/community/discussions/139932)
+
 ### remove-users-from-organization.sh
 
 Removes a list of users from the organization.
@@ -1264,6 +1276,10 @@ Updates a branch protection rule for a given branch.
 ### update-enterprise-owner-organizational-role.sh
 
 Adds your account to an organization in an enterprise as an owner, member, or leave the organization. This requires the user running the script to be an Enterprise Owner.
+
+### update-issue-issue-type.sh
+
+Updates / sets the issue type for an issue. See: [Community Discussions Post](https://github.com/orgs/community/discussions/139933)
 
 ### verify-team-membership.sh
 
