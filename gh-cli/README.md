@@ -1096,13 +1096,13 @@ Retrieves all SSO enabled PATs users have created for an organization.
 
 Retrieves all SSO-enabled SSH keys users have created for an organization.
 
-### get-sub-issue-summary-of-issue.sh
-
-Gets a summary of the sub-issues (children) of an issue (parent). See: [Community Discussions Post](https://github.com/orgs/community/discussions/139932)
-
 ### get-sub-issues-of-issue.sh
 
 Gets the sub-issues (children) of an issue (parent). See: [Community Discussions Post](https://github.com/orgs/community/discussions/139932)
+
+### get-sub-issues-summary-of-issue.sh
+
+Gets a summary of the sub-issues (children) of an issue (parent). See: [Community Discussions Post](https://github.com/orgs/community/discussions/139932)
 
 ### get-user-id.sh
 
