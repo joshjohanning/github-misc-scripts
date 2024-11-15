@@ -673,6 +673,10 @@ Gets info about an enterprise using the [EnterpriseOwnerInfo](https://docs.githu
 
 Gets the status of a [GitHub Enterprise Importer (GEI) migration](https://docs.github.com/en/enterprise-cloud@latest/migrations/using-github-enterprise-importer/migrating-organizations-with-github-enterprise-importer/migrating-organizations-from-githubcom-to-github-enterprise-cloud?tool=api#step-3-check-the-status-of-your-migration).
 
+### get-issue-type-of-issue.sh
+
+Gets the issue type of an issue. See: [Community Discussions Post](https://github.com/orgs/community/discussions/139933)
+
 ### get-label-usage-in-repository.sh
 
 Gets the usage of a label in a repository. Returns data in table format.
