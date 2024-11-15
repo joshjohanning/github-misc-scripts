@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Gets the sub-issue summary of an issue
+# Gets the sub-issues summary of an issue
 
 if [ -z "$3" ]; then
   echo "Usage: $0 <org> <repo> <issue-number>"
-  echo "Example: ./get-sub-issues-of-issue.sh joshjohanning-org migrating-ado-to-gh-issues-v2 5"
+  echo "Example: ./get-sub-issues-summary-of-issue.sh joshjohanning-org migrating-ado-to-gh-issues-v2 5"
   exit 1
 fi
 
