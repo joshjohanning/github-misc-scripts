@@ -47,7 +47,7 @@ parent_issue_id=$(fetch_issue_id "$org" "$repo" "$parent_issue_number")
 # Fetch the child issue ID given the issue number
 child_issue_id=$(fetch_issue_id "$org" "$repo" "$child_issue_number")
 
-# Set the issue type on the issue
+# Add the sub-issue to the parent issue
 gh api graphql -H GraphQL-Features:issue_types -H GraphQL-Features:sub_issues -f parrentIssueId="$parent_issue_id" -f childIssueId="$child_issue_id" -f query='
 mutation($parrentIssueId: ID!, $childIssueId: ID!) {
   addSubIssue(input: { issueId: $parrentIssueId, subIssueId: $childIssueId }) {

@@ -69,7 +69,7 @@ else
   exit 1
 fi
 
-# Set the issue type on the issue
+# Remove the sub-issue from the parent issue
 gh api graphql -H GraphQL-Features:issue_types -H GraphQL-Features:sub_issues -f parrentIssueId="$parent_issue_id" -f childIssueId="$child_issue_id" -f query='
 mutation($parrentIssueId: ID!, $childIssueId: ID!) {
   removeSubIssue(input: { issueId: $parrentIssueId, subIssueId: $childIssueId }) {
