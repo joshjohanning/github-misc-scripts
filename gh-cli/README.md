@@ -912,6 +912,10 @@ Retrieve the download URL for a specific version of a package in GitHub Packages
 > [!NOTE]
 > No longer works for GitHub.com and deprecated for GHES 3.7+. See [Changelog post](https://github.blog/changelog/2022-08-18-deprecation-notice-graphql-for-packages/), [GraphQL breaking changes](https://docs.github.com/en/graphql/overview/breaking-changes#changes-scheduled-for-2022-11-21-1), and [GHES 3.7 deprecations](https://docs.github.com/en/enterprise-server@3.7/admin/release-notes#3.7.0-deprecations)
 
+### get-parent-issue-of-issue.sh
+
+Gets the parent issue of a given sub-issue (child). See: [Community Discussions Post](https://github.com/orgs/community/discussions/139932)
+
 ### get-projects-added-to-repository.sh
 
 Gets ProjectsV2 added to a repository
@@ -1087,6 +1091,14 @@ Retrieves all SSO enabled PATs users have created for an organization.
 ### get-sso-enabled-ssh-keys.sh
 
 Retrieves all SSO-enabled SSH keys users have created for an organization.
+
+### get-sub-issue-summary-of-issue.sh
+
+Gets a summary of the sub-issues (children) of an issue (parent). See: [Community Discussions Post](https://github.com/orgs/community/discussions/139932)
+
+### get-sub-issues-of-issue.sh
+
+Gets the sub-issues (children) of an issue (parent). See: [Community Discussions Post](https://github.com/orgs/community/discussions/139932)
 
 ### get-user-id.sh
 
