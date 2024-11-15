@@ -65,6 +65,10 @@ See the [docs](https://cli.github.com/manual/gh_auth_login) for further informat
 
 ## Scripts
 
+### add-all-organization-members-to-a-team.sh
+
+Adds all members of an organization to a team.
+
 ### add-branch-protection-status-checks.sh
 
 Adds a status check to the branch protection status check contexts.
