@@ -14,6 +14,7 @@ issue_number="$3"
 
 # Define color codes
 RED='\033[0;31m'
+YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
 
 # Fetch the issue ID given the issue number
@@ -43,6 +44,7 @@ query($issueId: ID!, $endCursor: String) {
           title
           number
           url
+          id
           issueType {
             name
           }
@@ -66,8 +68,14 @@ fi
 combined_result=$(echo "$sub_issues" | jq -s '
   {
     totalCount: .[0].data.node.subIssues.totalCount,
-    issues: (map(.data.node.subIssues.nodes) | add)
+    issues: (map(.data.node.subIssues.nodes) | add | map(.issueType = .issueType.name))
   }')
 
 # Print the combined result as a colorized JSON object
 echo "$combined_result" | jq .
+
+# Check if total is 0 and print a warning
+total=$(echo "$combined_result" | jq -r '.totalCount')
+if [ "$total" -eq 0 ]; then
+  echo -e "${YELLOW}Warning: The total number of sub-issues for $org/$repo#$issue_number is 0.${NC}"
+fi

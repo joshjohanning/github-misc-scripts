@@ -14,6 +14,7 @@ issue_number="$3"
 
 # Define color codes
 RED='\033[0;31m'
+YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
 
 # Fetch the issue ID given the issue number
@@ -41,6 +42,7 @@ query($issueId: ID!) {
         title
         number
         url
+        id
         issueType {
           name
         }
@@ -61,8 +63,15 @@ formatted_parent_issue=$(echo "$parent_issue" | jq -r '
     title: .title,
     number: .number,
     url: .url,
-    issueType: .issueType
+    id: .id,
+    issueType: .issueType.name
   }')
 
 # Print the formatted parent issue details
 echo "$formatted_parent_issue" | jq .
+
+# Check if parent issue is null and print a warning
+number=$(echo "$formatted_parent_issue" | jq -r '.number')
+if [ "$number" = "null" ]; then
+  echo -e "${YELLOW}Warning: No parent issue for $org/$repo#$issue_number.${NC}"
+fi

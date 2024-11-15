@@ -77,6 +77,7 @@ mutation($parrentIssueId: ID!, $childIssueId: ID!) {
       title
       number
       url
+      id
       issueType {
         name
       }
@@ -85,6 +86,7 @@ mutation($parrentIssueId: ID!, $childIssueId: ID!) {
       title
       number
       url
+      id
       issueType {
         name
       }

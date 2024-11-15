@@ -52,6 +52,7 @@ mutation($issueId: ID!) {
       title
       number
       url
+      id
       issueType {
         name
       }
