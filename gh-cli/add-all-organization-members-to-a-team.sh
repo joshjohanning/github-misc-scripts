@@ -6,7 +6,7 @@
 # this script is currently cumulative-only; it won't remove any users from the team
 # (but this shouldn't matter, if someone gets pulled from org they won't be in team anymore anyway)
 
-if [ -z "$1" ]; then
+if [ -z "$2" ]; then
   echo "Usage: $0 <org> <team>"
   echo "Example: ./add-all-organization-members-to-a-team.sh joshjohanning-org all-users"
   exit 1
