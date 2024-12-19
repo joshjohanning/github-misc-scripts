@@ -5,7 +5,7 @@
 # Usage: 
 # Step 1: Create a list of user emails in a csv file, 1 per line, with a trailing empty line at the end of the file
 #   - DO NOT REMOVE TRAILING NEW LINE IN THE INPUT CSV FILE
-# Step 2: ./invite-users-to-org-from-list.sh users.csv <org> <team>
+# Step 2: ./invite-users-to-organization-from-list.sh users.csv <org> <team>
 
 if [ $# -lt "2" ]; then
     echo "Usage: $0 <users-file-name> <org>"
