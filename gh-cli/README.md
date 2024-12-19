@@ -1142,6 +1142,10 @@ Example output:
 ],
 ```
 
+### invite-users-to-organization-from-list.sh
+
+Adds users to an organization team from a CSV input list.
+
 ### lock-repository-with-migration.sh
 
 Creates a (mostly) empty migration for a given organization repository so that it can create a lock.
