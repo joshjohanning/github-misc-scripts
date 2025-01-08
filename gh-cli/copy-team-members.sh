@@ -39,10 +39,10 @@ fi
 
 echo -e "\ncopying members from $source_org/$source_team to $target_org/$target_team\n"
 
-GH_TOKEN=$SOURCE_TOKEN gh api graphql -f org="$source_org" -f teamslug="$source_team" -F query='query($org:String! $teamslug:String! $cursor:String) {
+GH_TOKEN=$SOURCE_TOKEN gh api graphql --paginate -f org="$source_org" -f teamslug="$source_team" -F query='query($org:String! $teamslug:String! $endCursor:String) {
   organization(login: $org) {
     team(slug: $teamslug) {
-      members(first: 100, after:$cursor, membership: IMMEDIATE) {
+      members(first: 100, after:$endCursor, membership: IMMEDIATE) {
         pageInfo {
           hasNextPage
           endCursor
