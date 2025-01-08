@@ -69,6 +69,12 @@ See the [docs](https://cli.github.com/manual/gh_auth_login) for further informat
 
 Adds all members of an organization to a team.
 
+### add-all-users-in-repository-to-project.sh
+
+Adds all users who are direct members of the repository to a ProjectV2 with a given role.
+
+Requires: `./add-user-to-project.sh`
+
 ### add-branch-protection-status-checks.sh
 
 Adds a status check to the branch protection status check contexts.
