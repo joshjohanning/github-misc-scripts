@@ -92,3 +92,9 @@ echo "$packages" | while IFS= read -r response; do
 done
 
 echo "Run this to clean up your working dir: rm -rf ./temp"
+
+# TODO: Would be nice to capture error messages somewhere:  | tee -a migration.log
+
+# TODO: Ability to delta sync? might be separate script
+
+# TODO: Concept for parallelization to speed up the process
