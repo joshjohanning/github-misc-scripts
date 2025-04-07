@@ -56,6 +56,10 @@ Amends the most recent commit by adding newly staged changes
 
 Amends the most recent commit's message
 
+## git-commit-analyzer.sh
+
+This script analyzes the size of a specific Git commit
+
 ## git-commit-empty-commit.sh
 
 Commits empty commit (useful for triggering CI builds)
@@ -71,6 +75,10 @@ Finds the best common ancestor(s) between two commits (you can use it to compare
 ## git-reorder-last-2-commits.sh
 
 Reorders the last 2 commits
+
+## git-repo-commit-analyzer.sh
+
+This script analyzes the size of all commits in a Git repository
 
 ## git-show-branch.sh
 
