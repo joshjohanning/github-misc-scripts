@@ -6,3 +6,5 @@
 node_modules*
 test*.js
 test*.sh
+temp
+tool
