@@ -8,3 +8,4 @@ test*.js
 test*.sh
 temp
 tool
+.env
