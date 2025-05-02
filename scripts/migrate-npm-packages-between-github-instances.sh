@@ -18,7 +18,7 @@
 
 set -e
 
-if [ $# -ne "4" ]; then
+if [ $# -lt "4" ]; then
     echo "Usage: $0 <source-org> <source-host> <target-org> <target-host>"
     exit 1
 fi
@@ -40,6 +40,7 @@ SOURCE_ORG=$1
 SOURCE_HOST=$2
 TARGET_ORG=$3
 TARGET_HOST=$4
+CUTOFF_DATE=${5:-$(date -u -v-1y +"%Y-%m-%dT%H:%M:%SZ")} # format YYYY-MM-DDTHH:MM:SSZ ex: 2023-03-13T00:00:00Z
 
 # create temp dir
 mkdir -p ./temp
@@ -57,20 +58,24 @@ echo "$packages" | while IFS= read -r response; do
   repo_name=$(echo "$response" | cut -d ' ' -f 2)
 
   echo "org: $SOURCE_ORG repo: $repo_name --> package name $package_name"
-  
-  versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages/npm/$package_name/versions" -q '.[] | .name' | sort -V)
+
+  # Cache package metadata to avoid multiple API calls for each version
+  curl -H "Authorization: token $GH_SOURCE_PAT" -Ls "https://npm.pkg.github.com/@$SOURCE_ORG/$package_name" > "${temp_dir}/${package_name}.json"
+
+  versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages/npm/$package_name/versions" | jq -r --arg cutoff "$CUTOFF_DATE" '.[] | select(.created_at >= $cutoff) | .name' | sort -V)
+
   for version in $versions
   do
     echo "$version"
 
     # get url of tarball
-    url=$(curl -H "Authorization: token $GH_SOURCE_PAT" -Ls https://npm.pkg.github.com/@$SOURCE_ORG/$package_name | jq --arg version $version -r '.versions[$version].dist.tarball')
+    url=$(jq --arg version $version -r '.versions[$version].dist.tarball' "${temp_dir}/${package_name}.json")
 
     # check for error
     if [ "$url" == "null" ]; then
         echo "ERROR: version $version not found for package $package_name"
         echo "NOTE: Make sure you have the proper scopes for gh; ie run this: gh auth refresh -h github.com -s read:packages"
-        exit 1
+        continue;
     fi
 
     # download 
