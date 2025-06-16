@@ -78,6 +78,10 @@ Docs:
 - [Generating an installation access token for a GitHub App](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app#generating-an-installation-access-token)
 - [List installations for the authenticated app](https://docs.github.com/en/rest/apps/apps?apiVersion=2022-11-28#list-installations-for-the-authenticated-app)
 
+## get-list-of-resolved-secret-scanning-alerts.sh
+
+This script retrieves and lists all resolved secret scanning alerts for a specified GitHub repository. It uses the GitHub API to fetch the alerts and displays them in a tabular format.
+
 ## get-new-outside-collaborators-added-to-repository.sh
 
 This script will generate a list of new outside collaborators added to a repository. It uses a database file specified to determine if any new users were added to the repository and echo them to the console for review.
@@ -134,6 +138,10 @@ These are scripts used with [`multi-gitter`](https://github.com/lindell/multi-gi
 ## recreate-security-in-repositories-and-teams
 
 See: [recreate-security-in-repositories-and-teams](./recreate-security-in-repositories-and-teams/README.md)
+
+## set-secret-scanning-alert-to-open-state.sh
+
+This script reopens a resolved secret scanning alert in a specified GitHub repository and optionally adds a comment.
 
 ## update-codeowners-mappings.js
 
