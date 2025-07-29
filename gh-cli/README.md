@@ -143,7 +143,7 @@ Adds a user to a ProjectV2 with a given role
 Example usage:
 
 ```shell
-./add-user-to-project.sh <organization> <repository> <project-number> <user> <role>
+./add-user-to-project.sh <organization> <repository> <project-number> <role> <user>
 ./add-user-to-project.sh joshjohanning-org my-repo 1234 joshjohanning ADMIN"
 ```
 
@@ -1147,6 +1147,10 @@ Example output:
   }
 ],
 ```
+
+### invite-user-to-repository.sh
+
+Calls the `./add-collaborator-to-repository.sh` script to add a user to a repository (this is a wrapper script as an alias since `invite == add`.
 
 ### invite-users-to-organization-from-list.sh
 
