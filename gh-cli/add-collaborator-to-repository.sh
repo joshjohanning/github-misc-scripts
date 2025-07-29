@@ -1,17 +1,20 @@
 #!/bin/bash
 
+# adds (or invites) a collaborator to a repository
+
 permissions=("pull" "triage" "push" "maintain" "admin")
+# corresponds to read, triage, write, maintain, admin
 
 if [ $# -ne 4 ]
   then
-    echo "usage: $(basename $0) <org> <repo> <login> <role>"
+    echo "usage: $(basename $0) <org> <repo> <role> <login>"
     exit 1
 fi
 
 org=$1
 repo=$2
-login=$3
-role=$4
+role=$3
+login=$4
 
 if [[ ! " ${permissions[*]} " =~  ${role}  ]]
   then
