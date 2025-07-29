@@ -63,7 +63,7 @@ GH_TOKEN=$SOURCE_TOKEN gh api "repos/$source_org/$repo/collaborators?affiliation
 
     echo "Adding user: $login with $role to $target_org/$target_repo"
 
-    GH_TOKEN=$TARGET_TOKEN "$script_path/add-collaborator-to-repository.sh" "$target_org" "$target_repo" "$login" "$role"
+    GH_TOKEN=$TARGET_TOKEN "$script_path/add-collaborator-to-repository.sh" "$target_org" "$target_repo" "$role" "$login"
 done
 
 echo -e "\nGranting Permissions to teams:\n"
