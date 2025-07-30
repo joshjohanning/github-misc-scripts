@@ -27,9 +27,9 @@ if [ $exit_code -ne 0 ]; then
   if echo "$response" | grep -q "Authorization failed\|HTTP 403"; then
     echo "Error: Authorization failed (HTTP 403)"
     echo ""
-    echo "This endpoint requires a Personal Access Token (PAT) instead of OAuth CLI token."
-    echo "Please export your PAT as GH_TOKEN:"
-    echo "  export GH_TOKEN=your_personal_access_token"
+    echo "This endpoint requires a classic Personal Access Token (PAT) instead of OAuth CLI token."
+    echo "Please export your classic PAT as GH_TOKEN:"
+    echo "  export GH_TOKEN=your_classic_personal_access_token"
     echo ""
     echo "For more information, visit:"
     echo "https://docs.github.com/migrations/using-ghe-migrator/exporting-migration-data-from-githubcom"
@@ -42,9 +42,9 @@ if [ $exit_code -ne 0 ]; then
     echo "- The repository is not locked"
     echo "- You don't have access to this migration"
     echo ""
-    echo "Note: This endpoint requires a Personal Access Token (PAT)."
-    echo "Make sure you have exported your PAT as GH_TOKEN:"
-    echo "  export GH_TOKEN=your_personal_access_token"
+    echo "Note: This endpoint requires a classic Personal Access Token (PAT)."
+    echo "Make sure you have exported your classic PAT as GH_TOKEN:"
+    echo "  export GH_TOKEN=your_classic_personal_access_token"
     exit 1
   else
     echo "Error: Failed to unlock repository"

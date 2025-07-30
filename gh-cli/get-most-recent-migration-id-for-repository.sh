@@ -21,9 +21,9 @@ if [ $exit_code -ne 0 ]; then
   if echo "$migrations" | grep -q "Authorization failed\|HTTP 403"; then
     echo "Error: Authorization failed (HTTP 403)" >&2
     echo "" >&2
-    echo "This endpoint requires a Personal Access Token (PAT) instead of OAuth CLI token." >&2
-    echo "Please export your PAT as GH_TOKEN:" >&2
-    echo "  export GH_TOKEN=your_personal_access_token" >&2
+    echo "This endpoint requires a classic Personal Access Token (PAT) instead of OAuth CLI token." >&2
+    echo "Please export your classic PAT as GH_TOKEN:" >&2
+    echo "  export GH_TOKEN=your_classic_personal_access_token" >&2
     echo "" >&2
     echo "For more information, visit:" >&2
     echo "https://docs.github.com/migrations/using-ghe-migrator/exporting-migration-data-from-githubcom" >&2
@@ -35,9 +35,9 @@ if [ $exit_code -ne 0 ]; then
     echo "- The organization '$org' doesn't exist" >&2
     echo "- You don't have access to view migrations for this organization" >&2
     echo "" >&2
-    echo "Note: This endpoint requires a Personal Access Token (PAT)." >&2
-    echo "Make sure you have exported your PAT as GH_TOKEN:" >&2
-    echo "  export GH_TOKEN=your_personal_access_token" >&2
+    echo "Note: This endpoint requires a classic Personal Access Token (PAT)." >&2
+    echo "Make sure you have exported your classic PAT as GH_TOKEN:" >&2
+    echo "  export GH_TOKEN=your_classic_personal_access_token" >&2
     exit 1
   else
     echo "Error: Failed to retrieve migrations" >&2
