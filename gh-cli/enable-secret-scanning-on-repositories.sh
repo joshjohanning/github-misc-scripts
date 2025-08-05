@@ -6,6 +6,15 @@
 # Uses the repository update API to enable secret scanning features
 # Usage: <org|file> [features] [--dry-run]
 
+# Define features in a structured way (name|api_field|display_name|enable_var|status_var)
+declare -a FEATURES=(
+  "scanning|secret_scanning|Secret scanning|enable_scanning|secret_scanning_enabled"
+  "push-protection|secret_scanning_push_protection|Push protection|enable_push_protection|push_protection_enabled"
+  "ai-detection|secret_scanning_ai_detection|AI detection|enable_ai_detection|ai_detection_enabled"
+  "non-provider-patterns|secret_scanning_non_provider_patterns|Non-provider patterns|enable_non_provider_patterns|non_provider_patterns_enabled"
+  "validity-checks|secret_scanning_validity_checks|Validity checks|enable_validity_checks|validity_checks_enabled"
+)
+
 # Helper function to build JSON payload for secret scanning features
 build_json_payload() {
   local include_advanced_security="$1"
@@ -18,31 +27,17 @@ build_json_payload() {
     has_changes=true
   fi
   
-  # Add secret scanning features
-  if [ "$enable_scanning" = true ] && [ "$secret_scanning_enabled" != "enabled" ]; then
-    payload+='"secret_scanning":{"status":"enabled"},'
-    has_changes=true
-  fi
-  
-  if [ "$enable_push_protection" = true ] && [ "$push_protection_enabled" != "enabled" ]; then
-    payload+='"secret_scanning_push_protection":{"status":"enabled"},'
-    has_changes=true
-  fi
-  
-  if [ "$enable_ai_detection" = true ] && [ "$ai_detection_enabled" != "enabled" ]; then
-    payload+='"secret_scanning_ai_detection":{"status":"enabled"},'
-    has_changes=true
-  fi
-  
-  if [ "$enable_non_provider_patterns" = true ] && [ "$non_provider_patterns_enabled" != "enabled" ]; then
-    payload+='"secret_scanning_non_provider_patterns":{"status":"enabled"},'
-    has_changes=true
-  fi
-  
-  if [ "$enable_validity_checks" = true ] && [ "$validity_checks_enabled" != "enabled" ]; then
-    payload+='"secret_scanning_validity_checks":{"status":"enabled"},'
-    has_changes=true
-  fi
+  # Process all features
+  for feature_def in "${FEATURES[@]}"; do
+    IFS='|' read -r _ api_field _ enable_var status_var <<< "$feature_def"
+    local enable_value="${!enable_var}"
+    local status_value="${!status_var}"
+    
+    if [ "$enable_value" = true ] && [ "$status_value" != "enabled" ]; then
+      payload+='"'"$api_field"'":{"status":"enabled"},'
+      has_changes=true
+    fi
+  done
   
   # Remove trailing comma and close JSON
   payload=$(echo "$payload" | sed 's/,$//')
@@ -52,44 +47,51 @@ build_json_payload() {
   echo "$has_changes|$payload"
 }
 
-# Helper function to check if a feature needs updating
-check_feature_status() {
-  local feature="$1"
-  local current_status="$2"
-  local enable_flag="$3"
-  
-  if [ "$enable_flag" = true ] && [ "$current_status" != "enabled" ]; then
-    echo "needs_update"
-  elif [ "$enable_flag" = true ]; then
-    echo "already_enabled"
-  else
-    echo "not_requested"
-  fi
+# Helper function to check if any feature needs updating
+check_if_updates_needed() {
+  for feature_def in "${FEATURES[@]}"; do
+    IFS='|' read -r _ _ _ enable_var status_var <<< "$feature_def"
+    local enable_value="${!enable_var}"
+    local status_value="${!status_var}"
+    
+    if [ "$enable_value" = true ] && [ "$status_value" != "enabled" ]; then
+      echo "true"
+      return 0
+    fi
+  done
+  echo "false"
+}
+
+# Helper function to build status messages
+build_status_messages() {
+  for feature_def in "${FEATURES[@]}"; do
+    IFS='|' read -r _ _ display_name enable_var status_var <<< "$feature_def"
+    local enable_value="${!enable_var}"
+    local status_value="${!status_var}"
+    
+    if [ "$enable_value" = true ]; then
+      if [ "$status_value" != "enabled" ]; then
+        status_messages+=("$display_name")
+      else
+        status_messages+=("✅ $display_name already enabled")
+      fi
+    fi
+  done
 }
 
 # Helper function to display dry-run information
 show_dry_run_info() {
   echo "  🔍 Would enable the following features:"
   
-  if [ "$enable_scanning" = true ] && [ "$secret_scanning_enabled" != "enabled" ]; then
-    echo "      - Secret scanning (currently: ${secret_scanning_enabled:-disabled})"
-  fi
-  
-  if [ "$enable_push_protection" = true ] && [ "$push_protection_enabled" != "enabled" ]; then
-    echo "      - Push protection (currently: ${push_protection_enabled:-disabled})"
-  fi
-  
-  if [ "$enable_ai_detection" = true ] && [ "$ai_detection_enabled" != "enabled" ]; then
-    echo "      - AI detection (currently: ${ai_detection_enabled:-disabled})"
-  fi
-  
-  if [ "$enable_non_provider_patterns" = true ] && [ "$non_provider_patterns_enabled" != "enabled" ]; then
-    echo "      - Non-provider patterns (currently: ${non_provider_patterns_enabled:-disabled})"
-  fi
-  
-  if [ "$enable_validity_checks" = true ] && [ "$validity_checks_enabled" != "enabled" ]; then
-    echo "      - Validity checks (currently: ${validity_checks_enabled:-disabled})"
-  fi
+  for feature_def in "${FEATURES[@]}"; do
+    IFS='|' read -r _ _ display_name enable_var status_var <<< "$feature_def"
+    local enable_value="${!enable_var}"
+    local status_value="${!status_var}"
+    
+    if [ "$enable_value" = true ] && [ "$status_value" != "enabled" ]; then
+      echo "      - $display_name (currently: ${status_value:-disabled})"
+    fi
+  done
   
   if [ "$repo_private" = "true" ] && [ "$advanced_security_enabled" != "enabled" ]; then
     echo "      Note: Private repo requires Advanced Security to be enabled first"
@@ -279,48 +281,9 @@ while IFS= read -r repo_full; do
     needs_update=false
     status_messages=()
     
-    # Check each feature status
-    scanning_status=$(check_feature_status "scanning" "$secret_scanning_enabled" "$enable_scanning")
-    push_protection_status=$(check_feature_status "push-protection" "$push_protection_enabled" "$enable_push_protection")
-    ai_detection_status=$(check_feature_status "ai-detection" "$ai_detection_enabled" "$enable_ai_detection")
-    non_provider_patterns_status=$(check_feature_status "non-provider-patterns" "$non_provider_patterns_enabled" "$enable_non_provider_patterns")
-    validity_checks_status=$(check_feature_status "validity-checks" "$validity_checks_enabled" "$enable_validity_checks")
-    
     # Build status messages and check if updates are needed
-    if [ "$scanning_status" = "needs_update" ]; then
-      needs_update=true
-      status_messages+=("secret scanning")
-    elif [ "$scanning_status" = "already_enabled" ]; then
-      status_messages+=("✅ secret scanning already enabled")
-    fi
-    
-    if [ "$push_protection_status" = "needs_update" ]; then
-      needs_update=true
-      status_messages+=("push protection")
-    elif [ "$push_protection_status" = "already_enabled" ]; then
-      status_messages+=("✅ push protection already enabled")
-    fi
-    
-    if [ "$ai_detection_status" = "needs_update" ]; then
-      needs_update=true
-      status_messages+=("AI detection")
-    elif [ "$ai_detection_status" = "already_enabled" ]; then
-      status_messages+=("✅ AI detection already enabled")
-    fi
-    
-    if [ "$non_provider_patterns_status" = "needs_update" ]; then
-      needs_update=true
-      status_messages+=("non-provider patterns")
-    elif [ "$non_provider_patterns_status" = "already_enabled" ]; then
-      status_messages+=("✅ non-provider patterns already enabled")
-    fi
-    
-    if [ "$validity_checks_status" = "needs_update" ]; then
-      needs_update=true
-      status_messages+=("validity checks")
-    elif [ "$validity_checks_status" = "already_enabled" ]; then
-      status_messages+=("✅ validity checks already enabled")
-    fi
+    build_status_messages
+    needs_update=$(check_if_updates_needed)
     
     # Display current status
     for msg in "${status_messages[@]}"; do
