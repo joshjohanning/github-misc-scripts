@@ -483,6 +483,29 @@ Using `curl`, `wget`, or `gh release download` to download public release assets
 
 Enable actions on repository - similar to [API example](./../api/enable-actions-on-repository.sh), but using `gh cli`
 
+### enable-secret-scanning-on-repositories.sh
+
+Enables secret scanning on all repositories in an organization with support for both public and private repositories.
+
+Usage:
+
+```shell
+./enable-secret-scanning-on-repositories.sh joshjohanning-org
+./enable-secret-scanning-on-repositories.sh joshjohanning-org true
+```
+
+The second parameter is optional for dry-run mode (true/false, defaults to false).
+
+Features:
+
+- Automatically handles Advanced Security enablement for private repositories when required
+- Dry-run mode to preview changes without making modifications
+- Comprehensive error handling and reporting
+- Skips repositories where secret scanning is already enabled
+
+> [!NOTE]
+> This requires admin access to the repositories. For private repositories, the organization must have GitHub Advanced Security enabled.
+
 ### find-attachments-in-repositories.sh
 
 Finds attachments in issues, pull requests, and optionally, issue/pull request comments. This finds both screenshots and file attachments.
