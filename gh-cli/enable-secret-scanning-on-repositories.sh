@@ -6,6 +6,96 @@
 # Uses the repository update API to enable secret scanning features
 # Usage: <org|file> [features] [--dry-run]
 
+# Helper function to build JSON payload for secret scanning features
+build_json_payload() {
+  local include_advanced_security="$1"
+  local payload='{"security_and_analysis":{'
+  local has_changes=false
+  
+  # Add Advanced Security if requested
+  if [ "$include_advanced_security" = true ] && [ "$repo_private" = "true" ] && [ "$advanced_security_enabled" != "enabled" ]; then
+    payload+='"advanced_security":{"status":"enabled"},'
+    has_changes=true
+  fi
+  
+  # Add secret scanning features
+  if [ "$enable_scanning" = true ] && [ "$secret_scanning_enabled" != "enabled" ]; then
+    payload+='"secret_scanning":{"status":"enabled"},'
+    has_changes=true
+  fi
+  
+  if [ "$enable_push_protection" = true ] && [ "$push_protection_enabled" != "enabled" ]; then
+    payload+='"secret_scanning_push_protection":{"status":"enabled"},'
+    has_changes=true
+  fi
+  
+  if [ "$enable_ai_detection" = true ] && [ "$ai_detection_enabled" != "enabled" ]; then
+    payload+='"secret_scanning_ai_detection":{"status":"enabled"},'
+    has_changes=true
+  fi
+  
+  if [ "$enable_non_provider_patterns" = true ] && [ "$non_provider_patterns_enabled" != "enabled" ]; then
+    payload+='"secret_scanning_non_provider_patterns":{"status":"enabled"},'
+    has_changes=true
+  fi
+  
+  if [ "$enable_validity_checks" = true ] && [ "$validity_checks_enabled" != "enabled" ]; then
+    payload+='"secret_scanning_validity_checks":{"status":"enabled"},'
+    has_changes=true
+  fi
+  
+  # Remove trailing comma and close JSON
+  payload=$(echo "$payload" | sed 's/,$//')
+  payload+='}}'
+  
+  # Return both payload and whether there are changes
+  echo "$has_changes|$payload"
+}
+
+# Helper function to check if a feature needs updating
+check_feature_status() {
+  local feature="$1"
+  local current_status="$2"
+  local enable_flag="$3"
+  
+  if [ "$enable_flag" = true ] && [ "$current_status" != "enabled" ]; then
+    echo "needs_update"
+  elif [ "$enable_flag" = true ]; then
+    echo "already_enabled"
+  else
+    echo "not_requested"
+  fi
+}
+
+# Helper function to display dry-run information
+show_dry_run_info() {
+  echo "  🔍 Would enable the following features:"
+  
+  if [ "$enable_scanning" = true ] && [ "$secret_scanning_enabled" != "enabled" ]; then
+    echo "      - Secret scanning (currently: ${secret_scanning_enabled:-disabled})"
+  fi
+  
+  if [ "$enable_push_protection" = true ] && [ "$push_protection_enabled" != "enabled" ]; then
+    echo "      - Push protection (currently: ${push_protection_enabled:-disabled})"
+  fi
+  
+  if [ "$enable_ai_detection" = true ] && [ "$ai_detection_enabled" != "enabled" ]; then
+    echo "      - AI detection (currently: ${ai_detection_enabled:-disabled})"
+  fi
+  
+  if [ "$enable_non_provider_patterns" = true ] && [ "$non_provider_patterns_enabled" != "enabled" ]; then
+    echo "      - Non-provider patterns (currently: ${non_provider_patterns_enabled:-disabled})"
+  fi
+  
+  if [ "$enable_validity_checks" = true ] && [ "$validity_checks_enabled" != "enabled" ]; then
+    echo "      - Validity checks (currently: ${validity_checks_enabled:-disabled})"
+  fi
+  
+  if [ "$repo_private" = "true" ] && [ "$advanced_security_enabled" != "enabled" ]; then
+    echo "      Note: Private repo requires Advanced Security to be enabled first"
+  fi
+}
+
 function print_usage {
   echo "Usage: $0 <org|file> [features] [--dry-run]"
   echo "Example: ./enable-secret-scanning-on-repositories.sh joshjohanning-org"
@@ -189,38 +279,46 @@ while IFS= read -r repo_full; do
     needs_update=false
     status_messages=()
     
-    if [ "$enable_scanning" = true ] && [ "$secret_scanning_enabled" != "enabled" ]; then
+    # Check each feature status
+    scanning_status=$(check_feature_status "scanning" "$secret_scanning_enabled" "$enable_scanning")
+    push_protection_status=$(check_feature_status "push-protection" "$push_protection_enabled" "$enable_push_protection")
+    ai_detection_status=$(check_feature_status "ai-detection" "$ai_detection_enabled" "$enable_ai_detection")
+    non_provider_patterns_status=$(check_feature_status "non-provider-patterns" "$non_provider_patterns_enabled" "$enable_non_provider_patterns")
+    validity_checks_status=$(check_feature_status "validity-checks" "$validity_checks_enabled" "$enable_validity_checks")
+    
+    # Build status messages and check if updates are needed
+    if [ "$scanning_status" = "needs_update" ]; then
       needs_update=true
       status_messages+=("secret scanning")
-    elif [ "$enable_scanning" = true ]; then
+    elif [ "$scanning_status" = "already_enabled" ]; then
       status_messages+=("✅ secret scanning already enabled")
     fi
     
-    if [ "$enable_push_protection" = true ] && [ "$push_protection_enabled" != "enabled" ]; then
+    if [ "$push_protection_status" = "needs_update" ]; then
       needs_update=true
       status_messages+=("push protection")
-    elif [ "$enable_push_protection" = true ]; then
+    elif [ "$push_protection_status" = "already_enabled" ]; then
       status_messages+=("✅ push protection already enabled")
     fi
     
-    if [ "$enable_ai_detection" = true ] && [ "$ai_detection_enabled" != "enabled" ]; then
+    if [ "$ai_detection_status" = "needs_update" ]; then
       needs_update=true
       status_messages+=("AI detection")
-    elif [ "$enable_ai_detection" = true ]; then
+    elif [ "$ai_detection_status" = "already_enabled" ]; then
       status_messages+=("✅ AI detection already enabled")
     fi
     
-    if [ "$enable_non_provider_patterns" = true ] && [ "$non_provider_patterns_enabled" != "enabled" ]; then
+    if [ "$non_provider_patterns_status" = "needs_update" ]; then
       needs_update=true
       status_messages+=("non-provider patterns")
-    elif [ "$enable_non_provider_patterns" = true ]; then
+    elif [ "$non_provider_patterns_status" = "already_enabled" ]; then
       status_messages+=("✅ non-provider patterns already enabled")
     fi
     
-    if [ "$enable_validity_checks" = true ] && [ "$validity_checks_enabled" != "enabled" ]; then
+    if [ "$validity_checks_status" = "needs_update" ]; then
       needs_update=true
       status_messages+=("validity checks")
-    elif [ "$enable_validity_checks" = true ]; then
+    elif [ "$validity_checks_status" = "already_enabled" ]; then
       status_messages+=("✅ validity checks already enabled")
     fi
     
@@ -233,70 +331,20 @@ while IFS= read -r repo_full; do
       echo "  ✅ All requested features already enabled"
     else
       if [ "$dry_run" = "true" ]; then
-        echo "  🔍 Would enable the following features:"
-        if [ "$enable_scanning" = true ] && [ "$secret_scanning_enabled" != "enabled" ]; then
-          echo "      - Secret scanning (currently: ${secret_scanning_enabled:-disabled})"
-        fi
-        if [ "$enable_push_protection" = true ] && [ "$push_protection_enabled" != "enabled" ]; then
-          echo "      - Push protection (currently: ${push_protection_enabled:-disabled})"
-        fi
-        if [ "$enable_ai_detection" = true ] && [ "$ai_detection_enabled" != "enabled" ]; then
-          echo "      - AI detection (currently: ${ai_detection_enabled:-disabled})"
-        fi
-        if [ "$enable_non_provider_patterns" = true ] && [ "$non_provider_patterns_enabled" != "enabled" ]; then
-          echo "      - Non-provider patterns (currently: ${non_provider_patterns_enabled:-disabled})"
-        fi
-        if [ "$enable_validity_checks" = true ] && [ "$validity_checks_enabled" != "enabled" ]; then
-          echo "      - Validity checks (currently: ${validity_checks_enabled:-disabled})"
-        fi
-        if [ "$repo_private" = "true" ] && [ "$advanced_security_enabled" != "enabled" ]; then
-          echo "      Note: Private repo requires Advanced Security to be enabled first"
-        fi
+        show_dry_run_info
       else
         echo "  🔄 Enabling features..."
         
-        # Build JSON payload for API call
-        json_payload='{"security_and_analysis":{'
-        has_changes=false
-        
-        # For private repositories, we may need to enable Advanced Security first
-        if [ "$repo_private" = "true" ] && [ "$advanced_security_enabled" != "enabled" ]; then
-          echo "      Private repository detected - enabling Advanced Security..."
-          json_payload+='"advanced_security":{"status":"enabled"},'
-          has_changes=true
-        fi
-        
-        # Add secret scanning features
-        if [ "$enable_scanning" = true ] && [ "$secret_scanning_enabled" != "enabled" ]; then
-          json_payload+='"secret_scanning":{"status":"enabled"},'
-          has_changes=true
-        fi
-        
-        if [ "$enable_push_protection" = true ] && [ "$push_protection_enabled" != "enabled" ]; then
-          json_payload+='"secret_scanning_push_protection":{"status":"enabled"},'
-          has_changes=true
-        fi
-        
-        if [ "$enable_ai_detection" = true ] && [ "$ai_detection_enabled" != "enabled" ]; then
-          json_payload+='"secret_scanning_ai_detection":{"status":"enabled"},'
-          has_changes=true
-        fi
-        
-        if [ "$enable_non_provider_patterns" = true ] && [ "$non_provider_patterns_enabled" != "enabled" ]; then
-          json_payload+='"secret_scanning_non_provider_patterns":{"status":"enabled"},'
-          has_changes=true
-        fi
-        
-        if [ "$enable_validity_checks" = true ] && [ "$validity_checks_enabled" != "enabled" ]; then
-          json_payload+='"secret_scanning_validity_checks":{"status":"enabled"},'
-          has_changes=true
-        fi
+        # Build JSON payload for API call (include Advanced Security if needed)
+        result=$(build_json_payload true)
+        has_changes=$(echo "$result" | cut -d'|' -f1)
+        json_payload=$(echo "$result" | cut -d'|' -f2)
         
         # Only send API request if there are actual changes to make
-        if [ "$has_changes" = true ]; then
-          # Remove trailing comma and close JSON
-          json_payload=$(echo "$json_payload" | sed 's/,$//')
-          json_payload+='}}'
+        if [ "$has_changes" = "true" ]; then
+          if [ "$repo_private" = "true" ] && [ "$advanced_security_enabled" != "enabled" ]; then
+            echo "      Private repository detected - enabling Advanced Security..."
+          fi
           
           echo "      Sending API request..."
           response=$(echo "$json_payload" | gh api -X PATCH "/repos/$repo_full" --input - 2>&1)
@@ -310,42 +358,13 @@ while IFS= read -r repo_full; do
               echo "      Advanced Security not required - retrying without it..."
               
               # Rebuild payload without Advanced Security
-              json_payload='{"security_and_analysis":{'
-              has_retry_changes=false
+              retry_result=$(build_json_payload false)
+              has_retry_changes=$(echo "$retry_result" | cut -d'|' -f1)
+              retry_payload=$(echo "$retry_result" | cut -d'|' -f2)
               
-              # Add only the secret scanning features (skip Advanced Security)
-              if [ "$enable_scanning" = true ] && [ "$secret_scanning_enabled" != "enabled" ]; then
-                json_payload+='"secret_scanning":{"status":"enabled"},'
-                has_retry_changes=true
-              fi
-              
-              if [ "$enable_push_protection" = true ] && [ "$push_protection_enabled" != "enabled" ]; then
-                json_payload+='"secret_scanning_push_protection":{"status":"enabled"},'
-                has_retry_changes=true
-              fi
-              
-              if [ "$enable_ai_detection" = true ] && [ "$ai_detection_enabled" != "enabled" ]; then
-                json_payload+='"secret_scanning_ai_detection":{"status":"enabled"},'
-                has_retry_changes=true
-              fi
-              
-              if [ "$enable_non_provider_patterns" = true ] && [ "$non_provider_patterns_enabled" != "enabled" ]; then
-                json_payload+='"secret_scanning_non_provider_patterns":{"status":"enabled"},'
-                has_retry_changes=true
-              fi
-              
-              if [ "$enable_validity_checks" = true ] && [ "$validity_checks_enabled" != "enabled" ]; then
-                json_payload+='"secret_scanning_validity_checks":{"status":"enabled"},'
-                has_retry_changes=true
-              fi
-              
-              if [ "$has_retry_changes" = true ]; then
-                # Remove trailing comma and close JSON
-                json_payload=$(echo "$json_payload" | sed 's/,$//')
-                json_payload+='}}'
-                
+              if [ "$has_retry_changes" = "true" ]; then
                 echo "      Retrying API request without Advanced Security..."
-                retry_response=$(echo "$json_payload" | gh api -X PATCH "/repos/$repo_full" --input - 2>&1)
+                retry_response=$(echo "$retry_payload" | gh api -X PATCH "/repos/$repo_full" --input - 2>&1)
                 
                 if [ $? -eq 0 ]; then
                   echo "  ✅ Successfully enabled requested features"
