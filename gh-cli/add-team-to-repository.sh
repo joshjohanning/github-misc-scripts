@@ -3,8 +3,8 @@
 # Adds a team to a repo
 
 function print_usage {
-  echo "Usage: $0 <org> <repo> <team_slug> <role>"
-  echo "Example: ./add-team-to-repository.sh joshjohanning-org my-repo my-team push"
+  echo "Usage: $0 <org> <repo> <role> <team_slug>"
+  echo "Example: ./add-team-to-repository.sh joshjohanning-org my-repo push my-team"
   echo "Valid roles: admin, maintain, push (write), triage, pull (read)"
   exit 1
 }
@@ -15,8 +15,8 @@ fi
 
 org=$1
 repo=$2
-team=$3
-permission=$(echo "$4" | tr '[:upper:]' '[:lower:]')
+permission=$(echo "$3" | tr '[:upper:]' '[:lower:]')
+team=$4
 
 case "$permission" in
   "admin" | "maintain" | "push" | "triage" | "pull")

@@ -10,4 +10,4 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Call the add-collaborator-to-repository.sh script with all arguments
-exec "$SCRIPT_DIR/add-collaborator-to-repository.sh" "$@"
+exec "$SCRIPT_DIR/add-user-to-repository.sh" "$@"
