@@ -487,6 +487,25 @@ Enable actions on repository - similar to [API example](./../api/enable-actions-
 
 Finds attachments in issues, pull requests, and optionally, issue/pull request comments. This finds both screenshots and file attachments.
 
+### find-expired-repository-invitations.sh
+
+Finds and optionally cancels expired repository invitations across all repositories in an organization.
+
+Usage:
+
+```shell
+./find-expired-repository-invitations.sh joshjohanning-org
+./find-expired-repository-invitations.sh joshjohanning-org cancel
+```
+
+Actions:
+
+- `list` (default) - List all expired invitations across all repositories
+- `cancel` - Cancel all expired invitations across all repositories
+
+> [!NOTE]
+> This requires admin access to the repositories in the organization.
+
 ### generate-release-notes-from-tags.sh
 
 Generates release notes between two tags. See the [release notes docs](https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes) on further customizations and the [API docs](https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#generate-release-notes-content-for-a-release) for info on the API.
