@@ -133,7 +133,7 @@ Adds a team to a repository with a given permission level
 Example usage:
 
 ```shell
-./add-team-to-repository.sh joshjohanning-org my-repo my-team push"
+./add-team-to-repository.sh joshjohanning-org my-repo push my-team"
 ```
 
 ### add-user-to-project.sh
@@ -144,7 +144,7 @@ Example usage:
 
 ```shell
 ./add-user-to-project.sh <organization> <repository> <project-number> <role> <user>
-./add-user-to-project.sh joshjohanning-org my-repo 1234 joshjohanning ADMIN"
+./add-user-to-project.sh joshjohanning-org my-repo 1234 ADMIN joshjohanning"
 ```
 
 Example roles:
@@ -161,7 +161,14 @@ Adds a user to a repository with a given permission
 Example usage:
 
 ```shell
-./add-user-to-repository.sh joshjohanning-org my-repo joshjohanning write"
+./add-user-to-repository.sh joshjohanning-org my-repo write joshjohanning"
+```
+
+This also will attempt to check if there is an existing invitation for this user pending, and if it's expired, cancel it. This can be opted out of by passing in `true` as the 5th parameter, such as
+
+```shell
+# don't check to see if existing invite is present; i.e. if adding existing organization user to repository
+./add-user-to-repository.sh joshjohanning-org my-repo write joshjohanning true"
 ```
 
 ### add-user-to-team.sh
@@ -1150,7 +1157,7 @@ Example output:
 
 ### invite-user-to-repository.sh
 
-Calls the `./add-collaborator-to-repository.sh` script to add a user to a repository (this is a wrapper script as an alias since `invite == add`.
+Calls the `./add-user-to-repository.sh` script to add a user to a repository (this is a wrapper script as an alias since `invite == add`).
 
 ### invite-users-to-organization-from-list.sh
 
