@@ -32,15 +32,24 @@ esac
 # Check for existing pending invitations (unless skipped)
 if [ "$skip_invite_check" != "true" ]; then
   echo "Checking for existing invitations for $user..."
-  pending_invitation=$(gh api "/repos/$org/$repo/invitations" --jq ".[] | select(.invitee.login == \"$user\") | .id" 2>/dev/null)
+  invitation_data=$(gh api "/repos/$org/$repo/invitations" --jq ".[] | select(.invitee.login == \"$user\") | {id: .id, expired: .expired}" 2>/dev/null)
 
-  if [ -n "$pending_invitation" ]; then
-    echo "Found pending invitation (ID: $pending_invitation) for $user. Canceling it first..."
-    gh api -X DELETE "/repos/$org/$repo/invitations/$pending_invitation"
-    if [ $? -eq 0 ]; then
-      echo "Successfully canceled pending invitation."
+  if [ -n "$invitation_data" ]; then
+    invitation_id=$(echo "$invitation_data" | jq -r '.id')
+    is_expired=$(echo "$invitation_data" | jq -r '.expired')
+    
+    if [ "$is_expired" = "true" ]; then
+      echo "Found expired invitation (ID: $invitation_id) for $user. Canceling it..."
+      gh api -X DELETE "/repos/$org/$repo/invitations/$invitation_id"
+      if [ $? -eq 0 ]; then
+        echo "Successfully canceled expired invitation."
+      else
+        echo "Warning: Failed to cancel expired invitation. Proceeding anyway..."
+      fi
     else
-      echo "Warning: Failed to cancel pending invitation. Proceeding anyway..."
+      echo "Found active invitation (ID: $invitation_id) for $user. Leaving it as is."
+      echo "Skipping new invitation since an active one already exists."
+      exit 0
     fi
   fi
 else
