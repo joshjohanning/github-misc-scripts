@@ -57,4 +57,19 @@ else
 fi
 
 echo "Adding/inviting $user to $org/$repo with $permission permission..."
-gh api -X PUT /repos/$org/$repo/collaborators/$user -f permission=$permission
+response=$(gh api -X PUT /repos/$org/$repo/collaborators/$user -f permission=$permission 2>&1)
+exit_code=$?
+
+if [ $exit_code -eq 0 ]; then
+  echo "✅ Successfully ensured $user has $permission permission on $org/$repo. (User may have been newly added or permission updated)"
+else
+  # Check for specific error cases
+  if echo "$response" | grep -q "Not Found"; then
+    echo "❌ Error: Repository $org/$repo not found or insufficient permissions."
+    exit 1
+  else
+    echo "❌ Error adding $user to $org/$repo:"
+    echo "$response"
+    exit 1
+  fi
+fi
