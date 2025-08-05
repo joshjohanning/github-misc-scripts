@@ -1227,6 +1227,25 @@ Code search in an organization.
 
 See the [docs](https://docs.github.com/en/rest/search?apiVersion=2022-11-28#search-code) and [StackOverflow](https://stackoverflow.com/questions/24132790/how-to-search-for-code-in-github-with-github-api) for more information.
 
+### search-repositories-by-custom-property.sh
+
+Search for repositories in an organization with specific custom properties using GitHub's search API with custom property filters.
+
+The script automatically adds the 'props.' prefix to property names and supports multiple search formats:
+
+- Single property: `RepoType:IssueOps`
+- Multiple properties (AND logic): `RepoType:IssueOps Environment:Production`
+- Exclusion search: `no:RepoType` (finds repos without the RepoType property)
+- Mixed queries: `RepoType:IssueOps&Environment:Production`
+
+Example usage:
+
+```shell
+./search-repositories-by-custom-property.sh joshjohanning-org 'RepoType:IssueOps'
+./search-repositories-by-custom-property.sh joshjohanning-org 'no:RepoType'
+./search-repositories-by-custom-property.sh joshjohanning-org 'RepoType:IssueOps Environment:Production'
+```
+
 ### set-branch-protection-status-checks.sh
 
 Set the branch protection status checks - and optionally create a branch protection rule if it doesn't exist or set the required status checks setting on an existing branch protection rule if it isn't set
