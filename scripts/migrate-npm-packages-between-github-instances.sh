@@ -67,6 +67,7 @@ echo "$packages" | while IFS= read -r response; do
   curl -H "Authorization: token $GH_SOURCE_PAT" -Ls "https://npm.pkg.github.com/@$SOURCE_ORG/$package_name" >"${temp_dir}/${package_name}.json"
 
   # Fetch versions, filter by date only if CUTOFF_DATE is set
+  # TODO: Can instead get versions from the package manifest instead of API
   if [ -n "$CUTOFF_DATE" ]; then
     versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api --paginate "/orgs/$SOURCE_ORG/packages/npm/$package_name/versions" |
       jq -r --arg cutoff "$CUTOFF_DATE" '.[] | select(.created_at >= $cutoff) | .name' |
@@ -102,6 +103,16 @@ echo "$packages" | while IFS= read -r response; do
     npm publish --ignore-scripts --userconfig $temp_dir/.npmrc || echo "skipped package due to failure: $package_name-$version.tgz" >>./failed-packages.txt
     cd ./../../
 
+  done
+
+  # Mark the latest tag as latest in GitHub's UI, otherwise latest version will be last semver version pushed
+  DIST_TAGS=$(jq -r '.["dist-tags"] | keys[]' "$MANIFEST")
+  for DIST_TAG in $DIST_TAGS; do
+    # get the version for the current tag
+    version=$(jq --arg TAG "$DIST_TAG" -r '.["dist-tags"].[$TAG]' "$MANIFEST")
+    echo "Setting dist-tag $DIST_TAG to version $version for package $PACKAGE"
+    # set the dist-tag using npm CLI
+    npm dist-tag add "$PACKAGE@$version" "$DIST_TAG" --userconfig "$temp_dir/.npmrc"
   done
 
   echo "..."
