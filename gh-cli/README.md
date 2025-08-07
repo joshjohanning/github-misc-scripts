@@ -1043,6 +1043,18 @@ Get repositories that have a CircleCI configuration file `.circleci/config.yml`
 
 Get repositories that have a CodeQL configuration file `.github/workflows/codeql.yml`
 
+### get-repositories-using-dependabot-version-updates.sh
+
+Get repositories that have Dependabot version updates configured by checking for the presence of a `.github/dependabot.yml` file.
+
+Usage:
+
+```shell
+./get-repositories-using-dependabot-version-updates.sh my-org
+```
+
+Returns a simple list of repository names followed by a count summary.
+
 ### get-repositories-webhooks-csv.sh
 
 Gets a CSV with the list of repository webhooks in a GitHub organization.
