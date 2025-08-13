@@ -35,7 +35,7 @@ Each script entry must include:
 
 - **Heading**: `### script-name.sh` (or appropriate extension)
 - **Description**: Brief explanation of what the script does
-- **Usage examples**: If applicable, show how to run the script
+- **Usage examples**: If applicable, show how to run the script (We don't need both usage AND an example of running the script - just one please)
 - **Notes/Warnings**: Any important information about prerequisites, permissions, or limitations
 
 ### 4. File Existence

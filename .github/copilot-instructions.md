@@ -17,6 +17,7 @@ When adding new scripts to any directory:
 - Always add an entry to the appropriate `README.md` file in alphabetical order
 - Follow the existing format and structure in the README
 - Include a clear description, usage examples, and any prerequisites/notes
+- We don't need both usage AND an example of running the script - just one please
 - Use proper kebab-case naming convention for script files
 - Avoid short words like "repo" (use "repository"), "org" (use "organization")
 - Test that the entry passes `lint-readme.js` validation
