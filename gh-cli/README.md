@@ -306,20 +306,21 @@ Example:
 > [!NOTE]
 > This script uses a private preview API for enterprise teams, which may change without notice. Requires GitHub CLI (`gh`) to be installed and authenticated. You may need special permissions or token scopes to access enterprise team membership information.
 
-### check-org-team-membership.sh
+
+### check-organization-team-membership.sh
 
 Checks if a user is a member of a specific team in an organization using the GitHub API.
 
 Usage:
 
 ```shell
-./check-org-team-membership.sh <organization> <team-slug> <username>
+./check-organization-team-membership.sh <organization> <team-slug> <username>
 ```
 
 Example:
 
 ```shell
-./check-org-team-membership.sh my-organization security johndoe
+./check-organization-team-membership.sh my-organization security johndoe
 ```
 
 > [!NOTE]
