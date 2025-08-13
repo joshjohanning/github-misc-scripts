@@ -240,53 +240,6 @@ Usage:
 ./check-enterprise-owner.sh <ENTERPRISE_SLUG> <USERNAME>
 ```
 
-Example:
-
-```shell
-./check-enterprise-owner.sh my-enterprise johndoe
-```
-
-> [!NOTE]
-> Requires GitHub CLI (`gh`) to be installed and authenticated. The script uses the GraphQL API and requires permission to view enterprise admins. Your token must have appropriate enterprise-level scopes. `jq` is required for JSON parsing.
-
-### check-organization-admin.sh
-
-Checks if a user is an admin in a given organization.
-
-Usage:
-
-```shell
-./check-organization-admin.sh <ORG_NAME> <USERNAME>
-```
-
-Example:
-
-```shell
-./check-organization-admin.sh octo-org johndoe
-```
-
-> [!NOTE]
-> Requires GitHub CLI (`gh`) to be installed and authenticated. The script uses the GitHub API and requires appropriate permissions to view organization members and their roles.
-
-### check-repository-admin.sh
-
-Checks if a user is a collaborator in a given repository and determines if they have admin access.
-
-Usage:
-
-```shell
-./check-repository-admin.sh <OWNER> <REPOSITORY> <USERNAME>
-```
-
-Example:
-
-```shell
-./check-repository-admin.sh octocat Hello-World johndoe
-```
-
-> [!NOTE]
-> Requires GitHub CLI (`gh`) to be installed and authenticated. The script uses the GitHub API and requires appropriate permissions to view collaborators and permissions for the repository. For private repositories, your token must have the `repo` scope.
-
 ### check-enterprise-team-membership.sh
 
 Checks if a user is a member of an enterprise team using the GitHub API (private preview feature).
@@ -297,15 +250,8 @@ Usage:
 ./check-enterprise-team-membership.sh <enterprise> <team-slug> <username>
 ```
 
-Example:
-
-```shell
-./check-enterprise-team-membership.sh my-enterprise dev-team octocat
-```
-
 > [!NOTE]
-> This script uses a private preview API for enterprise teams, which may change without notice. Requires GitHub CLI (`gh`) to be installed and authenticated. You may need special permissions or token scopes to access enterprise team membership information.
-
+> This script uses a private preview API for enterprise teams, which may change without notice.
 
 ### check-organization-team-membership.sh
 
@@ -317,14 +263,18 @@ Usage:
 ./check-organization-team-membership.sh <organization> <team-slug> <username>
 ```
 
-Example:
+> [!NOTE]
+> Your token must have the `read:org` scope to view team membership.
+
+### check-repository-admin.sh
+
+Checks if a user is a collaborator in a given repository and determines if they have admin access.
+
+Usage:
 
 ```shell
-./check-organization-team-membership.sh my-organization security johndoe
+./check-repository-admin.sh <OWNER> <REPOSITORY> <USERNAME>
 ```
-
-> [!NOTE]
-> Requires GitHub CLI (`gh`) to be installed and authenticated. Your token must have the `read:org` scope to view team membership.
 
 ### copy-organization-members.sh
 
