@@ -230,6 +230,101 @@ octocat/octocat
 
 Change a repository visibility to internal, for example
 
+### check-enterprise-owner.sh
+
+Checks if a user is an enterprise admin (owner) using the GitHub GraphQL API.
+
+Usage:
+
+```shell
+./check-enterprise-owner.sh <ENTERPRISE_SLUG> <USERNAME>
+```
+
+Example:
+
+```shell
+./check-enterprise-owner.sh my-enterprise johndoe
+```
+
+> [!NOTE]
+> Requires GitHub CLI (`gh`) to be installed and authenticated. The script uses the GraphQL API and requires permission to view enterprise admins. Your token must have appropriate enterprise-level scopes. `jq` is required for JSON parsing.
+
+### check-organization-admin.sh
+
+Checks if a user is an admin in a given organization.
+
+Usage:
+
+```shell
+./check-organization-admin.sh <ORG_NAME> <USERNAME>
+```
+
+Example:
+
+```shell
+./check-organization-admin.sh octo-org johndoe
+```
+
+> [!NOTE]
+> Requires GitHub CLI (`gh`) to be installed and authenticated. The script uses the GitHub API and requires appropriate permissions to view organization members and their roles.
+
+### check-repository-admin.sh
+
+Checks if a user is a collaborator in a given repository and determines if they have admin access.
+
+Usage:
+
+```shell
+./check-repository-admin.sh <OWNER> <REPOSITORY> <USERNAME>
+```
+
+Example:
+
+```shell
+./check-repository-admin.sh octocat Hello-World johndoe
+```
+
+> [!NOTE]
+> Requires GitHub CLI (`gh`) to be installed and authenticated. The script uses the GitHub API and requires appropriate permissions to view collaborators and permissions for the repository. For private repositories, your token must have the `repo` scope.
+
+### check-enterprise-team-membership.sh
+
+Checks if a user is a member of an enterprise team using the GitHub API (private preview feature).
+
+Usage:
+
+```shell
+./check-enterprise-team-membership.sh <enterprise> <team-slug> <username>
+```
+
+Example:
+
+```shell
+./check-enterprise-team-membership.sh my-enterprise dev-team octocat
+```
+
+> [!NOTE]
+> This script uses a private preview API for enterprise teams, which may change without notice. Requires GitHub CLI (`gh`) to be installed and authenticated. You may need special permissions or token scopes to access enterprise team membership information.
+
+### check-org-team-membership.sh
+
+Checks if a user is a member of a specific team in an organization using the GitHub API.
+
+Usage:
+
+```shell
+./check-org-team-membership.sh <organization> <team-slug> <username>
+```
+
+Example:
+
+```shell
+./check-org-team-membership.sh my-organization security johndoe
+```
+
+> [!NOTE]
+> Requires GitHub CLI (`gh`) to be installed and authenticated. Your token must have the `read:org` scope to view team membership.
+
 ### copy-organization-members.sh
 
 Copy organization members from one organization to the other, the member will **retain** the source role (owner or member), member cannot be demoted, if they already exist at the target with an owner role they cannot be demoted to member.
@@ -1016,7 +1111,7 @@ Gets the list of organization secrets that are available by repository (all repo
 
 Public repositories are ignored and not listed.
 
-A repository can only use a max of [100 organization secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#limits-for-secrets) that are available to it. The purpose of this script is to get list of repositories and the number of organization secrets available to them mostly to figure out if you are hitting the limit and not all secrets are really available to the repository (only first 100 secrets sorted by secret name are available).
+A repository can only use a max of [100 organization secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#limits-for-secrets) that are available to it. The purpose of this script is to get list of repositories and the number of organization secrets available to them mostly to figure out if you are hitting the limit and not all secrets are really available.
 
 usage:
 
