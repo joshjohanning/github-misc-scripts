@@ -1021,6 +1021,26 @@ Retrieve the download URL for a specific version of a package in GitHub Packages
 
 Gets the parent issue of a given sub-issue (child). See: [Community Discussions Post](https://github.com/orgs/community/discussions/139932)
 
+### get-project-board-items.sh
+
+Extracts all items from a GitHub Projects V2 board with comprehensive details including content, custom field values, and project item type (draft or issue).
+
+Usage:
+
+```shell
+./get-project-board-items.sh my-org 123
+```
+
+The script outputs formatted information for each project item including:
+
+- Issue/PR details with repository links and numbers
+- Draft issue content
+- Custom field values (Status, Priority, etc.)
+- Labels and descriptions with clean formatting
+
+> [!NOTE]
+> Works with Projects V2 (newer project boards). Find the project number in the URL: `github.com/orgs/ORG/projects/NUMBER`
+
 ### get-projects-added-to-repository.sh
 
 Gets ProjectsV2 added to a repository
