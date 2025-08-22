@@ -641,9 +641,6 @@ Count,Action
 2,actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 1,actions/dependency-review-action@v4
 1,actions/checkout@v4
-
-⚠️  Warning: The following repositories could not be analyzed (likely due to disabled Dependency Graph or permissions):
-  - joshjohanning-org/test2
 ```
 
 Example output (count-by-action) (with `--dedupe-by-repo`):
@@ -654,10 +651,10 @@ Count,Action
 2,actions/upload-artifact
 2,actions/setup-node
 1,actions/dependency-review-action
-
-⚠️  Warning: The following repositories could not be analyzed (likely due to disabled Dependency Graph or permissions):
-  - joshjohanning-org/test2
 ```
+
+> [!TIP]
+> If outputting to `txt` or `md`, you'll see a warning message for each repository that returned an error (because Dependency Graph is disabled). You will also see an informational message providing context around what the count is returning. `csv` returns clean data.
 
 > [!NOTE]
 > The count returned is the # of repositories that use the `action@version` combination - if a single repository uses the `action@version` combination 2x times, it will only be counted 1x (unless using `count-by-action` in combination with `--dedupe-by-repo`, which counts unique repositories per action). Conversely, if different `action@version` combinations are being used, they will be counted separately (for example, if the same action appears twice in a repository but one uses `@v2` and one uses `@v3`, by default they will be counted separately unless using `count-by-action` in combination with `--dedupe-by-repo`).
@@ -679,14 +676,19 @@ Optional flags:
 
 - `--resolve-shas` - Resolve commit SHAs to their corresponding tags
 
-Example output:
+Example output (with `--resolve-shas`):
 
 ```csv
+actions/checkout@v4
+actions/dependency-review-action@v4
+ossf/scorecard-action@e38b1902ae4f44df626f11ba0734b14fb91f8f86 # sha not associated to tag
+actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # v3.1.0
+github/codeql-action/upload-sarif@17573ee1cc1b9d061760f3a006fc4aac4f944fd5 # sha not associated to tag
 actions/checkout@v3
 github/codeql-action/analyze@v2
 github/codeql-action/autobuild@v2
 github/codeql-action/init@v2
-actions/dependency-review-action@v3
 ```
 
 > [!NOTE]
