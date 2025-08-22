@@ -227,8 +227,8 @@ if [ "$count_method" == "count-by-version" ] && [ "$report_format" != "csv" ]; t
   fi
 fi
 
-# Show warning about repos that couldn't be analyzed
-if [ ${#repos_without_dependency_graph[@]} -gt 0 ]; then
+# Show warning about repos that couldn't be analyzed (but not for CSV)
+if [ ${#repos_without_dependency_graph[@]} -gt 0 ] && [ "$report_format" != "csv" ]; then
   echo "" >&2
   echo "⚠️  Warning: The following repositories could not be analyzed (likely due to disabled Dependency Graph or permissions):" >&2
   for repo in "${repos_without_dependency_graph[@]}"; do
