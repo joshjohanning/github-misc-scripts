@@ -39,11 +39,11 @@ resolve_sha_to_tag() {
         # Try to find a tag that points to this commit SHA
         local tag_name
         # First try to find a semantic version tag (prefer v1.2.3 over v1)
-        tag_name=$(gh api repos/"$action_name"/git/refs/tags --paginate | jq -r --arg sha "$sha" '.[] | select(.object.sha == $sha) | .ref | sub("refs/tags/"; "")' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+        tag_name=$(gh api repos/"$action_name"/git/refs/tags --paginate 2>/dev/null | jq -r --arg sha "$sha" '.[] | select(.object.sha == $sha) | .ref | sub("refs/tags/"; "")' 2>/dev/null | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+' | head -1)
         
         # If no semantic version found, fall back to any tag
         if [ -z "$tag_name" ]; then
-            tag_name=$(gh api repos/"$action_name"/git/refs/tags --paginate | jq -r --arg sha "$sha" '.[] | select(.object.sha == $sha) | .ref | sub("refs/tags/"; "")' | head -1)
+            tag_name=$(gh api repos/"$action_name"/git/refs/tags --paginate 2>/dev/null | jq -r --arg sha "$sha" '.[] | select(.object.sha == $sha) | .ref | sub("refs/tags/"; "")' 2>/dev/null | head -1)
         fi
         
         if [ -n "$tag_name" ] && [ "$tag_name" != "null" ]; then
