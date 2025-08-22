@@ -659,6 +659,9 @@ Count,Action
 > [!NOTE]
 > The count returned is the # of repositories that use the `action@version` combination - if a single repository uses the `action@version` combination 2x times, it will only be counted 1x (unless using `count-by-action` in combination with `--dedupe-by-repo`, which counts unique repositories per action). Conversely, if different `action@version` combinations are being used, they will be counted separately (for example, if the same action appears twice in a repository but one uses `@v2` and one uses `@v3`, by default they will be counted separately unless using `count-by-action` in combination with `--dedupe-by-repo`).
 
+> [!NOTE]
+> Using `--resolve-shas` will add additional API calls, but we attempt to cache tag lookups to improve performance. The cache is stored in temporary files and automatically cleaned up when the script exits.
+
 ### get-actions-usage-in-repository.sh
 
 Returns a list of all actions used in a repository using the SBOM API

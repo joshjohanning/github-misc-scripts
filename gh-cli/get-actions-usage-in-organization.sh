@@ -56,7 +56,18 @@ if [ "$dedupe_by_repo" == "true" ] && [ "$count_method" != "count-by-action" ]; 
     exit 1
 fi
 
-# Function to resolve SHA to tag for a given action
+# Create temporary files for caching (compatible with bash 3.2)
+sha_cache_file=$(mktemp)
+action_tags_cache_dir=$(mktemp -d)
+
+# Cleanup function to remove temp files
+cleanup_cache() {
+    rm -f "$sha_cache_file" 2>/dev/null
+    rm -rf "$action_tags_cache_dir" 2>/dev/null
+}
+trap cleanup_cache EXIT
+
+# Function to resolve SHA to tag for a given action (with caching)
 resolve_sha_to_tag() {
     local action_with_sha="$1"
     local action_name
@@ -65,24 +76,52 @@ resolve_sha_to_tag() {
     action_name=$(echo "$action_with_sha" | cut -d'@' -f1)
     sha=$(echo "$action_with_sha" | cut -d'@' -f2)
     
+    # Create safe filename for cache (replace / with _)
+    local safe_action_name=$(echo "$action_name" | tr '/' '_')
+    local cache_key="${safe_action_name}@${sha}"
+    
+    # Check SHA cache first
+    if grep -q "^${cache_key}|" "$sha_cache_file" 2>/dev/null; then
+        grep "^${cache_key}|" "$sha_cache_file" | cut -d'|' -f2- | head -1
+        return
+    fi
+    
     # Only process if it looks like a SHA (40 character hex string)
     if [[ ${#sha} -eq 40 && "$sha" =~ ^[a-f0-9]+$ ]]; then
-        # Try to find a tag that points to this commit SHA
-        local tag_name
-        # First try to find a semantic version tag (prefer v1.2.3 over v1)
-        tag_name=$(gh api repos/"$action_name"/git/refs/tags --paginate 2>/dev/null | jq -r --arg sha "$sha" '.[] | select(.object.sha == $sha) | .ref | sub("refs/tags/"; "")' 2>/dev/null | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+        local action_cache_file="${action_tags_cache_dir}/${safe_action_name}"
         
-        # If no semantic version found, fall back to any tag
-        if [ -z "$tag_name" ]; then
-            tag_name=$(gh api repos/"$action_name"/git/refs/tags --paginate 2>/dev/null | jq -r --arg sha "$sha" '.[] | select(.object.sha == $sha) | .ref | sub("refs/tags/"; "")' 2>/dev/null | head -1)
+        # Check if we have tags cached for this action
+        if [ ! -f "$action_cache_file" ]; then
+            # Fetch and cache all tags for this action
+            gh api repos/"$action_name"/git/refs/tags --paginate 2>/dev/null | \
+                jq -r '.[] | "\(.object.sha)|\(.ref | sub("refs/tags/"; ""))"' 2>/dev/null > "$action_cache_file" || \
+                touch "$action_cache_file"
+        fi
+        
+        # Look up the SHA in the cached tags
+        local tag_name=""
+        if [ -s "$action_cache_file" ]; then
+            # First try to find a semantic version tag (prefer v1.2.3 over v1)
+            tag_name=$(grep "^${sha}|" "$action_cache_file" | cut -d'|' -f2 | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+            
+            # If no semantic version found, fall back to any tag
+            if [ -z "$tag_name" ]; then
+                tag_name=$(grep "^${sha}|" "$action_cache_file" | cut -d'|' -f2 | head -1)
+            fi
         fi
         
         if [ -n "$tag_name" ] && [ "$tag_name" != "null" ]; then
-            echo "$action_with_sha # $tag_name"
+            local result="$action_with_sha # $tag_name"
+            echo "${cache_key}|${result}" >> "$sha_cache_file"
+            echo "$result"
         else
-            echo "$action_with_sha # sha not associated to tag"
+            local result="$action_with_sha # sha not associated to tag"
+            echo "${cache_key}|${result}" >> "$sha_cache_file"
+            echo "$result"
         fi
     else
+        # Not a SHA, cache and return as-is
+        echo "${cache_key}|${action_with_sha}" >> "$sha_cache_file"
         echo "$action_with_sha"
     fi
 }
