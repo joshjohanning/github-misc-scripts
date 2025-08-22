@@ -601,40 +601,101 @@ Gets the status of Actions on a repository (ie, if Actions are disabled)
 
 Returns a list of all actions used in an organization using the SBOM API
 
-Example output:
+Usage:
+
+- `./get-actions-usage-in-organization.sh <org> [count-by-version|count-by-action] [txt|csv|md] [--resolve-shas] [--dedupe-by-repo]`
+
+Examples:
+
+- `./get-actions-usage-in-organization.sh joshjohanning-org count-by-version txt > output.txt`
+- `./get-actions-usage-in-organization.sh joshjohanning-org count-by-action md > output.md`
+- `./get-actions-usage-in-organization.sh joshjohanning-org count-by-version txt --resolve-shas > output.txt`
+- `./get-actions-usage-in-organization.sh joshjohanning-org count-by-action txt --dedupe-by-repo > output.txt`
+
+Output formats:
+
+- `txt` (default) - Plain text format
+- `csv` - Comma-separated values
+- `md` - Markdown table format
+
+Count methods:
+
+- `count-by-version` (default) - Count actions by version (actions/checkout@v2 separate from actions/checkout@v3)
+- `count-by-action` - Count actions by name only (versions stripped)
+
+Optional flags:
+
+- `--resolve-shas` - Resolve commit SHAs to their corresponding tags (works with count-by-version only)
+- `--dedupe-by-repo` - Count unique repositories per action (works with count-by-action only)
+
+Example output (count-by-version) (with `--resolve-shas`):
 
 ```csv
-71 actions/checkout@3
-42 actions/checkout@2
-13 actions/upload-artifact@2
-13 actions/setup-node@3
+Count,Action
+4 actions/upload-artifact@v4
+3 actions/setup-node@v3
+2,actions/checkout@v4.3.0
+2,actions/checkout@main
+2,actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # sha not associated to tag
+2,actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+2,actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+1,actions/dependency-review-action@v4
+1,actions/checkout@v4
 ```
 
-Or (`count-by-action` option to count by action as opposed to action@version):
+Example output (count-by-action) (with `--dedupe-by-repo`):
 
 ```csv
-130 actions/checkout
-35 actions/upload-artifact
-27 actions/github-script
-21 actions/setup-node
+Count,Action
+3,actions/checkout
+2,actions/upload-artifact
+2,actions/setup-node
+1,actions/dependency-review-action
 ```
+
+> [!TIP]
+> If outputting to `txt` or `md`, you'll see a warning message for each repository that returned an error (because Dependency Graph is disabled). You will also see an informational message providing context around what the count is returning. `csv` returns clean data.
 
 > [!NOTE]
-> The count returned is the # of repositories that use the action - if single a repository uses the action 2x times, it will only be counted 1x
+> The count returned is the # of repositories that use the `action@version` combination - if a single repository uses the `action@version` combination 2x times, it will only be counted 1x (unless using `count-by-action` in combination with `--dedupe-by-repo`, which counts unique repositories per action). Conversely, if different `action@version` combinations are being used, they will be counted separately (for example, if the same action appears twice in a repository but one uses `@v2` and one uses `@v3`, by default they will be counted separately unless using `count-by-action` in combination with `--dedupe-by-repo`).
+
+> [!NOTE]
+> Using `--resolve-shas` will add additional API calls, but we attempt to cache tag lookups to improve performance. The cache is stored in temporary files and automatically cleaned up when the script exits.
 
 ### get-actions-usage-in-repository.sh
 
 Returns a list of all actions used in a repository using the SBOM API
 
-Example output:
+Usage:
+
+- `./get-actions-usage-in-repository.sh <org> <repo> [--resolve-shas]`
+
+Examples:
+
+- `./get-actions-usage-in-repository.sh joshjohanning-org ghas-demo`
+- `./get-actions-usage-in-repository.sh joshjohanning-org ghas-demo --resolve-shas`
+
+Optional flags:
+
+- `--resolve-shas` - Resolve commit SHAs to their corresponding tags
+
+Example output (with `--resolve-shas`):
 
 ```csv
-actions/checkout@3
-github/codeql-action/analyze@2
-github/codeql-action/autobuild@2
-github/codeql-action/init@2
-actions/dependency-review-action@3
+actions/checkout@v4
+actions/dependency-review-action@v4
+ossf/scorecard-action@e38b1902ae4f44df626f11ba0734b14fb91f8f86 # sha not associated to tag
+actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # v3.1.0
+github/codeql-action/upload-sarif@17573ee1cc1b9d061760f3a006fc4aac4f944fd5 # sha not associated to tag
+actions/checkout@v3
+github/codeql-action/analyze@v2
+github/codeql-action/autobuild@v2
+github/codeql-action/init@v2
 ```
+
+> [!NOTE]
+> Using `--resolve-shas` will add significant time to resolve commit SHAs to their corresponding tags
 
 ### get-all-users-in-repository.sh
 
