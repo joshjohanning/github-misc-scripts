@@ -20,7 +20,15 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Lint ./gh-cli/README.md
-        run: node ./.github/scripts/lint-readme.js
+        id: lint
+        run: node ./.github/scripts/lint-readme.js | tee gh-cli-readme-lint-results.txt
+
+      - name: Upload lint results
+        if: steps.lint.outcome == 'failure' || steps.lint.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: gh-cli-readme-lint-results
+          path: gh-cli-readme-lint-results.txt
 
   lint-scripts-readme:
     name: Lint ./scripts/README.md
@@ -33,4 +41,64 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Lint ./scripts/README.md
-        run: node ./.github/scripts/lint-readme.js ./scripts '##' '# scripts'
+        id: lint
+        run: node ./.github/scripts/lint-readme.js ./scripts '##' '# scripts' | tee scripts-readme-lint-results.txt
+
+      - name: Upload lint results
+        if: steps.lint.outcome == 'failure' || steps.lint.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: scripts-readme-lint-results
+          path: scripts-readme-lint-results.txt
+
+  post-results:
+    name: Post Lint Results as PR Comment
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - lint-gh-cli-readme
+      - lint-scripts-readme
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Download lint results
+        uses: actions/download-artifact@v5
+        with:
+          path: ./lint-results/
+
+      - name: Process Lint Results
+        id: process-results
+        run: |
+          echo "## 📋 README Lint Results" > comment.md
+          echo "" >> comment.md
+          
+          # Function to process lint results
+          process_lint_results() {
+            local title="$1"
+            local file="$2"
+            
+            echo "### $title" >> comment.md
+            echo "\`\`\`" >> comment.md
+            if [ -f "$file" ]; then
+              cat "$file" >> comment.md
+            else
+              echo "❌ No results available" >> comment.md
+            fi
+            echo "\`\`\`" >> comment.md
+            echo "" >> comment.md
+          }
+          
+          # Process both README results
+          process_lint_results "⚡ gh-cli/README.md" "./lint-results/gh-cli-readme-lint-results/gh-cli-readme-lint-results.txt"
+          process_lint_results "🔧 scripts/README.md" "./lint-results/scripts-readme-lint-results/scripts-readme-lint-results.txt"
+          
+          echo "---" >> comment.md
+          echo "*Lint results updated at $(date)*" >> comment.md
+
+      - name: Post Sticky PR Comment
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: readme-lint-results
+          path: comment.md
