@@ -77,6 +77,21 @@ allScripts.forEach(file => {
   }
 });
 
+// Check bash syntax for all .sh files
+allScripts.forEach(file => {
+  if (!file.endsWith('.sh')) {
+    return;
+  }
+
+  const filePath = path.join(directoryPath, file);
+  try {
+    execSync(`bash -n "${filePath}"`, { stdio: 'pipe' });
+  } catch (error) {
+    console.log(`Bash syntax error in ${file}: ${error.stderr.toString().trim()}`);
+    issueCount++;
+  }
+});
+
 // Extract the part of the README under the ## Scripts heading
 const scriptsSection = readme.split(`${parentHeading}\n`)[1];
 
