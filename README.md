@@ -3,6 +3,7 @@
 [![./gh-cli scripts](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/joshjohanning/badges/main/github-misc-scripts/gh-cli-count.json)][gh-cli]
 [![./scripts scripts](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/joshjohanning/badges/main/github-misc-scripts/scripts-count.json)][scripts]
 [![linting workflow](https://img.shields.io/github/actions/workflow/status/joshjohanning/github-misc-scripts/lint-readme.yml?logo=github&label=linting%20workflow&color=brightgreen&labelColor=gray)][ci]
+[![stars](https://img.shields.io/github/stars/joshjohanning/github-misc-scripts?style=flat&logo=github&color=yellow&label=stars%20★)][stars]
 
 Miscellaneous GitHub scripts, `gh` commands, API calls, GraphQL queries, etc. for power user automation.
 
@@ -23,3 +24,4 @@ See the folder categories:
 [gh-cli]: https://github.com/joshjohanning/github-misc-scripts/tree/main/gh-cli
 [scripts]: https://github.com/joshjohanning/github-misc-scripts/tree/main/scripts
 [ci]: https://github.com/joshjohanning/github-misc-scripts/actions/workflows/lint-readme.yml
+[stars]: https://github.com/joshjohanning/github-misc-scripts/stargazers
