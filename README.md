@@ -21,7 +21,7 @@ See the folder categories:
 > [!IMPORTANT]
 > Your script contribution is welcome! ⭐️ Please see the **[CONTRIBUTING.md](CONTRIBUTING.md)** file for more details.
 
-[gh-cli]: https://github.com/joshjohanning/github-misc-scripts/tree/main/gh-cli
-[scripts]: https://github.com/joshjohanning/github-misc-scripts/tree/main/scripts
+[gh-cli]: https://github.com/joshjohanning/github-misc-scripts/tree/main/gh-cli#readme
+[scripts]: https://github.com/joshjohanning/github-misc-scripts/tree/main/scripts#readme
 [ci]: https://github.com/joshjohanning/github-misc-scripts/actions/workflows/lint-readme.yml
 [stars]: https://github.com/joshjohanning/github-misc-scripts/stargazers
