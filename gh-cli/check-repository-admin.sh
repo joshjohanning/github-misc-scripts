@@ -74,10 +74,3 @@ else
     echo "✗ User '$USERNAME' is NOT a collaborator in '$OWNER/$REPOSITORY' or an error occurred"
     exit 1
 fi
-    fi
-    
-else
-    # User is not a collaborator or an error occurred
-    echo "✗ User '$USERNAME' is NOT a collaborator in '$OWNER/$REPOSITORY' or an error occurred"
-    exit 1
-fi
