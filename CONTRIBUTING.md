@@ -13,7 +13,7 @@ Contributing to a project on GitHub is pretty straight forward. If this is your 
 3. If you're adding a new script to the `gh-cli` or `scripts` directory, add it to the appropriate `README.md` file
 4. Likewise, if you're significantly modifying a script, consider double checking that the respective `README.md` is still accurate
 5. [Create a pull request](https://github.com/joshjohanning/github-misc-scripts/compare) back to the **main** branch of this repo
-6. A [linting job](https://github.com/joshjohanning/github-misc-scripts/actions/workflows/lint-readme.yml) will run on your PR to ensure the file has been added to the appropriate `README.md` file correctly
+6. A [linting job](https://github.com/joshjohanning/github-misc-scripts/actions/workflows/lint-readme.yml) will run on your PR to check your changes against the [guidelines below](#linting-and-the-readmemd) (it will post the results with anything to fix as a comment in the PR!)
 7. That's it! Give me some time to review and approve the PR
 
 ### Linting and the README.md
