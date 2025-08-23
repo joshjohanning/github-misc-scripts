@@ -92,10 +92,16 @@ resolve_sha_to_tag() {
         
         # Check if we have tags cached for this action
         if [ ! -f "$action_cache_file" ]; then
-            # Fetch and cache all tags for this action
-            gh api repos/"$action_name"/git/refs/tags --paginate 2>/dev/null | \
-                jq -r '.[] | "\(.object.sha)|\(.ref | sub("refs/tags/"; ""))"' 2>/dev/null > "$action_cache_file" || \
-                touch "$action_cache_file"
+            # Fetch and cache all tags for this action (handles both lightweight and annotated tags)
+            {
+                # Get lightweight tags
+                gh api repos/"$action_name"/git/refs/tags --paginate 2>/dev/null | \
+                    jq -r '.[] | "\(.object.sha)|\(.ref | sub("refs/tags/"; ""))"' 2>/dev/null
+                
+                # Get annotated tags (dereference to commit SHA)
+                gh api repos/"$action_name"/tags --paginate 2>/dev/null | \
+                    jq -r '.[] | "\(.commit.sha)|\(.name)"' 2>/dev/null
+            } | sort -u > "$action_cache_file" || touch "$action_cache_file"
         fi
         
         # Look up the SHA in the cached tags

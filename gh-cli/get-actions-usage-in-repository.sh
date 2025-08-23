@@ -36,14 +36,34 @@ resolve_sha_to_tag() {
     
     # Only process if it looks like a SHA (40 character hex string)
     if [[ ${#sha} -eq 40 && "$sha" =~ ^[a-f0-9]+$ ]]; then
-        # Try to find a tag that points to this commit SHA
+        # Try to find a tag that points to this commit SHA (handles both lightweight and annotated tags)
         local tag_name
         # First try to find a semantic version tag (prefer v1.2.3 over v1)
-        tag_name=$(gh api repos/"$action_name"/git/refs/tags --paginate 2>/dev/null | jq -r --arg sha "$sha" '.[] | select(.object.sha == $sha) | .ref | sub("refs/tags/"; "")' 2>/dev/null | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+        tag_name=$(
+            {
+                # Get lightweight tags
+                gh api repos/"$action_name"/git/refs/tags --paginate 2>/dev/null | \
+                    jq -r --arg sha "$sha" '.[] | select(.object.sha == $sha) | .ref | sub("refs/tags/"; "")' 2>/dev/null
+                
+                # Get annotated tags (dereference to commit SHA)
+                gh api repos/"$action_name"/tags --paginate 2>/dev/null | \
+                    jq -r --arg sha "$sha" '.[] | select(.commit.sha == $sha) | .name' 2>/dev/null
+            } | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+' | head -1
+        )
         
         # If no semantic version found, fall back to any tag
         if [ -z "$tag_name" ]; then
-            tag_name=$(gh api repos/"$action_name"/git/refs/tags --paginate 2>/dev/null | jq -r --arg sha "$sha" '.[] | select(.object.sha == $sha) | .ref | sub("refs/tags/"; "")' 2>/dev/null | head -1)
+            tag_name=$(
+                {
+                    # Get lightweight tags
+                    gh api repos/"$action_name"/git/refs/tags --paginate 2>/dev/null | \
+                        jq -r --arg sha "$sha" '.[] | select(.object.sha == $sha) | .ref | sub("refs/tags/"; "")' 2>/dev/null
+                    
+                    # Get annotated tags (dereference to commit SHA)
+                    gh api repos/"$action_name"/tags --paginate 2>/dev/null | \
+                        jq -r --arg sha "$sha" '.[] | select(.commit.sha == $sha) | .name' 2>/dev/null
+                } | head -1
+            )
         fi
         
         if [ -n "$tag_name" ] && [ "$tag_name" != "null" ]; then
@@ -92,5 +112,8 @@ if [ "$resolve_shas" == "true" ]; then
     # Clean up any trailing newlines
     results=$(echo -e "$temp_results" | sed '/^$/d')
 fi
+
+# Sort results alphabetically
+results=$(echo -e "$results" | sort)
 
 echo -e "$results"
