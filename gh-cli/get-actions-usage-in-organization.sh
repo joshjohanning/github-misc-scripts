@@ -157,6 +157,9 @@ actions=""
 repos_without_dependency_graph=()
 
 for repo in $repos; do
+    # Add a small delay to avoid rate limiting
+    sleep 1
+
     # Try to get SBOM data - if it fails, dependency graph is likely disabled
     sbom_data=$(gh api repos/$repo/dependency-graph/sbom --jq '.sbom.packages[].externalRefs.[0].referenceLocator' 2>&1)
     
