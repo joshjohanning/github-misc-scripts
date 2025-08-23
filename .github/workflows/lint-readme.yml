@@ -70,7 +70,7 @@ jobs:
       - name: Process Lint Results
         id: process-results
         run: |
-          echo "## 📋 README Lint Results" > comment.md
+          echo "## 📋 Lint Results" > comment.md
           echo "" >> comment.md
           
           # Function to process lint results
@@ -90,8 +90,8 @@ jobs:
           }
           
           # Process both README results
-          process_lint_results "⚡ gh-cli/README.md" "./lint-results/gh-cli-readme-lint-results/gh-cli-readme-lint-results.txt"
-          process_lint_results "🔧 scripts/README.md" "./lint-results/scripts-readme-lint-results/scripts-readme-lint-results.txt"
+          process_lint_results "⚡ ./gh-cli scripts" "./lint-results/gh-cli-readme-lint-results/gh-cli-readme-lint-results.txt"
+          process_lint_results "🔧 ./scripts scripts" "./lint-results/scripts-readme-lint-results/scripts-readme-lint-results.txt"
           
           echo "---" >> comment.md
           echo "*Lint results updated at $(date)*" >> comment.md
