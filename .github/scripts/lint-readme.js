@@ -12,6 +12,10 @@ const directoryPath = process.argv[2] || './gh-cli';
 const headingLevel = process.argv[3] || '###';
 const parentHeading = process.argv[4] || '## Scripts';
 
+// Escape RegExp special characters
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 const readmePath = path.join(directoryPath, 'README.md');
 
 // Read README.md content
@@ -96,7 +100,7 @@ allScripts.forEach(file => {
 const scriptsSection = readme.split(`${parentHeading}\n`)[1];
 
 // Extract all ### headings from the scripts section
-const regex = new RegExp(`${headingLevel} .*`, 'g');
+const regex = new RegExp(`${escapeRegExp(headingLevel)} .*`, 'g');
 const headings = scriptsSection.match(regex);
 
 // Check that all scripts mentioned in the README.md actually exist in the repository
