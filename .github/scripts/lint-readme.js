@@ -19,10 +19,20 @@ function escapeRegExp(string) {
 const readmePath = path.join(directoryPath, 'README.md');
 
 // Read README.md content
+if (!fs.existsSync(readmePath)) {
+  console.log(`README.md not found at ${readmePath}`);
+  process.exit(1);
+}
 const readme = fs.readFileSync(readmePath, 'utf8');
 
 // Get all files tracked by Git
-const gitFiles = execSync('git ls-files', { cwd: directoryPath, encoding: 'utf-8' });
+let gitFiles;
+try {
+  gitFiles = execSync('git ls-files', { cwd: directoryPath, encoding: 'utf-8' });
+} catch (error) {
+  console.log(`Error running git ls-files in ${directoryPath}: ${error.message}`);
+  process.exit(1);
+}
 
 // Split the output into an array of file paths
 const files = gitFiles.split('\n');
@@ -49,19 +59,23 @@ const allScripts = filteredFiles.concat(subdirectories);
 // Initialize a counter for the number of issues
 let issueCount = 0;
 
+// Helper function to log numbered issues
+function logIssue(message) {
+  issueCount++;
+  console.log(`${issueCount}. ${message}`);
+}
+
 // Check if each .sh file is mentioned in the README.md
 allScripts.forEach(file => {
   if (!readme.includes(`${headingLevel} ${file}`)) {
-    console.log(`The file ${file} is not mentioned in the README.md`);
-    issueCount++;
+    logIssue(`📝 The file ${file} is not mentioned in the README.md`);
   }
 });
 
 // Check that all files follow the kebab-case naming convention
 allScripts.forEach(file => {
   if (!/^([a-z0-9]+-)*[a-z0-9]+(\.[a-z0-9]+)*$/.test(file)) {
-    console.log(`The file ${file} does not follow the kebab-case naming convention`);
-    issueCount++;
+    logIssue(`🔤 The file ${file} does not follow the kebab-case naming convention`);
   }
 });
 
@@ -76,8 +90,7 @@ allScripts.forEach(file => {
   const isExecutable = (stats.mode & fs.constants.X_OK) !== 0;
 
   if (!isExecutable) {
-    console.log(`The file ${file} does not have execution permissions`);
-    issueCount++;
+    logIssue(`🔒 The file ${file} does not have execution permissions`);
   }
 });
 
@@ -91,24 +104,33 @@ allScripts.forEach(file => {
   try {
     execSync(`bash -n "${filePath}"`, { stdio: 'pipe' });
   } catch (error) {
-    console.log(`Bash syntax error in ${file}: ${error.stderr.toString().trim()}`);
-    issueCount++;
+    logIssue(`🐛 The file ${file} has a bash syntax error`);
+    const errorLines = error.stderr.toString().trim().split('\n');
+    errorLines.forEach(line => console.log(`        ${line}`));
   }
 });
 
 // Extract the part of the README under the ## Scripts heading
 const scriptsSection = readme.split(`${parentHeading}\n`)[1];
+if (!scriptsSection) {
+  console.log(`Section "${parentHeading}" not found in README.md`);
+  process.exit(1);
+}
 
 // Extract all ### headings from the scripts section
 const regex = new RegExp(`${escapeRegExp(headingLevel)} .*`, 'g');
 const headings = scriptsSection.match(regex);
 
+if (!headings || headings.length === 0) {
+  console.log(`No headings found with level "${headingLevel}" in the scripts section`);
+  process.exit(1);
+}
+
 // Check that all scripts mentioned in the README.md actually exist in the repository
 headings.forEach(heading => {
   const script = heading.slice(headingLevel.length + 1); // Remove the '### ' prefix
   if (!allScripts.includes(script)) {
-    console.log(`The script ${script} is mentioned in the README.md but does not exist in the repository`);
-    issueCount++;
+    logIssue(`📁 The script ${script} is mentioned in the README.md but does not exist in the repository`);
   }
 });
 
@@ -124,8 +146,7 @@ allScripts.forEach(file => {
   Object.keys(shortWords).forEach(word => {
     const regex = new RegExp(`\\b${word}\\b`, 'g');
     if (regex.test(file)) {
-      console.log(`The file name "${file}" uses the short word "${word}". Consider using "${shortWords[word]}" instead.`);
-      issueCount++;
+      logIssue(`📏 The file name "${file}" uses the short word "${word}". Consider using "${shortWords[word]}" instead.`);
     }
   });
 });
@@ -136,16 +157,16 @@ for (let i = 0; i < headings.length - 1; i++) {
   const next = headings[i + 1].toLowerCase();
 
   if (next.startsWith(current + '-') || (current > next && !current.startsWith(next + '-'))) {
-    console.log(`The heading "${headings[i + 1]}" is out of order. It should come before "${headings[i]}".`);
-    issueCount++;
+    logIssue(`📋 The heading "${headings[i + 1]}" is out of order. It should come before "${headings[i]}".`);
     break;
   }
 }
 
-// If there are no issues, print a message
+// Output final summary
 if (issueCount === 0) {
-  console.log('No issues found. ✅');
+  console.log('✅ No issues found.');
 } else {
-  console.log(`Found ${issueCount} issue(s). ❌`);
+  console.log('');
+  console.log(`❌ Found ${issueCount} issue${issueCount === 1 ? '' : 's'} that need to be addressed.`);
   process.exit(1);
 }
