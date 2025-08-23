@@ -4,11 +4,14 @@ Miscellaneous GitHub scripts, `gh` commands, API calls, GraphQL queries, etc. fo
 
 See the folder categories:
 
-- [api](/api/README.md)
-- [gh-cli](/gh-cli/README.md) 🚀 ✨ ⬅️ *most updated!*
-- [git](/git/README.md)
-- [graphql](/graphql/README.md)
-- [scripts](/scripts/README.md)
+- [api](/api/README.md) *direct API calls using `curl`*
+- **[gh-cli](/gh-cli/README.md)** 🚀 ✨ ⬅️ *most updated and comprehensive scripts using `gh`, `gh api`, and `gh api graphql`!*
+- [git](/git/README.md) *Git-related scripts/commands*
+- [graphql](/graphql/README.md) *GraphQL queries using `curl`*
+- [scripts](/scripts/README.md) *standalone scripts and specialized tools*
 
 > [!TIP]
-> The **[gh-cli](/gh-cli/README.md)** folder is the most maintained; I've started adding both API and GraphQL queries in there using `gh api` commands.
+> The **[gh-cli](/gh-cli/README.md)** folder is the most maintained; I've started adding both API and GraphQL queries in there using `gh api` and `gh api graphql` commands.
+
+> [!IMPORTANT]
+> Your script contribution is welcome! ⭐️ Please see the **[CONTRIBUTING.md](CONTRIBUTING.md)** file for more details.
