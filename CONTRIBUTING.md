@@ -28,6 +28,7 @@ This means:
 4. That the file is named correctly (kebab casing)
 5. That `.sh` files have executable permissions (i.e.: `chmod +x ./my-file.sh`)
 6. That you aren't using the shorthand `repo`, `repos`, `org`, or `orgs` in the filenames; spell out the full word (i.e.: `repository`, `repositories`, `organization`, and `organizations`)
+7. There are no syntax errors in `.sh` files
 
 ### Documentation
 
