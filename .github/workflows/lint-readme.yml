@@ -12,6 +12,8 @@ jobs:
   lint-gh-cli-readme:
     name: Lint ./gh-cli/README.md
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
@@ -23,6 +25,8 @@ jobs:
   lint-scripts-readme:
     name: Lint ./scripts/README.md
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
