@@ -4,6 +4,9 @@
 # This script works with GitHub Projects V2 (the newer project boards)
 # Usage: ./get-project-board-items.sh <org> <project-number>
 
+# This will get all issues and pull requests linked to the project board,
+# it will bring in any comments but only the first 100 comments as currently constructed
+
 if [ $# -ne 2 ]; then
     echo "Usage: $0 <org> <project-number>"
     echo "Example: ./get-project-board-items.sh my-org 123"
@@ -47,6 +50,16 @@ response=$(gh api graphql --paginate -f org="$org" -F projectNumber="$project_nu
                     name
                   }
                 }
+                comments(first: 100) {
+                  nodes {
+                    body
+                    author {
+                      login
+                    }
+                    createdAt
+                    updatedAt
+                  }
+                }
               }
               ... on PullRequest {
                 title
@@ -59,13 +72,23 @@ response=$(gh api graphql --paginate -f org="$org" -F projectNumber="$project_nu
                     login
                   }
                 }
+                comments(first: 100) {
+                  nodes {
+                    body
+                    author {
+                      login
+                    }
+                    createdAt
+                    updatedAt
+                  }
+                }
               }
               ... on DraftIssue {
                 title
                 body
               }
             }
-            fieldValues(first: 20) {
+            fieldValues(first: 100) {
               nodes {
                 ... on ProjectV2ItemFieldTextValue {
                   text
@@ -237,7 +260,7 @@ echo "$items" | while IFS= read -r item; do
     
     # Show labels for issues
     if [ "$content_type" = "Issue" ]; then
-        labels=$(echo "$item" | jq -r '.content.labels.nodes[]?.name // empty' | tr '\n' ' ')
+        labels=$(echo "$item" | jq -r '.content.labels.nodes[]?.name // empty' | tr '\n' ' ' | sed 's/[[:space:]]*$//')
         if [ -n "$labels" ]; then
             echo ""
             echo "🏷️  Labels: $labels"
@@ -270,6 +293,38 @@ echo "$items" | while IFS= read -r item; do
                 echo "   • $field_name: $value"
             fi
         done
+    fi
+    
+    # Show comments for issues and pull requests
+    if [ "$content_type" = "Issue" ] || [ "$content_type" = "PullRequest" ]; then
+        comments=$(echo "$item" | jq -c '.content.comments.nodes[]? // empty')
+        if [ -n "$comments" ]; then
+            comment_count=$(echo "$comments" | wc -l | tr -d ' ')
+            echo ""
+            echo "💬 Comments ($comment_count):"
+            echo "$comments" | while IFS= read -r comment; do
+                if [ -n "$comment" ]; then
+                    author=$(echo "$comment" | jq -r '.author.login // "Unknown"')
+                    created_at=$(echo "$comment" | jq -r '.createdAt // ""')
+                    comment_body=$(echo "$comment" | jq -r '.body // ""')
+                    
+                    # Format the date
+                    if [ -n "$created_at" ] && [ "$created_at" != "null" ]; then
+                        created_date=$(date -j -f "%Y-%m-%dT%H:%M:%SZ" "$created_at" "+%Y-%m-%d %H:%M" 2>/dev/null || echo "$created_at")
+                    else
+                        created_date="Unknown date"
+                    fi
+                    
+                    echo "   ┌─ 👤 $author • $created_date"
+                    if [ -n "$comment_body" ] && [ "$comment_body" != "null" ]; then
+                        echo "$comment_body" | sed 's/[[:space:]]*$//' | sed 's/^/   │ /'
+                    else
+                        echo "   │ (no content)"
+                    fi
+                    echo "   └────────────────────────────────────────"
+                fi
+            done
+        fi
     fi
     
     echo ""
