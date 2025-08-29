@@ -13,7 +13,7 @@ usage() {
     echo ""
     echo "Notes:"
     echo "  - Migration ID is the GraphQL node ID (not the REST API migration ID)"
-    echo "  - Requires using a classic Personal Access Token (ghp_*) with appropriate scopes"
+    echo "  - Requires using a classic Personal Access Token (ghp_*) with appropriate scopes (set a class token with \`export GH_TOKEN=ghp_your_token\`)"
     exit 1
 }
 
@@ -55,7 +55,7 @@ if [ $? -ne 0 ]; then
     echo -e "${RED}❌ Failed to fetch migration information${NC}"
     echo "This could be due to:"
     echo "  - Invalid migration ID"
-    echo "  - Insufficient permissions (set a class token with \`export GH_TOKEN=ghp_your_token\`)"
+    echo "  - Insufficient permissions - make sure to set a class token with \`export GH_TOKEN=ghp_your_token\`"
     exit 1
 fi
 
@@ -101,6 +101,3 @@ esac
 if [ "$failure_reason" != "N/A" ] && [ "$failure_reason" != "null" ]; then
     echo -e "${BLUE}❌ Failure Reason:${NC} ${RED}$failure_reason${NC}"
 fi
-
-echo ""
-echo "✅ Migration information retrieved successfully"
