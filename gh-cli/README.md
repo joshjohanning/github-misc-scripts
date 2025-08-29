@@ -843,6 +843,36 @@ Gets the issue type of an issue. See: [Community Discussions Post](https://githu
 
 Gets the usage of a label in a repository. Returns data in table format.
 
+### get-migration-status.sh
+
+Gets migration information using GraphQL API for a given migration ID.
+
+Usage:
+
+```shell
+./get-migration-info.sh RM_kgDaACQzNWUwMWIxNS0yZmRjLTRjYWQtOTUwNy00YTgwNGNhZThiMTk
+```
+
+Output:
+
+```text
+🔍 Fetching migration information for ID: RM_kgDaACQzNWUwMWIxNS0yZmRjLTRjYWQtOTUwNy00YTgwNGNhZThiMTk
+
+📊 Migration Information
+=======================
+
+🆔 Migration ID: RM_kgDaACQzNWUwMWIxNS0yZmRjLTRjYWQtOTUwNy00YTgwNGNhZThiMTk
+🌐 Source URL: https://github.com/joshjohanning-org/export-actions-usage-report
+📍 Migration Source: GHEC Source
+📊 State: SUCCEEDED
+❌ Failure Reason: 
+
+✅ Migration information retrieved successfully
+```
+
+> [!NOTE]
+> Migration ID is the GraphQL node ID (not the REST API migration ID). Requires using a classic Personal Access Token (ghp_*) with appropriate scopes set as the `GITHUB_TOKEN` environment variable.
+
 ### get-most-recent-migration-id-for-organization.sh
 
 Returns the most recent migration ID for a given organization.
