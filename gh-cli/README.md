@@ -597,6 +597,21 @@ Generates a list of users from a team in the organization - has many uses, but t
 
 Gets the status of Actions on a repository (ie, if Actions are disabled)
 
+### get-actions-repository-variables-in-organization.sh
+
+Exports repository variables and their values from all repositories in an organization to a CSV file.
+
+Usage:
+
+```shell
+./get-actions-repository-variables-in-organization.sh my-org
+./get-actions-repository-variables-in-organization.sh my-org repo-variables.csv
+./get-actions-repository-variables-in-organization.sh my-org output.csv --repos-file=repos.txt # optionally specify an input file instead
+```
+
+> [!NOTE]
+> Requires `write` access to repositories to retrieve variables
+
 ### get-actions-usage-in-organization.sh
 
 Returns a list of all actions used in an organization using the SBOM API
