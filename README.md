@@ -2,8 +2,8 @@
 
 [![./gh-cli scripts](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/joshjohanning/badges/main/github-misc-scripts/gh-cli-count.json)][gh-cli]
 [![./scripts scripts](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/joshjohanning/badges/main/github-misc-scripts/scripts-count.json)][scripts]
-[![linting workflow](https://img.shields.io/github/actions/workflow/status/joshjohanning/github-misc-scripts/lint-readme.yml?logo=github&label=linting%20workflow&color=brightgreen&labelColor=gray)][ci]
-[![stars](https://img.shields.io/github/stars/joshjohanning/github-misc-scripts?style=flat&logo=github&color=yellow&label=stars%20★)][stars]
+[![linting workflow](https://img.shields.io/github/actions/workflow/status/joshjohanning/github-misc-scripts/lint-readme.yml?logo=github&label=linting%20workflow&color=28a745&labelColor=333)][ci]
+[![stars](https://img.shields.io/github/stars/joshjohanning/github-misc-scripts?style=flat&logo=github&color=yellow&label=stars%20★&labelColor=333)][stars]
 
 Miscellaneous GitHub scripts, `gh` commands, API calls, GraphQL queries, etc. for power user automation.
 
