@@ -9,6 +9,8 @@ When creating or modifying scripts in the `gh-cli` directory, ensure:
 - We make sure to paginate (`--paginate`) when retrieving results
 - Note any special permissions/token requirements
 - If modifying input parameters to a script, make sure to update the respective `README.md` in the script directory (if applicable)
+- Use only `2` spaces for indentation - not `4`
+- Do not leave any trailing whitespace at the end of lines
 
 ## README.md documentation
 
