@@ -28,10 +28,40 @@ const { Octokit } = require("octokit");
 
 // Parse command line arguments
 const args = process.argv.slice(2);
+
+// Check for help flag
+if (args.includes('--help') || args.includes('-h')) {
+  console.log('Copy Discussions between GitHub repositories');
+  console.log('');
+  console.log('Usage:');
+  console.log('  node copy-discussions.js <source_org> <source_repo> <target_org> <target_repo>');
+  console.log('');
+  console.log('Arguments:');
+  console.log('  source_org    Source organization name');
+  console.log('  source_repo   Source repository name');
+  console.log('  target_org    Target organization name');
+  console.log('  target_repo   Target repository name');
+  console.log('');
+  console.log('Environment Variables:');
+  console.log('  SOURCE_TOKEN  GitHub token with read access to source repository discussions');
+  console.log('  TARGET_TOKEN  GitHub token with write access to target repository discussions');
+  console.log('');
+  console.log('Example:');
+  console.log('  node copy-discussions.js source-org repo1 target-org repo2');
+  console.log('');
+  console.log('Note:');
+  console.log('  - Both tokens must have the "repo" scope');
+  console.log('  - This script copies discussion content, comments, replies, polls, reactions,');
+  console.log('    locked status, and pinned status');
+  console.log('  - Attachments (images and files) will not copy over and require manual handling');
+  process.exit(0);
+}
+
 if (args.length !== 4) {
   console.error("Usage: node copy-discussions.js <source_org> <source_repo> <target_org> <target_repo>");
   console.error("\nExample:");
   console.error("  node copy-discussions.js source-org repo1 target-org repo2");
+  console.error("\nFor more information, use --help");
   process.exit(1);
 }
 
