@@ -36,6 +36,44 @@ Configuration values to change in the script:
 
 Migrate work items from Azure DevOps to GitHub issues - this just links out to a [separate repo](https://github.com/joshjohanning/ado_workitems_to_github_issues)
 
+## copy-discussions.js
+
+Copy GitHub Discussions between repositories, including categories, labels, comments, and replies. This script can copy discussions across different GitHub instances and enterprises.
+
+The script is expecting:
+
+- environment variables `SOURCE_TOKEN` and `TARGET_TOKEN` with GitHub PATs that have `repo` and `read:discussion` scopes
+- dependencies installed via `npm i octokit`
+
+Script usage:
+
+```bash
+export SOURCE_TOKEN=ghp_abc
+export TARGET_TOKEN=ghp_xyz
+npm i octokit
+node ./copy-discussions.js source-org source-repo target-org target-repo
+```
+
+Features:
+
+- Automatically creates missing discussion categories in the target repository
+- Creates labels in the target repository if they don't exist
+- Copies all comments and threaded replies with proper attribution
+- Copies poll results as static snapshots (with table and optional Mermaid chart)
+- Handles rate limiting with exponential backoff
+- Provides colored console output for better visibility
+
+Configuration:
+
+- Set `INCLUDE_POLL_MERMAID_CHART = false` at the top of the script to disable Mermaid pie charts for polls
+
+Notes:
+
+- If a category doesn't exist in the target repository, discussions will be created in the "General" category
+- The script preserves discussion metadata by adding attribution text to the body and comments
+- Poll results are copied as static snapshots - voting is not available in copied discussions
+- Both source and target repositories must have GitHub Discussions enabled
+
 ## delete-branch-protection-rules.ps1
 
 Delete branch protection rules programmatically based on a pattern.
