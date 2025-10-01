@@ -9,24 +9,24 @@ This directory contains scripts for interacting with the GitHub API / GraphQL us
 #### macOS
 
 ```shell
-$ brew install gh # install gh cli on mac with brew
-$ brew upgrade gh # upgrade
+brew install gh # install gh cli on mac with brew
+brew upgrade gh # upgrade
 ```
 
 #### Windows
 
 ```shell
-$ choco install gh # install gh cli on windows with chocolatey
-$ choco upgrade gh # upgrade
+choco install gh # install gh cli on windows with chocolatey
+choco upgrade gh # upgrade
 ```
 
-MSI installer is available [here](https://github.com/cli/cli/releases/latest)
+[MSI installer](https://github.com/cli/cli/releases/latest) is available
 
 #### Linux/other
 
-Other operating systems and install methods can be found [here](https://github.com/cli/cli#installation)
+Other operating systems and install methods [are available](https://github.com/cli/cli#installation)
 
-### Authentication 
+### Authentication
 
 #### Authenticate in the CLI
 
@@ -51,6 +51,13 @@ $ export GH_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
 # authenticate to a GitHub Enterprise Server instance
 $ gh auth login -h github.mycompany.com # -h github.com is the default
+
+# authenticate to a GitHub Enterprise Data Residency instance
+$ gh auth login -h tenant.ghe.com
+
+# authenticate with an environment variable for the hostname
+$ export GH_HOST=github.mycompany.com #
+$ export GH_HOST=tenant.ghe.com
 ```
 
 #### Authenticate in GitHub Actions
@@ -370,9 +377,10 @@ It copies all [environments](https://docs.github.com/en/actions/deployment/targe
 
 > [!NOTE]
 > The following settings are **not** copied:
->  - [Environment Variables](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#environment-variables)
->  - [Custom Deployment Protection Rules](https://docs.github.com/en/actions/deployment/protecting-deployments/configuring-custom-deployment-protection-rules#using-existing-custom-deployment-protection-rules)
->  - Secrets
+>
+> - [Environment Variables](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#environment-variables)
+> - [Custom Deployment Protection Rules](https://docs.github.com/en/actions/deployment/protecting-deployments/configuring-custom-deployment-protection-rules#using-existing-custom-deployment-protection-rules)
+> - Secrets
 
 ### copy-repository-variables.sh
 
@@ -597,7 +605,7 @@ Generates release notes between two tags. See the [release notes docs](https://d
 
 Generates a list of repos in the organization - has many uses, but the exported repos can be used in the `delete-repositories-from-list.sh` script.
 
-Credits to @tspascoal from this repo: https://github.com/tspascoal/dependabot-alerts-helper
+*Credits to [@tspascoal](https://github.com/tspascoal) from this [repo](https://github.com/tspascoal/dependabot-alerts-helper)*
 
 1. Run: `./generate-repositories.sh <org> > repos.csv`
 
@@ -684,10 +692,10 @@ Count,Action
 
 > [!TIP]
 > If outputting to `txt` or `md`, you'll see a warning message for each repository that returned an error (because Dependency Graph is disabled). You will also see an informational message providing context around what the count is returning. `csv` returns clean data.
-
+<!-- -->
 > [!NOTE]
 > The count returned is the # of repositories that use the `action@version` combination - if a single repository uses the `action@version` combination 2x times, it will only be counted 1x (unless using `count-by-action` in combination with `--dedupe-by-repo`, which counts unique repositories per action). Conversely, if different `action@version` combinations are being used, they will be counted separately (for example, if the same action appears twice in a repository but one uses `@v2` and one uses `@v3`, by default they will be counted separately unless using `count-by-action` in combination with `--dedupe-by-repo`).
-
+<!-- -->
 > [!NOTE]
 > Using `--resolve-shas` will add additional API calls, but we attempt to cache tag lookups to improve performance. The cache is stored in temporary files and automatically cleaned up when the script exits.
 
@@ -735,9 +743,10 @@ Gets all users who have created an issue, pull request, issue comment, or pull r
 Generates a JWT for a GitHub app and use that JWT to generate installation tokens for each org installation. The installation tokens, returned as `ghs_abc`, can then be used for normal API calls. It requires the App ID and Private Key `pem` file as input.
 
 > [!NOTE]
+>
 > - Not using `gh-cli` since we have to pass in JWT using `curl` (but otherwise no PAT required)
 > - Similar script to [get-apps-installed-in-organization.sh](./../scripts/get-app-tokens-for-each-installation.sh), but this one doesn't have a python dependency
-> - Thanks [@kenmuse](https://github.com/kenmuse) for the [starter](https://gist.github.com/kenmuse/9429221d6944c087deaed2ec5075d0bf)! 
+> - Thanks [@kenmuse](https://github.com/kenmuse) for the [starter](https://gist.github.com/kenmuse/9429221d6944c087deaed2ec5075d0bf)!
 
 ### get-apps-installed-in-organization.sh
 
@@ -775,7 +784,7 @@ Gets the commits of since a certain date - date should be in [ISO 8601](https://
 
 Gets dependencies used in the repository, including the ecosystem and version number.
 
-Example output: 
+Example output:
 
 ```csv
 npm/source-list-map@2.0.1
@@ -809,8 +818,8 @@ Get the enterprise ID used for other GraphQL calls. Use the URL slug of the Ente
 
 Adding `-H X-Github-Next-Global-ID:1` per the documentation here to get the new ID format:
 
-- https://github.blog/changelog/2022-11-10-graphql-legacy-global-id-deprecation-message/
-- https://docs.github.com/en/graphql/guides/migrating-graphql-global-node-ids
+- [GraphQL Legacy Global ID Deprecation (November 10, 2022)](https://github.blog/changelog/2022-11-10-graphql-legacy-global-id-deprecation-message/)
+- [Migrating GraphQL Global Node IDs - GitHub Docs](https://docs.github.com/en/graphql/guides/migrating-graphql-global-node-ids)
 
 ### get-enterprise-ip-allow-list.sh
 
@@ -928,8 +937,8 @@ Get the organization ID used for other GraphQL calls. Use the login of the Organ
 
 Adding `-H X-Github-Next-Global-ID:1` per the documentation here to get the new ID format:
 
-- https://github.blog/changelog/2022-11-10-graphql-legacy-global-id-deprecation-message/
-- https://docs.github.com/en/graphql/guides/migrating-graphql-global-node-ids
+- [GraphQL Legacy Global ID Deprecation (November 10, 2022)](https://github.blog/changelog/2022-11-10-graphql-legacy-global-id-deprecation-message/)
+- [Migrating GraphQL Global Node IDs - GitHub Docs](https://docs.github.com/en/graphql/guides/migrating-graphql-global-node-ids)
 
 ### get-organization-ip-allow-list.sh
 

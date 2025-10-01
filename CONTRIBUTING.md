@@ -33,3 +33,6 @@ This means:
 ### Documentation
 
 I strive to maintain well-commented code. If a code segment is complex or not immediately clear, it should be accompanied by comments for clarity. When introducing new code or modifying existing code in a way that changes its function or usage, ensure it is properly documented both in the script and the respective `README.md` file.
+
+> [!TIP]
+> Consider using the [markdownlint extension](https://marketplace.visualstudio.com/items?itemName=DavidAnson.vscode-markdownlint) for VS Code to help catch markdown formatting issues before submitting your PR.
