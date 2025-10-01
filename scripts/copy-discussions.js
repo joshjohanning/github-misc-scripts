@@ -23,7 +23,6 @@
 //
 // TODO: Polls don't copy options
 // TODO: Mark as answers
-// TODO: Copy closed discussions and mark as closed in target
 
 const { Octokit } = require("octokit");
 
@@ -282,6 +281,20 @@ const ADD_DISCUSSION_COMMENT_REPLY_MUTATION = `
         id
         body
         createdAt
+      }
+    }
+  }
+`;
+
+const CLOSE_DISCUSSION_MUTATION = `
+  mutation($discussionId: ID!, $reason: DiscussionCloseReason) {
+    closeDiscussion(input: {
+      discussionId: $discussionId,
+      reason: $reason
+    }) {
+      discussion {
+        id
+        closed
       }
     }
   }
@@ -549,6 +562,25 @@ async function addDiscussionCommentReply(octokit, discussionId, replyToId, body,
   }
 }
 
+async function closeDiscussion(octokit, discussionId) {
+  log("Closing discussion...");
+  
+  await rateLimitSleep(2);
+  
+  try {
+    await octokit.graphql(CLOSE_DISCUSSION_MUTATION, {
+      discussionId,
+      reason: "RESOLVED"
+    });
+    
+    log("✓ Discussion closed");
+    return true;
+  } catch (err) {
+    error(`Failed to close discussion: ${err.message}`);
+    return false;
+  }
+}
+
 async function copyDiscussionComments(octokit, discussionId, comments) {
   if (!comments || comments.length === 0) {
     log("No comments to copy for this discussion");
@@ -689,6 +721,12 @@ async function processDiscussionsPage(sourceOctokit, targetOctokit, owner, repo,
         log("Processing comments for discussion...");
         const comments = await fetchDiscussionComments(sourceOctokit, discussion.id);
         await copyDiscussionComments(targetOctokit, newDiscussion.id, comments);
+        
+        // Close discussion if it was closed in source
+        if (discussion.closed) {
+          log("Source discussion is closed, closing target discussion...");
+          await closeDiscussion(targetOctokit, newDiscussion.id);
+        }
         
         log(`✅ Finished processing discussion #${discussion.number}: '${discussion.title}'`);
         
