@@ -276,26 +276,6 @@ Usage:
 ./check-repository-admin.sh <OWNER> <REPOSITORY> <USERNAME>
 ```
 
-### copy-discussions.sh
-
-Copies discussions from one repository to another repository using GraphQL API. Supports cross-enterprise copying with different authentication tokens.
-
-Usage:
-
-```shell
-./copy-discussions.sh <source_org> <source_repo> <target_org> <target_repo>
-```
-
-Prerequisites:
-
-- `SOURCE_TOKEN` environment variable with read access to source repository discussions
-- `TARGET_TOKEN` environment variable with write access to target repository discussions  
-- Both tokens must have the `public_repo` or `repo` scope
-- GitHub CLI (gh) must be installed
-
-> [!NOTE]
-> This script copies discussion content, comments, replies, and basic metadata. Reactions are not copied. The script will attempt to match discussion categories by name or slug between repositories. Attachments (images and files) will not copy over and require manual handling.
-
 ### copy-organization-members.sh
 
 Copy organization members from one organization to the other, the member will **retain** the source role (owner or member), member cannot be demoted, if they already exist at the target with an owner role they cannot be demoted to member.
