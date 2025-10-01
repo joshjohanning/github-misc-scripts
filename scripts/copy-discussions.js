@@ -637,7 +637,7 @@ async function createDiscussion(octokit, repositoryId, categoryId, title, body, 
   }
   
   // Add metadata
-  enhancedBody += `\n\n---\n<details>\n<summary><i>Original discussion metadata</i></summary>\n\n_Original discussion by @${sourceAuthor} on ${sourceCreated}_\n_Source: ${sourceUrl}_\n${locked ? '\n_🔒 This discussion was locked in the source repository_' : ''}\n</details>`;
+  enhancedBody += `\n---\n<details>\n<summary><i>Original discussion metadata</i></summary>\n\n_Original discussion by @${sourceAuthor} on ${sourceCreated}_\n_Source: ${sourceUrl}_\n${locked ? '\n_🔒 This discussion was locked in the source repository_' : ''}\n</details>`;
   
   log(`Creating discussion: '${title}'`);
   
@@ -706,7 +706,7 @@ async function addDiscussionComment(octokit, discussionId, body, originalAuthor,
     enhancedBody += reactionsMarkdown;
   }
   
-  enhancedBody += `\n\n---\n<details>\n<summary><i>Original comment metadata</i></summary>\n\n_Original comment by @${originalAuthor} on ${originalCreated}_\n</details>`;
+  enhancedBody += `\n---\n<details>\n<summary><i>Original comment metadata</i></summary>\n\n_Original comment by @${originalAuthor} on ${originalCreated}_\n</details>`;
   
   log("Adding comment to discussion");
   
@@ -736,7 +736,7 @@ async function addDiscussionCommentReply(octokit, discussionId, replyToId, body,
     enhancedBody += reactionsMarkdown;
   }
   
-  enhancedBody += `\n\n---\n_Original reply by @${originalAuthor} on ${originalCreated}_`;
+  enhancedBody += `\n---\n_Original reply by @${originalAuthor} on ${originalCreated}_`;
   
   log(`Adding reply to comment ${replyToId}`);
   
@@ -883,6 +883,10 @@ async function processDiscussionsPage(sourceOctokit, targetOctokit, owner, repo,
     
     const discussions = response.repository.discussions.nodes;
     const pageInfo = response.repository.discussions.pageInfo;
+    const pinnedDiscussions = response.repository.pinnedDiscussions.nodes || [];
+    
+    // Create a set of pinned discussion IDs for quick lookup
+    const pinnedDiscussionIds = new Set(pinnedDiscussions.map(p => p.discussion.id));
     
     log(`Found ${discussions.length} discussions to process on this page`);
     
@@ -904,6 +908,9 @@ async function processDiscussionsPage(sourceOctokit, targetOctokit, owner, repo,
         continue;
       }
       
+      // Check if discussion is pinned
+      const isPinned = pinnedDiscussionIds.has(discussion.id);
+      
       // Create discussion
       try {
         const newDiscussion = await createDiscussion(
@@ -917,7 +924,7 @@ async function processDiscussionsPage(sourceOctokit, targetOctokit, owner, repo,
           discussion.createdAt,
           discussion.poll || null,
           discussion.locked || false,
-          discussion.isPinned || false,
+          isPinned,
           discussion.reactionGroups || []
         );
         
@@ -931,7 +938,7 @@ async function processDiscussionsPage(sourceOctokit, targetOctokit, owner, repo,
         if (discussion.locked) {
           log(`  🔒 Discussion was locked in source and has been locked in target`);
         }
-        if (discussion.isPinned) {
+        if (isPinned) {
           log(`  📌 Discussion was pinned in source (indicator added to body)`);
         }
         const totalReactions = discussion.reactionGroups?.reduce((sum, group) => sum + (group.users.totalCount || 0), 0) || 0;
