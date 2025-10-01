@@ -10,6 +10,7 @@
 if [ $# -ne 2 ]; then
     echo "Usage: $0 <org> <project-number>"
     echo "Example: ./get-project-board-items.sh my-org 123"
+    echo "Example: ./get-project-board-items.sh my-org 123" > results.txt
     echo ""
     echo "Note: This script works with Projects V2 (the newer project boards)"
     echo "To find project number, check the URL: github.com/orgs/ORG/projects/NUMBER"
@@ -145,7 +146,26 @@ response=$(gh api graphql --paginate -f org="$org" -F projectNumber="$project_nu
 
 # Check for errors
 if [ $? -ne 0 ]; then
-    if echo "$response" | grep -q "Could not resolve to a ProjectV2"; then
+    if echo "$response" | grep -q "INSUFFICIENT_SCOPES"; then
+        echo "❌ Error: Your GitHub token doesn't have the required permissions"
+        echo ""
+        echo "🔐 Required scope: 'read:project'"
+        echo ""
+        echo "Your token currently has these scopes:"
+        # Extract current scopes from the error message
+        current_scopes=$(echo "$response" | grep -o "but your token has only been granted the: \[.*\]" | sed "s/.*\[\(.*\)\].*/\1/" | tr ',' '\n' | sed "s/['\", ]//g" | grep -v "^$" | sort | uniq)
+        if [ -n "$current_scopes" ]; then
+            echo "$current_scopes" | sed 's/^/  • /'
+        else
+            echo "  • (Unable to determine current scopes)"
+        fi
+        echo ""
+        echo "📝 To fix this issue, run:"
+        echo "  gh auth refresh -h github.com -s read:project"
+        echo ""
+        echo "ℹ️ If using a PAT, go update the permissions to include the 'read:project' scope."
+        exit 1
+    elif echo "$response" | grep -q "Could not resolve to a ProjectV2"; then
         echo "❌ Error: Project #$project_number not found in organization '$org'"
         echo "Make sure:"
         echo "- The project number is correct"
