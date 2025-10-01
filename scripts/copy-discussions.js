@@ -27,6 +27,7 @@
 
 // Configuration
 const INCLUDE_POLL_MERMAID_CHART = true; // Set to false to disable Mermaid pie chart for polls
+const RATE_LIMIT_SLEEP_SECONDS = 2; // Default sleep duration between API calls to avoid rate limiting
 
 const { Octokit } = require("octokit");
 
@@ -136,7 +137,7 @@ async function sleep(seconds) {
   return new Promise(resolve => setTimeout(resolve, seconds * 1000));
 }
 
-async function rateLimitSleep(seconds = 2) {
+async function rateLimitSleep(seconds = RATE_LIMIT_SLEEP_SECONDS) {
   log(`Waiting ${seconds}s to avoid rate limiting...`);
   await sleep(seconds);
 }
@@ -493,7 +494,7 @@ const MARK_DISCUSSION_COMMENT_AS_ANSWER_MUTATION = `
 async function checkDiscussionsEnabled(octokit, owner, repo) {
   log(`Checking if discussions are enabled in ${owner}/${repo}...`);
   
-  await rateLimitSleep(2);
+  await rateLimitSleep();
   
   try {
     const response = await octokit.graphql(CHECK_DISCUSSIONS_ENABLED_QUERY, {
@@ -517,7 +518,7 @@ async function checkDiscussionsEnabled(octokit, owner, repo) {
 async function fetchCategories(octokit, owner, repo) {
   log(`Fetching categories from ${owner}/${repo}...`);
   
-  await rateLimitSleep(2);
+  await rateLimitSleep();
   
   try {
     const response = await octokit.graphql(FETCH_CATEGORIES_QUERY, {
@@ -538,7 +539,7 @@ async function fetchCategories(octokit, owner, repo) {
 async function fetchLabels(octokit, owner, repo) {
   log(`Fetching labels from ${owner}/${repo}...`);
   
-  await rateLimitSleep(2);
+  await rateLimitSleep();
   
   try {
     const response = await octokit.graphql(FETCH_LABELS_QUERY, {
@@ -606,7 +607,7 @@ function findLabelId(labels, labelName) {
 async function createLabel(octokit, repositoryId, name, color, description, targetLabels) {
   log(`Creating new label: '${name}'`);
   
-  await rateLimitSleep(2);
+  await rateLimitSleep();
   
   try {
     const response = await octokit.graphql(CREATE_LABEL_MUTATION, {
@@ -651,7 +652,7 @@ async function addLabelsToDiscussion(octokit, discussionId, labelIds) {
   
   log(`Adding ${labelIds.length} labels to discussion`);
   
-  await rateLimitSleep(2);
+  await rateLimitSleep();
   
   try {
     await octokit.graphql(ADD_LABELS_MUTATION, {
@@ -719,7 +720,7 @@ async function createDiscussion(octokit, repositoryId, categoryId, title, body, 
 async function lockDiscussion(octokit, discussionId) {
   log(`Locking discussion ${discussionId}...`);
   
-  await rateLimitSleep(2);
+  await rateLimitSleep();
   
   try {
     await octokit.graphql(LOCK_DISCUSSION_MUTATION, {
@@ -734,7 +735,7 @@ async function lockDiscussion(octokit, discussionId) {
 async function fetchDiscussionComments(octokit, discussionId) {
   log(`Fetching comments for discussion ${discussionId}...`);
   
-  await rateLimitSleep(2);
+  await rateLimitSleep();
   
   try {
     const response = await octokit.graphql(FETCH_DISCUSSION_COMMENTS_QUERY, {
@@ -761,7 +762,7 @@ async function addDiscussionComment(octokit, discussionId, body, originalAuthor,
   
   log("Adding comment to discussion");
   
-  await rateLimitSleep(2);
+  await rateLimitSleep();
   
   try {
     const response = await octokit.graphql(ADD_DISCUSSION_COMMENT_MUTATION, {
@@ -791,7 +792,7 @@ async function addDiscussionCommentReply(octokit, discussionId, replyToId, body,
   
   log(`Adding reply to comment ${replyToId}`);
   
-  await rateLimitSleep(2);
+  await rateLimitSleep();
   
   try {
     const response = await octokit.graphql(ADD_DISCUSSION_COMMENT_REPLY_MUTATION, {
@@ -812,7 +813,7 @@ async function addDiscussionCommentReply(octokit, discussionId, replyToId, body,
 async function closeDiscussion(octokit, discussionId) {
   log("Closing discussion...");
   
-  await rateLimitSleep(2);
+  await rateLimitSleep();
   
   try {
     await octokit.graphql(CLOSE_DISCUSSION_MUTATION, {
@@ -831,7 +832,7 @@ async function closeDiscussion(octokit, discussionId) {
 async function markCommentAsAnswer(octokit, commentId) {
   log("Marking comment as answer...");
   
-  await rateLimitSleep(2);
+  await rateLimitSleep();
   
   try {
     await octokit.graphql(MARK_DISCUSSION_COMMENT_AS_ANSWER_MUTATION, {
