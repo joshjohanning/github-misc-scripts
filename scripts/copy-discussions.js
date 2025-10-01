@@ -27,7 +27,8 @@
 
 // Configuration
 const INCLUDE_POLL_MERMAID_CHART = true; // Set to false to disable Mermaid pie chart for polls
-const RATE_LIMIT_SLEEP_SECONDS = 2; // Default sleep duration between API calls to avoid rate limiting
+const RATE_LIMIT_SLEEP_SECONDS = 0.5; // Default sleep duration between API calls to avoid rate limiting
+const DISCUSSION_PROCESSING_DELAY_SECONDS = 5; // Delay between processing discussions
 
 const { Octokit } = require("octokit");
 
@@ -693,7 +694,7 @@ async function createDiscussion(octokit, repositoryId, categoryId, title, body, 
   
   log(`Creating discussion: '${title}'`);
   
-  await rateLimitSleep(3);
+  await rateLimitSleep();
   
   try {
     const response = await octokit.graphql(CREATE_DISCUSSION_MUTATION, {
@@ -924,7 +925,7 @@ async function copyDiscussionComments(octokit, discussionId, comments, answerCom
 async function processDiscussionsPage(sourceOctokit, targetOctokit, owner, repo, targetRepoId, targetCategories, targetLabels, cursor = null) {
   log(`Fetching discussions page (cursor: ${cursor || "null"})...`);
   
-  await rateLimitSleep(3);
+  await rateLimitSleep();
   
   try {
     const response = await sourceOctokit.graphql(FETCH_DISCUSSIONS_QUERY, {
@@ -1050,7 +1051,7 @@ async function processDiscussionsPage(sourceOctokit, targetOctokit, owner, repo,
         log(`✅ Finished processing discussion #${discussion.number}: '${discussion.title}'`);
         
         // Delay between discussions
-        await sleep(5);
+        await sleep(DISCUSSION_PROCESSING_DELAY_SECONDS);
         
       } catch (err) {
         error(`Failed to create discussion #${discussion.number}: '${discussion.title}' - ${err.message}`);
