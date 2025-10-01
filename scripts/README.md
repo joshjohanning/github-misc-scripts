@@ -20,7 +20,7 @@ node ./add-dependabot-file-to-repositories.js ./repos.txt ./dependabot.yml
 
 The `repos.txt` should be in the following format:
 
-```
+```text
 joshjohanning-org/test-repo-1
 joshjohanning-org/test-repo-2
 joshjohanning-org/test-repo-3
@@ -65,15 +65,18 @@ This script will generate generate a JWT for a GitHub app and use that JWT to ge
 
 Output example:
 
-> Getting installation token for: Josh-Test ...
-> 
->  ... token: ghs_abc
-> 
-> Getting installation token for: joshjohanning-org ...
-> 
->  ... token: ghs_xyz
+```text
+Getting installation token for: Josh-Test ...
+
+ ... token: ghs_abc
+
+Getting installation token for: joshjohanning-org ...
+
+ ... token: ghs_xyz
+```
 
 Docs:
+
 - [Generate a JWT for a GitHub App](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app#example-using-python-to-generate-a-jwt)
 - [Generating an installation access token for a GitHub App](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app#generating-an-installation-access-token)
 - [List installations for the authenticated app](https://docs.github.com/en/rest/apps/apps?apiVersion=2022-11-28#list-installations-for-the-authenticated-app)
@@ -117,7 +120,7 @@ Migrate npm packages in GitHub Packages from one GitHub organization to another.
 
 ## migrate-nuget-packages-between-github-instances.sh
 
-Migrate NuGet packages in GitHub Packages from one GitHub organization to another. Runs script from upstream [source](https://github.com/joshjohanning/github-packages-migrate-nuget-packages-between-github-instances). 
+Migrate NuGet packages in GitHub Packages from one GitHub organization to another. Runs script from upstream [source](https://github.com/joshjohanning/github-packages-migrate-nuget-packages-between-github-instances).
 
 1. Define the source GitHub PAT env var: `export GH_SOURCE_PAT=ghp_abc` (must have at least `read:packages`, `read:org` scope)
 2. Define the target GitHub PAT env var: `export GH_TARGET_PAT=ghp_abc` (must have at least `write:packages`, `read:org` scope)
