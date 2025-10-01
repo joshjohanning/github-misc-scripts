@@ -22,7 +22,6 @@
 // Attachments (images and files) will not copy over - they need manual handling.
 //
 // TODO: Polls don't copy options
-// TODO: Mark as answers
 
 const { Octokit } = require("octokit");
 
@@ -157,6 +156,9 @@ const FETCH_DISCUSSIONS_QUERY = `
               color
               description
             }
+          }
+          answer {
+            id
           }
           author {
             login
@@ -295,6 +297,18 @@ const CLOSE_DISCUSSION_MUTATION = `
       discussion {
         id
         closed
+      }
+    }
+  }
+`;
+
+const MARK_DISCUSSION_COMMENT_AS_ANSWER_MUTATION = `
+  mutation($commentId: ID!) {
+    markDiscussionCommentAsAnswer(input: {
+      id: $commentId
+    }) {
+      discussion {
+        id
       }
     }
   }
@@ -581,14 +595,35 @@ async function closeDiscussion(octokit, discussionId) {
   }
 }
 
-async function copyDiscussionComments(octokit, discussionId, comments) {
+async function markCommentAsAnswer(octokit, commentId) {
+  log("Marking comment as answer...");
+  
+  await rateLimitSleep(2);
+  
+  try {
+    await octokit.graphql(MARK_DISCUSSION_COMMENT_AS_ANSWER_MUTATION, {
+      commentId
+    });
+    
+    log("✓ Comment marked as answer");
+    return true;
+  } catch (err) {
+    error(`Failed to mark comment as answer: ${err.message}`);
+    return false;
+  }
+}
+
+async function copyDiscussionComments(octokit, discussionId, comments, answerCommentId = null) {
   if (!comments || comments.length === 0) {
     log("No comments to copy for this discussion");
-    return;
+    return null;
   }
   
   log(`Copying ${comments.length} comments...`);
   totalComments += comments.length;
+  
+  // Map to track source comment ID to target comment ID
+  const commentIdMap = new Map();
   
   for (const comment of comments) {
     if (!comment.body) continue;
@@ -608,6 +643,9 @@ async function copyDiscussionComments(octokit, discussionId, comments) {
     
     if (newCommentId) {
       copiedComments++;
+      
+      // Track the mapping
+      commentIdMap.set(comment.id, newCommentId);
       
       // Copy replies if any
       const replies = comment.replies?.nodes || [];
@@ -638,6 +676,13 @@ async function copyDiscussionComments(octokit, discussionId, comments) {
   }
   
   log("✓ Finished copying comments");
+  
+  // Return the new comment ID if this was the answer comment
+  if (answerCommentId && commentIdMap.has(answerCommentId)) {
+    return commentIdMap.get(answerCommentId);
+  }
+  
+  return null;
 }
 
 async function processDiscussionsPage(sourceOctokit, targetOctokit, owner, repo, targetRepoId, targetCategories, targetLabels, cursor = null) {
@@ -720,7 +765,19 @@ async function processDiscussionsPage(sourceOctokit, targetOctokit, owner, repo,
         // Copy comments
         log("Processing comments for discussion...");
         const comments = await fetchDiscussionComments(sourceOctokit, discussion.id);
-        await copyDiscussionComments(targetOctokit, newDiscussion.id, comments);
+        const answerCommentId = discussion.answer?.id || null;
+        const newAnswerCommentId = await copyDiscussionComments(
+          targetOctokit, 
+          newDiscussion.id, 
+          comments,
+          answerCommentId
+        );
+        
+        // Mark answer if applicable
+        if (newAnswerCommentId) {
+          log("Source discussion has an answer comment, marking it in target...");
+          await markCommentAsAnswer(targetOctokit, newAnswerCommentId);
+        }
         
         // Close discussion if it was closed in source
         if (discussion.closed) {
