@@ -139,6 +139,33 @@ function formatPollData(poll) {
   return pollMarkdown;
 }
 
+function formatReactions(reactionGroups) {
+  if (!reactionGroups || reactionGroups.length === 0) {
+    return '';
+  }
+
+  const reactionMap = {
+    'THUMBS_UP': '👍',
+    'THUMBS_DOWN': '👎',
+    'LAUGH': '😄',
+    'HOORAY': '🎉',
+    'CONFUSED': '😕',
+    'HEART': '❤️',
+    'ROCKET': '🚀',
+    'EYES': '👀'
+  };
+
+  const formattedReactions = reactionGroups
+    .filter(group => group.users.totalCount > 0)
+    .map(group => {
+      const emoji = reactionMap[group.content] || group.content;
+      return `${emoji} ${group.users.totalCount}`;
+    })
+    .join(' | ');
+
+  return formattedReactions ? `\n\n**Reactions:** ${formattedReactions}` : '';
+}
+
 // GraphQL Queries and Mutations
 const CHECK_DISCUSSIONS_ENABLED_QUERY = `
   query($owner: String!, $repo: String!) {
@@ -229,6 +256,19 @@ const FETCH_DISCUSSIONS_QUERY = `
               }
             }
           }
+          reactionGroups {
+            content
+            users {
+              totalCount
+            }
+          }
+        }
+      }
+      pinnedDiscussions(first: 100) {
+        nodes {
+          discussion {
+            id
+          }
         }
       }
     }
@@ -248,6 +288,12 @@ const FETCH_DISCUSSION_COMMENTS_QUERY = `
             }
             createdAt
             upvoteCount
+            reactionGroups {
+              content
+              users {
+                totalCount
+              }
+            }
             replies(first: 50) {
               nodes {
                 id
@@ -257,6 +303,12 @@ const FETCH_DISCUSSION_COMMENTS_QUERY = `
                 }
                 createdAt
                 upvoteCount
+                reactionGroups {
+                  content
+                  users {
+                    totalCount
+                  }
+                }
               }
             }
           }
@@ -357,6 +409,18 @@ const CLOSE_DISCUSSION_MUTATION = `
       discussion {
         id
         closed
+      }
+    }
+  }
+`;
+
+const LOCK_DISCUSSION_MUTATION = `
+  mutation($discussionId: ID!) {
+    lockLockable(input: {
+      lockableId: $discussionId
+    }) {
+      lockedRecord {
+        locked
       }
     }
   }
@@ -552,8 +616,19 @@ async function addLabelsToDiscussion(octokit, discussionId, labelIds) {
   }
 }
 
-async function createDiscussion(octokit, repositoryId, categoryId, title, body, sourceUrl, sourceAuthor, sourceCreated, poll = null) {
+async function createDiscussion(octokit, repositoryId, categoryId, title, body, sourceUrl, sourceAuthor, sourceCreated, poll = null, locked = false, isPinned = false, reactionGroups = []) {
   let enhancedBody = body;
+  
+  // Add pinned indicator if discussion was pinned
+  if (isPinned) {
+    enhancedBody = `📌 _This discussion was pinned in the source repository_\n\n${enhancedBody}`;
+  }
+  
+  // Add reactions if present
+  const reactionsMarkdown = formatReactions(reactionGroups);
+  if (reactionsMarkdown) {
+    enhancedBody += reactionsMarkdown;
+  }
   
   // Add poll data if present
   if (poll) {
@@ -562,7 +637,7 @@ async function createDiscussion(octokit, repositoryId, categoryId, title, body, 
   }
   
   // Add metadata
-  enhancedBody += `\n\n---\n<details>\n<summary><i>Original discussion metadata</i></summary>\n\n_Original discussion by @${sourceAuthor} on ${sourceCreated}_\n_Source: ${sourceUrl}_\n</details>`;
+  enhancedBody += `\n\n---\n<details>\n<summary><i>Original discussion metadata</i></summary>\n\n_Original discussion by @${sourceAuthor} on ${sourceCreated}_\n_Source: ${sourceUrl}_\n${locked ? '\n_🔒 This discussion was locked in the source repository_' : ''}\n</details>`;
   
   log(`Creating discussion: '${title}'`);
   
@@ -576,10 +651,32 @@ async function createDiscussion(octokit, repositoryId, categoryId, title, body, 
       body: enhancedBody
     });
     
-    return response.createDiscussion.discussion;
+    const newDiscussion = response.createDiscussion.discussion;
+    
+    // Lock the discussion if it was locked in the source
+    if (locked) {
+      await lockDiscussion(octokit, newDiscussion.id);
+    }
+    
+    return newDiscussion;
   } catch (err) {
     error(`Failed to create discussion: ${err.message}`);
     throw err;
+  }
+}
+
+async function lockDiscussion(octokit, discussionId) {
+  log(`Locking discussion ${discussionId}...`);
+  
+  await rateLimitSleep(2);
+  
+  try {
+    await octokit.graphql(LOCK_DISCUSSION_MUTATION, {
+      discussionId
+    });
+    log(`Discussion locked successfully`);
+  } catch (err) {
+    error(`Failed to lock discussion: ${err.message}`);
   }
 }
 
@@ -600,8 +697,16 @@ async function fetchDiscussionComments(octokit, discussionId) {
   }
 }
 
-async function addDiscussionComment(octokit, discussionId, body, originalAuthor, originalCreated) {
-  const enhancedBody = `${body}\n\n---\n<details>\n<summary><i>Original comment metadata</i></summary>\n\n_Original comment by @${originalAuthor} on ${originalCreated}_\n</details>`;
+async function addDiscussionComment(octokit, discussionId, body, originalAuthor, originalCreated, reactionGroups = []) {
+  let enhancedBody = body;
+  
+  // Add reactions if present
+  const reactionsMarkdown = formatReactions(reactionGroups);
+  if (reactionsMarkdown) {
+    enhancedBody += reactionsMarkdown;
+  }
+  
+  enhancedBody += `\n\n---\n<details>\n<summary><i>Original comment metadata</i></summary>\n\n_Original comment by @${originalAuthor} on ${originalCreated}_\n</details>`;
   
   log("Adding comment to discussion");
   
@@ -622,8 +727,16 @@ async function addDiscussionComment(octokit, discussionId, body, originalAuthor,
   }
 }
 
-async function addDiscussionCommentReply(octokit, discussionId, replyToId, body, originalAuthor, originalCreated) {
-  const enhancedBody = `${body}\n\n---\n_Original reply by @${originalAuthor} on ${originalCreated}_`;
+async function addDiscussionCommentReply(octokit, discussionId, replyToId, body, originalAuthor, originalCreated, reactionGroups = []) {
+  let enhancedBody = body;
+  
+  // Add reactions if present
+  const reactionsMarkdown = formatReactions(reactionGroups);
+  if (reactionsMarkdown) {
+    enhancedBody += reactionsMarkdown;
+  }
+  
+  enhancedBody += `\n\n---\n_Original reply by @${originalAuthor} on ${originalCreated}_`;
   
   log(`Adding reply to comment ${replyToId}`);
   
@@ -707,7 +820,8 @@ async function copyDiscussionComments(octokit, discussionId, comments, answerCom
       discussionId,
       comment.body,
       author,
-      createdAt
+      createdAt,
+      comment.reactionGroups || []
     );
     
     if (newCommentId) {
@@ -735,7 +849,8 @@ async function copyDiscussionComments(octokit, discussionId, comments, answerCom
             newCommentId,
             reply.body,
             replyAuthor,
-            replyCreated
+            replyCreated,
+            reply.reactionGroups || []
           );
         }
       }
@@ -800,15 +915,28 @@ async function processDiscussionsPage(sourceOctokit, targetOctokit, owner, repo,
           discussion.url,
           discussion.author?.login || "unknown",
           discussion.createdAt,
-          discussion.poll || null
+          discussion.poll || null,
+          discussion.locked || false,
+          discussion.isPinned || false,
+          discussion.reactionGroups || []
         );
         
         createdDiscussions++;
         log(`✓ Created discussion #${discussion.number}: '${discussion.title}'`);
         
-        // Log poll info if present
+        // Log additional metadata info
         if (discussion.poll && discussion.poll.options?.nodes?.length > 0) {
           log(`  ℹ️  Poll included with ${discussion.poll.options.nodes.length} options (${discussion.poll.totalVoteCount} total votes)`);
+        }
+        if (discussion.locked) {
+          log(`  🔒 Discussion was locked in source and has been locked in target`);
+        }
+        if (discussion.isPinned) {
+          log(`  📌 Discussion was pinned in source (indicator added to body)`);
+        }
+        const totalReactions = discussion.reactionGroups?.reduce((sum, group) => sum + (group.users.totalCount || 0), 0) || 0;
+        if (totalReactions > 0) {
+          log(`  ❤️  ${totalReactions} reaction${totalReactions !== 1 ? 's' : ''} copied`);
         }
         
         // Process labels

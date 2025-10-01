@@ -60,6 +60,9 @@ Features:
 - Creates labels in the target repository if they don't exist
 - Copies all comments and threaded replies with proper attribution
 - Copies poll results as static snapshots (with table and optional Mermaid chart)
+- Preserves reaction counts on discussions, comments, and replies
+- Maintains locked status of discussions
+- Indicates pinned discussions with a visual indicator
 - Handles rate limiting with exponential backoff
 - Provides colored console output for better visibility
 
@@ -72,6 +75,9 @@ Notes:
 - If a category doesn't exist in the target repository, discussions will be created in the "General" category
 - The script preserves discussion metadata by adding attribution text to the body and comments
 - Poll results are copied as static snapshots - voting is not available in copied discussions
+- Reactions are copied as read-only summaries (users cannot add new reactions)
+- Locked discussions will be locked in the target repository
+- Pinned status is indicated in the discussion body (GitHub API doesn't allow pinning via GraphQL)
 - Both source and target repositories must have GitHub Discussions enabled
 
 ## delete-branch-protection-rules.ps1
