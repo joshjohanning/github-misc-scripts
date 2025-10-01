@@ -54,6 +54,22 @@ npm i octokit
 node ./copy-discussions.js source-org source-repo target-org target-repo
 ```
 
+Optional environment variables:
+
+- `SOURCE_API_URL` - API endpoint for source (defaults to `https://api.github.com`)
+- `TARGET_API_URL` - API endpoint for target (defaults to `https://api.github.com`)
+
+Example with GitHub Enterprise Server:
+
+```bash
+export SOURCE_API_URL=https://github.mycompany.com/api/v3
+export TARGET_API_URL=https://api.github.com
+export SOURCE_TOKEN=ghp_abc
+export TARGET_TOKEN=ghp_xyz
+npm i octokit
+node ./copy-discussions.js source-org source-repo target-org target-repo
+```
+
 Features:
 
 - Automatically creates missing discussion categories in the target repository

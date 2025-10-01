@@ -17,6 +17,10 @@
 // - Both tokens must have the 'repo' scope
 // - Dependencies installed via `npm i octokit`
 //
+// Optional Environment Variables:
+// - SOURCE_API_URL: API endpoint for source (defaults to https://api.github.com)
+// - TARGET_API_URL: API endpoint for target (defaults to https://api.github.com)
+//
 // Note: This script copies discussion content, comments, replies, polls, reactions, locked status,
 // and pinned status. Reactions are copied as read-only summaries.
 // Attachments (images and files) will not copy over - they need manual handling.
@@ -42,11 +46,22 @@ if (args.includes('--help') || args.includes('-h')) {
   console.log('  target_org    Target organization name');
   console.log('  target_repo   Target repository name');
   console.log('');
-  console.log('Environment Variables:');
-  console.log('  SOURCE_TOKEN  GitHub token with read access to source repository discussions');
-  console.log('  TARGET_TOKEN  GitHub token with write access to target repository discussions');
+  console.log('Environment Variables (Required):');
+  console.log('  SOURCE_TOKEN     GitHub token with read access to source repository discussions');
+  console.log('  TARGET_TOKEN     GitHub token with write access to target repository discussions');
+  console.log('');
+  console.log('Environment Variables (Optional):');
+  console.log('  SOURCE_API_URL   API endpoint for source (defaults to https://api.github.com)');
+  console.log('  TARGET_API_URL   API endpoint for target (defaults to https://api.github.com)');
   console.log('');
   console.log('Example:');
+  console.log('  node copy-discussions.js source-org repo1 target-org repo2');
+  console.log('');
+  console.log('Example with GHES:');
+  console.log('  SOURCE_API_URL=https://github.mycompany.com/api/v3 \\');
+  console.log('  TARGET_API_URL=https://api.github.com \\');
+  console.log('  SOURCE_TOKEN=ghp_xxx \\');
+  console.log('  TARGET_TOKEN=ghp_yyy \\');
   console.log('  node copy-discussions.js source-org repo1 target-org repo2');
   console.log('');
   console.log('Note:');
@@ -78,13 +93,19 @@ if (!process.env.TARGET_TOKEN) {
   process.exit(1);
 }
 
+// Get API endpoints from environment variables (optional)
+const SOURCE_API_URL = process.env.SOURCE_API_URL || 'https://api.github.com';
+const TARGET_API_URL = process.env.TARGET_API_URL || 'https://api.github.com';
+
 // Initialize Octokit instances
 const sourceOctokit = new Octokit({
-  auth: process.env.SOURCE_TOKEN
+  auth: process.env.SOURCE_TOKEN,
+  baseUrl: SOURCE_API_URL
 });
 
 const targetOctokit = new Octokit({
-  auth: process.env.TARGET_TOKEN
+  auth: process.env.TARGET_TOKEN,
+  baseUrl: TARGET_API_URL
 });
 
 // Tracking variables
