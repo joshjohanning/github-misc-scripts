@@ -23,7 +23,7 @@ jobs:
         id: lint
         run: |
           set -o pipefail
-          node ./.github/scripts/lint-readme.js | tee gh-cli-readme-lint-results.txt || true
+          node ./.github/scripts/lint-readme.js | tee gh-cli-readme-lint-results.txt
 
       - name: Upload lint results
         if: steps.lint.outcome == 'failure' || steps.lint.outcome == 'success'
@@ -46,7 +46,7 @@ jobs:
         id: lint
         run: |
           set -o pipefail
-          node ./.github/scripts/lint-readme.js ./scripts '##' '# scripts' | tee scripts-readme-lint-results.txt || true
+          node ./.github/scripts/lint-readme.js ./scripts '##' '# scripts' | tee scripts-readme-lint-results.txt
 
       - name: Upload lint results
         if: steps.lint.outcome == 'failure' || steps.lint.outcome == 'success'
