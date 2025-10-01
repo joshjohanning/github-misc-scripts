@@ -427,6 +427,20 @@ Creates an organization webhook, with a secret, with some help from `jq`
 
 Create a new repo from a repo template - note that it only creates as public or private, if you want internal you have to do a subsequent call (see `change-repository-visibility.sh`)
 
+### create-runner-groups-in-organization.sh
+
+Creates a runner group in an organization with configurable visibility and repository access.
+
+Usage:
+
+```shell
+./create-runner-groups-in-organization.sh my-org "Production Runners" all
+./create-runner-groups-in-organization.sh my-org "Production Runners" selected --repo-file repos.txt
+./create-runner-groups-in-organization.sh my-org "Production Runners" selected --allow-public --repo-file repos.txt
+```
+
+The `repos.txt` file should contain one repository name per line. The script will automatically look up repository IDs.
+
 ### create-teams-from-list.sh
 
 Loops through a list of teams and creates them.
