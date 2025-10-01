@@ -124,8 +124,8 @@ function formatPollData(poll) {
     options.forEach(option => {
       const votes = option.totalVoteCount || 0;
       if (votes > 0) {
-        // Escape quotes in option text for Mermaid
-        const escapedOption = option.option.replace(/"/g, '\\"');
+        // Escape backslashes and quotes in option text for Mermaid
+        const escapedOption = option.option.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
         pollMarkdown += `    "${escapedOption}" : ${votes}\n`;
       }
     });
