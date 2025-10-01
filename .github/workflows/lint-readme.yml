@@ -21,7 +21,9 @@ jobs:
 
       - name: Lint ./gh-cli/README.md
         id: lint
-        run: node ./.github/scripts/lint-readme.js | tee gh-cli-readme-lint-results.txt
+        run: |
+          set -o pipefail
+          node ./.github/scripts/lint-readme.js | tee gh-cli-readme-lint-results.txt
 
       - name: Upload lint results
         if: steps.lint.outcome == 'failure' || steps.lint.outcome == 'success'
@@ -42,7 +44,9 @@ jobs:
 
       - name: Lint ./scripts/README.md
         id: lint
-        run: node ./.github/scripts/lint-readme.js ./scripts '##' '# scripts' | tee scripts-readme-lint-results.txt
+        run: |
+          set -o pipefail
+          node ./.github/scripts/lint-readme.js ./scripts '##' '# scripts' | tee scripts-readme-lint-results.txt
 
       - name: Upload lint results
         if: steps.lint.outcome == 'failure' || steps.lint.outcome == 'success'
