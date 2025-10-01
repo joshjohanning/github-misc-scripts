@@ -17,8 +17,8 @@
 // - Both tokens must have the 'repo' scope
 // - Dependencies installed via `npm i octokit`
 //
-// Note: This script copies discussion content, comments, replies, and basic metadata.
-// Reactions and other advanced interactions are not copied.
+// Note: This script copies discussion content, comments, replies, polls, reactions, locked status,
+// and pinned status. Reactions are copied as read-only summaries.
 // Attachments (images and files) will not copy over - they need manual handling.
 
 // Configuration
