@@ -20,8 +20,9 @@
 // Note: This script copies discussion content, comments, replies, and basic metadata.
 // Reactions and other advanced interactions are not copied.
 // Attachments (images and files) will not copy over - they need manual handling.
-//
-// TODO: Polls don't copy options
+
+// Configuration
+const INCLUDE_POLL_MERMAID_CHART = true; // Set to false to disable Mermaid pie chart for polls
 
 const { Octokit } = require("octokit");
 
@@ -87,6 +88,55 @@ async function sleep(seconds) {
 async function rateLimitSleep(seconds = 2) {
   log(`Waiting ${seconds}s to avoid rate limiting...`);
   await sleep(seconds);
+}
+
+function formatPollData(poll) {
+  if (!poll || !poll.options || poll.options.nodes.length === 0) {
+    return '';
+  }
+
+  const options = poll.options.nodes;
+  const totalVotes = poll.totalVoteCount || 0;
+  
+  let pollMarkdown = '\n\n---\n\n### 📊 Poll Results (from source discussion)\n\n';
+  pollMarkdown += `**${poll.question}**\n\n`;
+  
+  // Create table
+  pollMarkdown += '| Option | Votes | Percentage |\n';
+  pollMarkdown += '|--------|-------|------------|\n';
+  
+  options.forEach(option => {
+    const votes = option.totalVoteCount || 0;
+    const percentage = totalVotes > 0 ? ((votes / totalVotes) * 100).toFixed(1) : '0.0';
+    pollMarkdown += `| ${option.option} | ${votes} | ${percentage}% |\n`;
+  });
+  
+  pollMarkdown += `\n**Total votes:** ${totalVotes}\n`;
+  
+  // Add Mermaid pie chart if enabled
+  if (INCLUDE_POLL_MERMAID_CHART && totalVotes > 0) {
+    pollMarkdown += '\n<details>\n<summary><i>Visual representation</i></summary>\n\n';
+    pollMarkdown += '```mermaid\n';
+    pollMarkdown += '%%{init: {"pie": {"textPosition": 0.5}, "themeVariables": {"pieOuterStrokeWidth": "5px"}}}%%\n';
+    pollMarkdown += 'pie showData\n';
+    pollMarkdown += `    title ${poll.question}\n`;
+    
+    options.forEach(option => {
+      const votes = option.totalVoteCount || 0;
+      if (votes > 0) {
+        // Escape quotes in option text for Mermaid
+        const escapedOption = option.option.replace(/"/g, '\\"');
+        pollMarkdown += `    "${escapedOption}" : ${votes}\n`;
+      }
+    });
+    
+    pollMarkdown += '```\n\n';
+    pollMarkdown += '</details>\n';
+  }
+  
+  pollMarkdown += '\n_Note: This is a static snapshot of poll results from the source discussion. Voting is not available in copied discussions._\n';
+  
+  return pollMarkdown;
 }
 
 // GraphQL Queries and Mutations
@@ -169,6 +219,16 @@ const FETCH_DISCUSSIONS_QUERY = `
           upvoteCount
           url
           number
+          poll {
+            question
+            totalVoteCount
+            options(first: 100) {
+              nodes {
+                option
+                totalVoteCount
+              }
+            }
+          }
         }
       }
     }
@@ -492,8 +552,17 @@ async function addLabelsToDiscussion(octokit, discussionId, labelIds) {
   }
 }
 
-async function createDiscussion(octokit, repositoryId, categoryId, title, body, sourceUrl, sourceAuthor, sourceCreated) {
-  const enhancedBody = `${body}\n\n---\n<details>\n<summary><i>Original discussion metadata</i></summary>\n\n_Original discussion by @${sourceAuthor} on ${sourceCreated}_\n_Source: ${sourceUrl}_\n</details>`;
+async function createDiscussion(octokit, repositoryId, categoryId, title, body, sourceUrl, sourceAuthor, sourceCreated, poll = null) {
+  let enhancedBody = body;
+  
+  // Add poll data if present
+  if (poll) {
+    const pollMarkdown = formatPollData(poll);
+    enhancedBody += pollMarkdown;
+  }
+  
+  // Add metadata
+  enhancedBody += `\n\n---\n<details>\n<summary><i>Original discussion metadata</i></summary>\n\n_Original discussion by @${sourceAuthor} on ${sourceCreated}_\n_Source: ${sourceUrl}_\n</details>`;
   
   log(`Creating discussion: '${title}'`);
   
@@ -730,11 +799,17 @@ async function processDiscussionsPage(sourceOctokit, targetOctokit, owner, repo,
           discussion.body || "",
           discussion.url,
           discussion.author?.login || "unknown",
-          discussion.createdAt
+          discussion.createdAt,
+          discussion.poll || null
         );
         
         createdDiscussions++;
         log(`✓ Created discussion #${discussion.number}: '${discussion.title}'`);
+        
+        // Log poll info if present
+        if (discussion.poll && discussion.poll.options?.nodes?.length > 0) {
+          log(`  ℹ️  Poll included with ${discussion.poll.options.nodes.length} options (${discussion.poll.totalVoteCount} total votes)`);
+        }
         
         // Process labels
         if (discussion.labels.nodes.length > 0) {
