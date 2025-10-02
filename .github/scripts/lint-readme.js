@@ -37,7 +37,7 @@ try {
 // Split the output into an array of file paths
 const files = gitFiles.split('\n');
 
-// Filter out .sh files in the root directory (excluding those in subdirectories)
+// Filter files in the root directory (excluding those in subdirectories)
 const fileExtensions = ['.sh', '.ps1', '.js', '.mjs', '.py'];
 
 const filteredFiles = files.filter(file => {
