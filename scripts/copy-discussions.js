@@ -29,6 +29,8 @@
 const INCLUDE_POLL_MERMAID_CHART = true; // Set to false to disable Mermaid pie chart for polls
 const RATE_LIMIT_SLEEP_SECONDS = 0.5; // Default sleep duration between API calls to avoid rate limiting
 const DISCUSSION_PROCESSING_DELAY_SECONDS = 5; // Delay between processing discussions
+const RATE_LIMIT_RETRY_DELAY_SECONDS = 60; // Delay when hitting rate limits before retrying
+const MAX_RETRIES = 3; // Maximum number of retries for failed operations
 
 const { Octokit } = require("octokit");
 
@@ -167,6 +169,39 @@ async function sleep(seconds) {
 async function rateLimitSleep(seconds = RATE_LIMIT_SLEEP_SECONDS) {
   log(`Waiting ${seconds}s to avoid rate limiting...`);
   await sleep(seconds);
+}
+
+function isRateLimitError(err) {
+  const message = err.message?.toLowerCase() || '';
+  const status = err.status || 0;
+  
+  // Check for primary rate limit (403 with rate limit message)
+  if (status === 403 && (message.includes('rate limit') || message.includes('api rate limit'))) {
+    return true;
+  }
+  
+  // Check for secondary rate limit (403 with abuse/secondary message)
+  if (status === 403 && (message.includes('secondary') || message.includes('abuse'))) {
+    return true;
+  }
+  
+  // Check for retry-after header indication
+  if (message.includes('retry after') || message.includes('try again later')) {
+    return true;
+  }
+  
+  return false;
+}
+
+async function handleRateLimitError(err, attemptNumber) {
+  if (isRateLimitError(err)) {
+    const waitTime = RATE_LIMIT_RETRY_DELAY_SECONDS * attemptNumber; // Exponential-ish backoff
+    warn(`Rate limit detected (attempt ${attemptNumber}). Waiting ${waitTime}s before retry...`);
+    warn(`Error details: ${err.message}`);
+    await sleep(waitTime);
+    return true;
+  }
+  return false;
 }
 
 function formatPollData(poll) {
@@ -997,99 +1032,124 @@ async function processDiscussionsPage(sourceOctokit, targetOctokit, owner, repo,
       // Check if discussion is pinned
       const isPinned = pinnedDiscussionIds.has(discussion.id);
       
-      // Create discussion
-      try {
-        const newDiscussion = await createDiscussion(
-          targetOctokit,
-          targetRepoId,
-          targetCategoryId,
-          discussion.title,
-          discussion.body || "",
-          discussion.url,
-          discussion.author?.login || "unknown",
-          discussion.createdAt,
-          discussion.poll || null,
-          discussion.locked || false,
-          isPinned,
-          discussion.reactionGroups || []
-        );
-        
-        createdDiscussions++;
-        log(`✓ Created discussion #${discussion.number}: '${discussion.title}'`);
-        
-        // Log additional metadata info
-        if (discussion.poll && discussion.poll.options?.nodes?.length > 0) {
-          log(`  ℹ️  Poll included with ${discussion.poll.options.nodes.length} options (${discussion.poll.totalVoteCount} total votes)`);
-        }
-        if (discussion.locked) {
-          log(`  🔒 Discussion was locked in source and has been locked in target`);
-        }
-        if (isPinned) {
-          log(`  📌 Discussion was pinned in source (indicator added to body)`);
-        }
-        const totalReactions = discussion.reactionGroups?.reduce((sum, group) => sum + (group.users.totalCount || 0), 0) || 0;
-        if (totalReactions > 0) {
-          log(`  ❤️  ${totalReactions} reaction${totalReactions !== 1 ? 's' : ''} copied`);
-        }
-        
-        // Process labels
-        if (discussion.labels.nodes.length > 0) {
-          const labelIds = [];
+      // Create discussion with retry logic
+      let newDiscussion = null;
+      let createSuccess = false;
+      
+      for (let attempt = 1; attempt <= MAX_RETRIES && !createSuccess; attempt++) {
+        try {
+          newDiscussion = await createDiscussion(
+            targetOctokit,
+            targetRepoId,
+            targetCategoryId,
+            discussion.title,
+            discussion.body || "",
+            discussion.url,
+            discussion.author?.login || "unknown",
+            discussion.createdAt,
+            discussion.poll || null,
+            discussion.locked || false,
+            isPinned,
+            discussion.reactionGroups || []
+          );
           
-          for (const label of discussion.labels.nodes) {
-            log(`Processing label: '${label.name}' (color: ${label.color})`);
-            
-            const labelId = await getOrCreateLabelId(
-              targetOctokit,
-              targetRepoId,
-              label.name,
-              label.color,
-              label.description || "",
-              targetLabels
-            );
-            
-            if (labelId) {
-              labelIds.push(labelId);
+          createSuccess = true;
+          createdDiscussions++;
+          log(`✓ Created discussion #${discussion.number}: '${discussion.title}'`);
+          
+        } catch (err) {
+          // Handle rate limit errors with retry
+          const shouldRetry = await handleRateLimitError(err, attempt);
+          
+          if (!shouldRetry) {
+            // Not a rate limit error, or unrecoverable error
+            error(`Failed to create discussion #${discussion.number}: '${discussion.title}' - ${err.message}`);
+            if (attempt < MAX_RETRIES) {
+              warn(`Retrying (attempt ${attempt + 1}/${MAX_RETRIES})...`);
+              await sleep(5); // Brief pause before retry
+            } else {
+              error(`Max retries (${MAX_RETRIES}) reached. Skipping discussion #${discussion.number}.`);
+              skippedDiscussions++;
+              break;
             }
           }
+          // If shouldRetry is true, loop will continue to next attempt
+        }
+      }
+      
+      // If we exhausted retries without success, skip this discussion
+      if (!createSuccess) {
+        continue;
+      }
+      
+      // Log additional metadata info
+      if (discussion.poll && discussion.poll.options?.nodes?.length > 0) {
+        log(`  ℹ️  Poll included with ${discussion.poll.options.nodes.length} options (${discussion.poll.totalVoteCount} total votes)`);
+      }
+      if (discussion.locked) {
+        log(`  🔒 Discussion was locked in source and has been locked in target`);
+      }
+      if (isPinned) {
+        log(`  📌 Discussion was pinned in source (indicator added to body)`);
+      }
+      const totalReactions = discussion.reactionGroups?.reduce((sum, group) => sum + (group.users.totalCount || 0), 0) || 0;
+      if (totalReactions > 0) {
+        log(`  ❤️  ${totalReactions} reaction${totalReactions !== 1 ? 's' : ''} copied`);
+      }
+      
+      // Process labels
+      if (discussion.labels.nodes.length > 0) {
+        const labelIds = [];
+        
+        for (const label of discussion.labels.nodes) {
+          log(`Processing label: '${label.name}' (color: ${label.color})`);
           
-          if (labelIds.length > 0) {
-            await addLabelsToDiscussion(targetOctokit, newDiscussion.id, labelIds);
+          const labelId = await getOrCreateLabelId(
+            targetOctokit,
+            targetRepoId,
+            label.name,
+            label.color,
+            label.description || "",
+            targetLabels
+          );
+          
+          if (labelId) {
+            labelIds.push(labelId);
           }
         }
         
-        // Copy comments
-        log("Processing comments for discussion...");
-        const comments = await fetchDiscussionComments(sourceOctokit, discussion.id);
-        const answerCommentId = discussion.answer?.id || null;
-        const newAnswerCommentId = await copyDiscussionComments(
-          targetOctokit, 
-          newDiscussion.id, 
-          comments,
-          answerCommentId
-        );
-        
-        // Mark answer if applicable
-        if (newAnswerCommentId) {
-          log("Source discussion has an answer comment, marking it in target...");
-          await markCommentAsAnswer(targetOctokit, newAnswerCommentId);
+        if (labelIds.length > 0) {
+          await addLabelsToDiscussion(targetOctokit, newDiscussion.id, labelIds);
         }
-        
-        // Close discussion if it was closed in source
-        if (discussion.closed) {
-          log("Source discussion is closed, closing target discussion...");
-          await closeDiscussion(targetOctokit, newDiscussion.id);
-        }
-        
-        log(`✅ Finished processing discussion #${discussion.number}: '${discussion.title}'`);
-        
-        // Delay between discussions
-        await sleep(DISCUSSION_PROCESSING_DELAY_SECONDS);
-        
-      } catch (err) {
-        error(`Failed to create discussion #${discussion.number}: '${discussion.title}' - ${err.message}`);
-        skippedDiscussions++;
       }
+      
+      // Copy comments
+      log("Processing comments for discussion...");
+      const comments = await fetchDiscussionComments(sourceOctokit, discussion.id);
+      const answerCommentId = discussion.answer?.id || null;
+      const newAnswerCommentId = await copyDiscussionComments(
+        targetOctokit, 
+        newDiscussion.id, 
+        comments,
+        answerCommentId
+      );
+      
+      // Mark answer if applicable
+      if (newAnswerCommentId) {
+        log("Source discussion has an answer comment, marking it in target...");
+        await markCommentAsAnswer(targetOctokit, newAnswerCommentId);
+      }
+      
+      // Close discussion if it was closed in source
+      if (discussion.closed) {
+        log("Source discussion is closed, closing target discussion...");
+        await closeDiscussion(targetOctokit, newDiscussion.id);
+      }
+      
+      log(`✅ Finished processing discussion #${discussion.number}: '${discussion.title}'`);
+      
+      // Delay between discussions
+      await sleep(DISCUSSION_PROCESSING_DELAY_SECONDS);
     }
     
     // Process next page if exists
