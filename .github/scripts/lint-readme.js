@@ -74,11 +74,11 @@ function getItemType(itemPath) {
 }
 
 // Check if each file/directory is mentioned in the README.md
-allScripts.forEach(file => {
-  if (!readme.includes(`${headingLevel} ${file}`)) {
-    const filePath = path.join(directoryPath, file);
-    const type = getItemType(filePath) || 'file/directory';
-    logIssue(`📝 The ${type} ${file} is not mentioned in the README.md`);
+allScripts.forEach(item => {
+  if (!readme.includes(`${headingLevel} ${item}`)) {
+    const itemPath = path.join(directoryPath, item);
+    const type = getItemType(itemPath) || 'file/directory';
+    logIssue(`📝 The ${type} ${item} is not mentioned in the README.md`);
   }
 });
 
@@ -92,45 +92,45 @@ allScripts.forEach(item => {
 });
 
 // Check that all .sh files have execution permissions
-allScripts.forEach(file => {
-  if (!file.endsWith('.sh')) {
+allScripts.forEach(item => {
+  if (!item.endsWith('.sh')) {
     return;
   }
 
-  const filePath = path.join(directoryPath, file);
+  const itemPath = path.join(directoryPath, item);
   
   // Check if file exists before trying to stat it
-  if (!fs.existsSync(filePath)) {
-    logIssue(`⚠️  The file ${file} is tracked in Git but does not exist on the filesystem`);
+  if (!fs.existsSync(itemPath)) {
+    logIssue(`⚠️  The file ${item} is tracked in Git but does not exist on the filesystem`);
     return;
   }
   
-  const stats = fs.statSync(filePath);
+  const stats = fs.statSync(itemPath);
   const isExecutable = (stats.mode & fs.constants.X_OK) !== 0;
 
   if (!isExecutable) {
-    logIssue(`🔒 The file ${file} does not have execution permissions`);
+    logIssue(`🔒 The file ${item} does not have execution permissions`);
   }
 });
 
 // Check bash syntax for all .sh files
-allScripts.forEach(file => {
-  if (!file.endsWith('.sh')) {
+allScripts.forEach(item => {
+  if (!item.endsWith('.sh')) {
     return;
   }
 
-  const filePath = path.join(directoryPath, file);
+  const itemPath = path.join(directoryPath, item);
   
   // Check if file exists before trying to validate syntax
-  if (!fs.existsSync(filePath)) {
+  if (!fs.existsSync(itemPath)) {
     // Already reported in the execution permissions check
     return;
   }
   
   try {
-    execSync(`bash -n "${filePath}"`, { stdio: 'pipe' });
+    execSync(`bash -n "${itemPath}"`, { stdio: 'pipe' });
   } catch (error) {
-    logIssue(`🐛 The file ${file} has a bash syntax error`);
+    logIssue(`🐛 The file ${item} has a bash syntax error`);
     const errorLines = error.stderr.toString().trim().split('\n');
     errorLines.forEach(line => console.log(`        ${line}`));
   }
@@ -152,11 +152,11 @@ if (!headings || headings.length === 0) {
   process.exit(1);
 }
 
-// Check that all scripts mentioned in the README.md actually exist in the repository
+// Check that all items mentioned in the README.md actually exist in the repository
 headings.forEach(heading => {
-  const script = heading.slice(headingLevel.length + 1); // Remove the '### ' prefix
-  if (!allScripts.includes(script)) {
-    logIssue(`📁 The script ${script} is mentioned in the README.md but does not exist in the repository`);
+  const item = heading.slice(headingLevel.length + 1); // Remove the '### ' prefix
+  if (!allScripts.includes(item)) {
+    logIssue(`📁 The item "${item}" is mentioned in the README.md but does not exist in the repository`);
   }
 });
 
