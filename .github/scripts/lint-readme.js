@@ -37,7 +37,7 @@ try {
 // Split the output into an array of file paths
 const files = gitFiles.split('\n');
 
-// Filter out .sh files in the root directory (excluding those in subdirectories)
+// Filter files in the root directory (excluding those in subdirectories)
 const fileExtensions = ['.sh', '.ps1', '.js', '.mjs', '.py'];
 
 const filteredFiles = files.filter(file => {
@@ -65,46 +65,76 @@ function logIssue(message) {
   console.log(`${issueCount}. ${message}`);
 }
 
-// Check if each .sh file is mentioned in the README.md
-allScripts.forEach(file => {
-  if (!readme.includes(`${headingLevel} ${file}`)) {
-    logIssue(`📝 The file ${file} is not mentioned in the README.md`);
+/**
+ * Determines if a path is a file, directory, or doesn't exist
+ * @param {string} itemPath - Path to check
+ * @returns {string|null} - 'file', 'directory', or null if doesn't exist
+ */
+function getItemType(itemPath) {
+  if (!fs.existsSync(itemPath)) {
+    return null; // doesn't exist
+  }
+  return fs.statSync(itemPath).isDirectory() ? 'directory' : 'file';
+}
+
+// Check if each file/directory is mentioned in the README.md
+allScripts.forEach(item => {
+  if (!readme.includes(`${headingLevel} ${item}`)) {
+    const itemPath = path.join(directoryPath, item);
+    const type = getItemType(itemPath) || 'file/directory';
+    logIssue(`📝 The ${type} ${item} is not mentioned in the README.md`);
   }
 });
 
 // Check that all files follow the kebab-case naming convention
-allScripts.forEach(file => {
-  if (!/^([a-z0-9]+-)*[a-z0-9]+(\.[a-z0-9]+)*$/.test(file)) {
-    logIssue(`🔤 The file ${file} does not follow the kebab-case naming convention`);
+allScripts.forEach(item => {
+  if (!/^([a-z0-9]+-)*[a-z0-9]+(\.[a-z0-9]+)*$/.test(item)) {
+    const itemPath = path.join(directoryPath, item);
+    const type = getItemType(itemPath) || 'file';
+    logIssue(`🔤 The ${type} ${item} does not follow the kebab-case naming convention`);
   }
 });
 
 // Check that all .sh files have execution permissions
-allScripts.forEach(file => {
-  if (!file.endsWith('.sh')) {
+allScripts.forEach(item => {
+  if (!item.endsWith('.sh')) {
     return;
   }
 
-  const filePath = path.join(directoryPath, file);
-  const stats = fs.statSync(filePath);
+  const itemPath = path.join(directoryPath, item);
+
+  // Check if file exists before trying to stat it
+  if (!fs.existsSync(itemPath)) {
+    logIssue(`⚠️  The file ${item} is tracked in Git but does not exist on the filesystem`);
+    return;
+  }
+  
+  const stats = fs.statSync(itemPath);
   const isExecutable = (stats.mode & fs.constants.X_OK) !== 0;
 
   if (!isExecutable) {
-    logIssue(`🔒 The file ${file} does not have execution permissions`);
+    logIssue(`🔒 The file ${item} does not have execution permissions`);
   }
 });
 
 // Check bash syntax for all .sh files
-allScripts.forEach(file => {
-  if (!file.endsWith('.sh')) {
+allScripts.forEach(item => {
+  if (!item.endsWith('.sh')) {
     return;
   }
 
-  const filePath = path.join(directoryPath, file);
+  const itemPath = path.join(directoryPath, item);
+
+  // Check if file exists before trying to validate syntax
+  if (!fs.existsSync(itemPath)) {
+    // Already reported in the execution permissions check
+    return;
+  }
+  
   try {
-    execSync(`bash -n "${filePath}"`, { stdio: 'pipe' });
+    execSync(`bash -n "${itemPath}"`, { stdio: 'pipe' });
   } catch (error) {
-    logIssue(`🐛 The file ${file} has a bash syntax error`);
+    logIssue(`🐛 The file ${item} has a bash syntax error`);
     const errorLines = error.stderr.toString().trim().split('\n');
     errorLines.forEach(line => console.log(`        ${line}`));
   }
@@ -126,15 +156,15 @@ if (!headings || headings.length === 0) {
   process.exit(1);
 }
 
-// Check that all scripts mentioned in the README.md actually exist in the repository
+// Check that all items mentioned in the README.md actually exist in the repository
 headings.forEach(heading => {
-  const script = heading.slice(headingLevel.length + 1); // Remove the '### ' prefix
-  if (!allScripts.includes(script)) {
-    logIssue(`📁 The script ${script} is mentioned in the README.md but does not exist in the repository`);
+  const item = heading.slice(headingLevel.length + 1); // Remove the '### ' prefix
+  if (!allScripts.includes(item)) {
+    logIssue(`📁 The item "${item}" is mentioned in the README.md but does not exist at "${path.join(directoryPath, item)}"`);
   }
 });
 
-// Check that certain short words are not used in the .sh file names
+// Check that certain short words are not used in file/directory names
 const shortWords = {
   'repo': 'repository',
   'repos': 'repositories',
@@ -142,16 +172,20 @@ const shortWords = {
   'orgs': 'organizations'
 };
 
-allScripts.forEach(file => {
+allScripts.forEach(item => {
   Object.keys(shortWords).forEach(word => {
     const regex = new RegExp(`\\b${word}\\b`, 'g');
-    if (regex.test(file)) {
-      logIssue(`📏 The file name "${file}" uses the short word "${word}". Consider using "${shortWords[word]}" instead.`);
+    if (regex.test(item)) {
+      const itemPath = path.join(directoryPath, item);
+      const type = getItemType(itemPath) || 'file';
+      logIssue(`📏 The ${type} name "${item}" uses the short word "${word}". Consider using "${shortWords[word]}" instead.`);
     }
   });
 });
 
 // Check if the headings are in alphabetical order
+// Special handling: prefixed items (e.g., 'add-user') should come after their prefix base (e.g., 'add')
+// but 'add-team-to-repository' should come before 'add-user' (standard alphabetical)
 for (let i = 0; i < headings.length - 1; i++) {
   const current = headings[i].toLowerCase();
   const next = headings[i + 1].toLowerCase();
