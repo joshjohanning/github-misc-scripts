@@ -5,9 +5,24 @@ Migrate GitHub Discussions between repositories, including categories, labels, c
 ## Prerequisites
 
 - `SOURCE_TOKEN` environment variable with GitHub PAT that has `repo` scope and read access to source repository discussions
+  - Alternatively, use a GitHub App token (recommended for better rate limits and security)
 - `TARGET_TOKEN` environment variable with GitHub PAT that has `repo` scope and write access to target repository discussions
-- Dependencies installed via `npm i octokit`
+  - Alternatively, use a GitHub App token (recommended for better rate limits, security, and authorship) (✨ **recommended for target token!**)
+- Dependencies installed via `npm i`
 - Both source and target repositories must have GitHub Discussions enabled
+
+### Using a GitHub App (Recommended)
+
+GitHub Apps provide better rate limits and security compared to personal access tokens. To use a GitHub App:
+
+1. Create or use an existing GitHub App with `repo` permissions
+2. Install the app on the source and/or target repositories
+3. Generate a token using the GitHub CLI and [`gh-token`](https://github.com/Link-/gh-token) extension:
+
+```bash
+export SOURCE_TOKEN=$(gh token generate --app-id YOUR_SOURCE_APP_ID --installation-id YOUR_SOURCE_INSTALLATION_ID --key /path/to/source/private-key.pem --token-only)
+export TARGET_TOKEN=$(gh token generate --app-id YOUR_TARGET_APP_ID --installation-id YOUR_TARGET_INSTALLATION_ID --key /path/to/target/private-key.pem --token-only)
+```
 
 ## Script usage
 
@@ -16,6 +31,8 @@ Basic usage:
 ```bash
 export SOURCE_TOKEN=ghp_abc
 export TARGET_TOKEN=ghp_xyz
+# export SOURCE_TOKEN=$(gh token generate --app-id YOUR_SOURCE_APP_ID --installation-id YOUR_SOURCE_INSTALLATION_ID --key /path/to/source/private-key.pem --token-only)
+# export TARGET_TOKEN=$(gh token generate --app-id YOUR_TARGET_APP_ID --installation-id YOUR_TARGET_INSTALLATION_ID --key /path/to/target/private-key.pem --token-only)
 # export SOURCE_API_URL= # if GHES
 # export TARGET_API_URL= # if GHES/ghe.com
 cd ./scripts/migrate-discussions
