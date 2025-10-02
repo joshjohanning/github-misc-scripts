@@ -65,7 +65,11 @@ function logIssue(message) {
   console.log(`${issueCount}. ${message}`);
 }
 
-// Helper function to determine if a path is a directory, file, or doesn't exist
+/**
+ * Determines if a path is a file, directory, or doesn't exist
+ * @param {string} itemPath - Path to check
+ * @returns {string|null} - 'file', 'directory', or null if doesn't exist
+ */
 function getItemType(itemPath) {
   if (!fs.existsSync(itemPath)) {
     return null; // doesn't exist
@@ -98,7 +102,7 @@ allScripts.forEach(item => {
   }
 
   const itemPath = path.join(directoryPath, item);
-  
+
   // Check if file exists before trying to stat it
   if (!fs.existsSync(itemPath)) {
     logIssue(`⚠️  The file ${item} is tracked in Git but does not exist on the filesystem`);
@@ -120,7 +124,7 @@ allScripts.forEach(item => {
   }
 
   const itemPath = path.join(directoryPath, item);
-  
+
   // Check if file exists before trying to validate syntax
   if (!fs.existsSync(itemPath)) {
     // Already reported in the execution permissions check
@@ -156,7 +160,7 @@ if (!headings || headings.length === 0) {
 headings.forEach(heading => {
   const item = heading.slice(headingLevel.length + 1); // Remove the '### ' prefix
   if (!allScripts.includes(item)) {
-    logIssue(`📁 The item "${item}" is mentioned in the README.md but does not exist in the repository`);
+    logIssue(`📁 The item "${item}" is mentioned in the README.md but does not exist at "${path.join(directoryPath, item)}"`);
   }
 });
 
@@ -180,6 +184,8 @@ allScripts.forEach(item => {
 });
 
 // Check if the headings are in alphabetical order
+// Special handling: prefixed items (e.g., 'add-user') should come after their prefix base (e.g., 'add')
+// but 'add-team-to-repository' should come before 'add-user' (standard alphabetical)
 for (let i = 0; i < headings.length - 1; i++) {
   const current = headings[i].toLowerCase();
   const next = headings[i + 1].toLowerCase();
