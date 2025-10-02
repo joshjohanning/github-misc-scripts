@@ -1,0 +1,37 @@
+{
+  "name": "migrate-discussions",
+  "version": "1.0.0",
+  "description": "Migrate GitHub Discussions between repositories, including categories, labels, comments, and replies. Supports cross-enterprise and cross-instance migrations with automatic rate limit handling.",
+  "main": "migrate-discussions.js",
+  "scripts": {
+    "start": "node migrate-discussions.js",
+    "help": "node migrate-discussions.js --help"
+  },
+  "keywords": [
+    "github",
+    "discussions",
+    "migrate",
+    "copy",
+    "github-api",
+    "graphql",
+    "octokit",
+    "github-enterprise"
+  ],
+  "author": "Josh Johanning",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "octokit": "^3.1.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joshjohanning/github-misc-scripts.git",
+    "directory": "scripts/migrate-discussions"
+  },
+  "bugs": {
+    "url": "https://github.com/joshjohanning/github-misc-scripts/issues"
+  },
+  "homepage": "https://github.com/joshjohanning/github-misc-scripts/tree/main/scripts/migrate-discussions"
+}
