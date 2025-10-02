@@ -36,8 +36,7 @@
 const INCLUDE_POLL_MERMAID_CHART = true; // Set to false to disable Mermaid pie chart for polls
 const RATE_LIMIT_SLEEP_SECONDS = 0.5; // Default sleep duration between API calls to avoid rate limiting
 const DISCUSSION_PROCESSING_DELAY_SECONDS = 5; // Delay between processing discussions
-const RATE_LIMIT_RETRY_DELAY_SECONDS = 60; // Delay when hitting rate limits before retrying
-const MAX_RETRIES = 3; // Maximum number of retries for failed operations
+const MAX_RETRIES = 3; // Maximum number of retries for failed operations (rate limits handled automatically by Octokit)
 
 const { Octokit } = require("octokit");
 
@@ -134,15 +133,41 @@ if (!process.env.TARGET_TOKEN) {
 const SOURCE_API_URL = process.env.SOURCE_API_URL || 'https://api.github.com';
 const TARGET_API_URL = process.env.TARGET_API_URL || 'https://api.github.com';
 
-// Initialize Octokit instances
+// Configure throttling for rate limit handling
+// Octokit's throttling plugin automatically handles both REST and GraphQL rate limits
+// by intercepting HTTP 403 responses and retry-after headers
+const throttleOptions = {
+  onRateLimit: (retryAfter, options, octokit) => {
+    warn(`Primary rate limit exhausted for request ${options.method} ${options.url}`);
+    if (options.request.retryCount <= 2) {
+      warn(`Retrying after ${retryAfter} seconds (retry ${options.request.retryCount + 1}/3)`);
+      return true;
+    }
+    error(`Max retries reached for rate limit`);
+    return false;
+  },
+  onSecondaryRateLimit: (retryAfter, options, octokit) => {
+    warn(`Secondary rate limit detected for request ${options.method} ${options.url}`);
+    if (options.request.retryCount <= 2) {
+      warn(`Retrying after ${retryAfter} seconds (retry ${options.request.retryCount + 1}/3)`);
+      return true;
+    }
+    error(`Max retries reached for secondary rate limit`);
+    return false;
+  }
+};
+
+// Initialize Octokit instances with throttling enabled
 const sourceOctokit = new Octokit({
   auth: process.env.SOURCE_TOKEN,
-  baseUrl: SOURCE_API_URL
+  baseUrl: SOURCE_API_URL,
+  throttle: throttleOptions
 });
 
 const targetOctokit = new Octokit({
   auth: process.env.TARGET_TOKEN,
-  baseUrl: TARGET_API_URL
+  baseUrl: TARGET_API_URL,
+  throttle: throttleOptions
 });
 
 // Tracking variables
@@ -176,39 +201,6 @@ async function sleep(seconds) {
 async function rateLimitSleep(seconds = RATE_LIMIT_SLEEP_SECONDS) {
   log(`Waiting ${seconds}s to avoid rate limiting...`);
   await sleep(seconds);
-}
-
-function isRateLimitError(err) {
-  const message = err.message?.toLowerCase() || '';
-  const status = err.status || 0;
-  
-  // Check for primary rate limit (403 with rate limit message)
-  if (status === 403 && (message.includes('rate limit') || message.includes('api rate limit'))) {
-    return true;
-  }
-  
-  // Check for secondary rate limit (403 with abuse/secondary message)
-  if (status === 403 && (message.includes('secondary') || message.includes('abuse'))) {
-    return true;
-  }
-  
-  // Check for retry-after header indication
-  if (message.includes('retry after') || message.includes('try again later')) {
-    return true;
-  }
-  
-  return false;
-}
-
-async function handleRateLimitError(err, attemptNumber) {
-  if (isRateLimitError(err)) {
-    const waitTime = RATE_LIMIT_RETRY_DELAY_SECONDS * attemptNumber; // Exponential-ish backoff
-    warn(`Rate limit detected (attempt ${attemptNumber}). Waiting ${waitTime}s before retry...`);
-    warn(`Error details: ${err.message}`);
-    await sleep(waitTime);
-    return true;
-  }
-  return false;
 }
 
 function formatPollData(poll) {
@@ -1039,7 +1031,7 @@ async function processDiscussionsPage(sourceOctokit, targetOctokit, owner, repo,
       // Check if discussion is pinned
       const isPinned = pinnedDiscussionIds.has(discussion.id);
       
-      // Create discussion with retry logic
+      // Create discussion (Octokit throttling plugin handles rate limits automatically)
       let newDiscussion = null;
       let createSuccess = false;
       
@@ -1065,22 +1057,17 @@ async function processDiscussionsPage(sourceOctokit, targetOctokit, owner, repo,
           log(`✓ Created discussion #${discussion.number}: '${discussion.title}'`);
           
         } catch (err) {
-          // Handle rate limit errors with retry
-          const shouldRetry = await handleRateLimitError(err, attempt);
+          // Octokit throttling handles rate limits; this catches other errors
+          error(`Failed to create discussion #${discussion.number}: '${discussion.title}' - ${err.message}`);
           
-          if (!shouldRetry) {
-            // Not a rate limit error, or unrecoverable error
-            error(`Failed to create discussion #${discussion.number}: '${discussion.title}' - ${err.message}`);
-            if (attempt < MAX_RETRIES) {
-              warn(`Retrying (attempt ${attempt + 1}/${MAX_RETRIES})...`);
-              await sleep(5); // Brief pause before retry
-            } else {
-              error(`Max retries (${MAX_RETRIES}) reached. Skipping discussion #${discussion.number}.`);
-              skippedDiscussions++;
-              break;
-            }
+          if (attempt < MAX_RETRIES) {
+            warn(`Retrying (attempt ${attempt + 1}/${MAX_RETRIES}) in 5 seconds...`);
+            await sleep(5);
+          } else {
+            error(`Max retries (${MAX_RETRIES}) reached. Skipping discussion #${discussion.number}.`);
+            skippedDiscussions++;
+            break;
           }
-          // If shouldRetry is true, loop will continue to next attempt
         }
       }
       
