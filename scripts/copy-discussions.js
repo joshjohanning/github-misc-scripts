@@ -139,6 +139,7 @@ const TARGET_API_URL = process.env.TARGET_API_URL || 'https://api.github.com';
 // by intercepting HTTP 403 responses and retry-after headers
 const throttleOptions = {
   onRateLimit: (retryAfter, options, octokit) => {
+    primaryRateLimitHits++;
     warn(`Primary rate limit exhausted for request ${options.method} ${options.url}`);
     if (options.request.retryCount <= 2) {
       warn(`Retrying after ${retryAfter} seconds (retry ${options.request.retryCount + 1}/3)`);
@@ -148,6 +149,7 @@ const throttleOptions = {
     return false;
   },
   onSecondaryRateLimit: (retryAfter, options, octokit) => {
+    secondaryRateLimitHits++;
     warn(`Secondary rate limit detected for request ${options.method} ${options.url}`);
     if (options.request.retryCount <= 2) {
       warn(`Retrying after ${retryAfter} seconds (retry ${options.request.retryCount + 1}/3)`);
@@ -178,6 +180,8 @@ let createdDiscussions = 0;
 let skippedDiscussions = 0;
 let totalComments = 0;
 let copiedComments = 0;
+let primaryRateLimitHits = 0;
+let secondaryRateLimitHits = 0;
 
 // Helper functions
 function log(message) {
@@ -1245,6 +1249,8 @@ async function main() {
     log(`Discussions skipped: ${skippedDiscussions}`);
     log(`Total comments found: ${totalComments}`);
     log(`Comments copied: ${copiedComments}`);
+    log(`Primary rate limits hit: ${primaryRateLimitHits}`);
+    log(`Secondary rate limits hit: ${secondaryRateLimitHits}`);
     
     if (missingCategories.length > 0) {
       warn("\nThe following categories were missing and need to be created manually:");
