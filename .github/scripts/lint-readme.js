@@ -90,6 +90,13 @@ allScripts.forEach(file => {
   }
 
   const filePath = path.join(directoryPath, file);
+  
+  // Check if file exists before trying to stat it
+  if (!fs.existsSync(filePath)) {
+    logIssue(`⚠️  The file ${file} is tracked in Git but does not exist on the filesystem`);
+    return;
+  }
+  
   const stats = fs.statSync(filePath);
   const isExecutable = (stats.mode & fs.constants.X_OK) !== 0;
 
@@ -105,6 +112,13 @@ allScripts.forEach(file => {
   }
 
   const filePath = path.join(directoryPath, file);
+  
+  // Check if file exists before trying to validate syntax
+  if (!fs.existsSync(filePath)) {
+    // Already reported in the execution permissions check
+    return;
+  }
+  
   try {
     execSync(`bash -n "${filePath}"`, { stdio: 'pipe' });
   } catch (error) {
