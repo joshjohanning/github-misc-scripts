@@ -65,10 +65,14 @@ function logIssue(message) {
   console.log(`${issueCount}. ${message}`);
 }
 
-// Check if each .sh file is mentioned in the README.md
+// Check if each file/directory is mentioned in the README.md
 allScripts.forEach(file => {
   if (!readme.includes(`${headingLevel} ${file}`)) {
-    logIssue(`📝 The file ${file} is not mentioned in the README.md`);
+    // Check if it's a directory or a file
+    const filePath = path.join(directoryPath, file);
+    const isDirectory = fs.existsSync(filePath) && fs.statSync(filePath).isDirectory();
+    const type = isDirectory ? 'directory' : 'file';
+    logIssue(`📝 The ${type} ${file} is not mentioned in the README.md`);
   }
 });
 
