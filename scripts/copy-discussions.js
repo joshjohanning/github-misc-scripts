@@ -40,13 +40,16 @@ if (args.includes('--help') || args.includes('-h')) {
   console.log('Copy Discussions between GitHub repositories');
   console.log('');
   console.log('Usage:');
-  console.log('  node copy-discussions.js <source_org> <source_repo> <target_org> <target_repo>');
+  console.log('  node copy-discussions.js <source_org> <source_repo> <target_org> <target_repo> [options]');
   console.log('');
   console.log('Arguments:');
   console.log('  source_org    Source organization name');
   console.log('  source_repo   Source repository name');
   console.log('  target_org    Target organization name');
   console.log('  target_repo   Target repository name');
+  console.log('');
+  console.log('Options:');
+  console.log('  --start-from <number>   Start copying from a specific discussion number (useful for resuming)');
   console.log('');
   console.log('Environment Variables (Required):');
   console.log('  SOURCE_TOKEN     GitHub token with read access to source repository discussions');
@@ -58,6 +61,9 @@ if (args.includes('--help') || args.includes('-h')) {
   console.log('');
   console.log('Example:');
   console.log('  node copy-discussions.js source-org repo1 target-org repo2');
+  console.log('');
+  console.log('Example with resume from discussion #50:');
+  console.log('  node copy-discussions.js source-org repo1 target-org repo2 --start-from 50');
   console.log('');
   console.log('Example with GHES:');
   console.log('  SOURCE_API_URL=https://github.mycompany.com/api/v3 \\');
@@ -71,13 +77,33 @@ if (args.includes('--help') || args.includes('-h')) {
   console.log('  - This script copies discussion content, comments, replies, polls, reactions,');
   console.log('    locked status, and pinned status');
   console.log('  - Attachments (images and files) will not copy over and require manual handling');
+  console.log('  - Use --start-from to resume from a specific discussion in case of interruption');
   process.exit(0);
 }
 
+// Parse --start-from option
+let startFromNumber = null;
+const startFromIndex = args.indexOf('--start-from');
+if (startFromIndex !== -1) {
+  if (startFromIndex + 1 >= args.length) {
+    console.error("ERROR: --start-from requires a discussion number");
+    process.exit(1);
+  }
+  startFromNumber = parseInt(args[startFromIndex + 1], 10);
+  if (isNaN(startFromNumber) || startFromNumber < 1) {
+    console.error("ERROR: --start-from must be a positive integer");
+    process.exit(1);
+  }
+  // Remove the option and its value from args
+  args.splice(startFromIndex, 2);
+}
+
 if (args.length !== 4) {
-  console.error("Usage: node copy-discussions.js <source_org> <source_repo> <target_org> <target_repo>");
+  console.error("Usage: node copy-discussions.js <source_org> <source_repo> <target_org> <target_repo> [--start-from <number>]");
   console.error("\nExample:");
   console.error("  node copy-discussions.js source-org repo1 target-org repo2");
+  console.error("\nExample with resume:");
+  console.error("  node copy-discussions.js source-org repo1 target-org repo2 --start-from 50");
   console.error("\nFor more information, use --help");
   process.exit(1);
 }
@@ -690,7 +716,7 @@ async function createDiscussion(octokit, repositoryId, categoryId, title, body, 
   }
   
   // Add metadata
-  enhancedBody += `\n---\n<details>\n<summary><i>Original discussion metadata</i></summary>\n\n_Original discussion by @${sourceAuthor} on ${sourceCreated}_\n_Source: ${sourceUrl}_\n${locked ? '\n_🔒 This discussion was locked in the source repository_' : ''}\n</details>`;
+  enhancedBody += `\n\n<details>\n<summary><i>Original discussion metadata</i></summary>\n\n_Original discussion by @${sourceAuthor} on ${sourceCreated}_\n_Source: ${sourceUrl}_\n${locked ? '\n_🔒 This discussion was locked in the source repository_' : ''}\n</details>`;
   
   log(`Creating discussion: '${title}'`);
   
@@ -759,7 +785,7 @@ async function addDiscussionComment(octokit, discussionId, body, originalAuthor,
     enhancedBody += reactionsMarkdown;
   }
   
-  enhancedBody += `\n---\n<details>\n<summary><i>Original comment metadata</i></summary>\n\n_Original comment by @${originalAuthor} on ${originalCreated}_\n</details>`;
+  enhancedBody += `\n\n<details>\n<summary><i>Original comment metadata</i></summary>\n\n_Original comment by @${originalAuthor} on ${originalCreated}_\n</details>`;
   
   log("Adding comment to discussion");
   
@@ -789,7 +815,7 @@ async function addDiscussionCommentReply(octokit, discussionId, replyToId, body,
     enhancedBody += reactionsMarkdown;
   }
   
-  enhancedBody += `\n---\n_Original reply by @${originalAuthor} on ${originalCreated}_`;
+  enhancedBody += `\n\n<details>\n<summary><i>Original reply metadata</i></summary>\n\n_Original reply by @${originalAuthor} on ${originalCreated}_\n</details>`;
   
   log(`Adding reply to comment ${replyToId}`);
   
@@ -922,7 +948,7 @@ async function copyDiscussionComments(octokit, discussionId, comments, answerCom
   return null;
 }
 
-async function processDiscussionsPage(sourceOctokit, targetOctokit, owner, repo, targetRepoId, targetCategories, targetLabels, cursor = null) {
+async function processDiscussionsPage(sourceOctokit, targetOctokit, owner, repo, targetRepoId, targetCategories, targetLabels, cursor = null, startFromNumber = null) {
   log(`Fetching discussions page (cursor: ${cursor || "null"})...`);
   
   await rateLimitSleep();
@@ -945,6 +971,13 @@ async function processDiscussionsPage(sourceOctokit, targetOctokit, owner, repo,
     
     for (const discussion of discussions) {
       totalDiscussions++;
+      
+      // Skip discussions before the start-from number
+      if (startFromNumber !== null && discussion.number < startFromNumber) {
+        log(`Skipping discussion #${discussion.number}: '${discussion.title}' (before start-from #${startFromNumber})`);
+        skippedDiscussions++;
+        continue;
+      }
       
       log(`\n=== Processing discussion #${discussion.number}: '${discussion.title}' ===`);
       
@@ -1070,7 +1103,8 @@ async function processDiscussionsPage(sourceOctokit, targetOctokit, owner, repo,
         targetRepoId,
         targetCategories,
         targetLabels,
-        pageInfo.endCursor
+        pageInfo.endCursor,
+        startFromNumber
       );
     } else {
       log("No more pages to process");
@@ -1088,6 +1122,9 @@ async function main() {
     log("Starting discussion copy process...");
     log(`Source: ${SOURCE_ORG}/${SOURCE_REPO}`);
     log(`Target: ${TARGET_ORG}/${TARGET_REPO}`);
+    if (startFromNumber !== null) {
+      log(`Resume mode: Starting from discussion #${startFromNumber}`);
+    }
     log("");
     log("⚡ This script uses conservative rate limiting to avoid GitHub API limits");
     log("");
@@ -1133,7 +1170,9 @@ async function main() {
       SOURCE_REPO,
       targetRepoId,
       targetCategories,
-      targetLabels
+      targetLabels,
+      null,
+      startFromNumber
     );
     
     // Summary
