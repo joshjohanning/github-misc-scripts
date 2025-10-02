@@ -68,10 +68,13 @@ function logIssue(message) {
 // Check if each file/directory is mentioned in the README.md
 allScripts.forEach(file => {
   if (!readme.includes(`${headingLevel} ${file}`)) {
-    // Check if it's a directory or a file
     const filePath = path.join(directoryPath, file);
-    const isDirectory = fs.existsSync(filePath) && fs.statSync(filePath).isDirectory();
-    const type = isDirectory ? 'directory' : 'file';
+    let type = 'file';
+    if (fs.existsSync(filePath)) {
+      type = fs.statSync(filePath).isDirectory() ? 'directory' : 'file';
+    } else {
+      type = 'file/directory'; // or 'script' as generic term
+    }
     logIssue(`📝 The ${type} ${file} is not mentioned in the README.md`);
   }
 });
