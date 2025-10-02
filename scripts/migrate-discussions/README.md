@@ -16,7 +16,10 @@ Basic usage:
 ```bash
 export SOURCE_TOKEN=ghp_abc
 export TARGET_TOKEN=ghp_xyz
-npm i octokit
+# export SOURCE_API_URL= # if GHES
+# export TARGET_API_URL= # if GHES/ghe.com
+cd ./scripts/migrate-discussions
+npm i
 node ./migrate-discussions.js source-org source-repo target-org target-repo
 ```
 
@@ -38,7 +41,6 @@ export SOURCE_API_URL=https://github.mycompany.com/api/v3
 export TARGET_API_URL=https://api.github.com
 export SOURCE_TOKEN=ghp_abc
 export TARGET_TOKEN=ghp_xyz
-npm i octokit
 node ./migrate-discussions.js source-org source-repo target-org target-repo
 ```
 
