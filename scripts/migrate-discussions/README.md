@@ -74,15 +74,15 @@ node ./migrate-discussions.js source-org source-repo target-org target-repo
 - Indicates pinned discussions with a visual indicator
 - Marks answered discussions and preserves the accepted answer
 
-### Rate Limiting & Reliability
+### Rate limiting and reliability
 
 - **Automatic rate limit handling** with Octokit's built-in throttling plugin
-- **Intelligent retry logic** for both primary and secondary rate limits (up to 3 retries)
+- **Intelligent retry logic** with configurable retries for both rate-limit and non-rate-limit errors
 - **GitHub-recommended delays** - 3 seconds between discussions/comments to stay under secondary rate limits
 - **Resume capability** - Use `--start-from <number>` to resume from a specific discussion if interrupted
 - **Rate limit tracking** - Summary shows how many times primary and secondary rate limits were hit
 
-### User Experience
+### User experience
 
 - Colored console output with timestamps for better visibility
 - Comprehensive summary statistics at completion
@@ -95,7 +95,7 @@ Edit these constants at the top of the script:
 - `INCLUDE_POLL_MERMAID_CHART` - Set to `false` to disable Mermaid pie charts for polls (default: `true`)
 - `RATE_LIMIT_SLEEP_SECONDS` - Sleep duration between API calls (default: `0.5` seconds)
 - `DISCUSSION_PROCESSING_DELAY_SECONDS` - Delay between processing discussions/comments (default: `3` seconds)
-- `MAX_RETRIES` - Maximum retries for non-rate-limit errors (default: `3`)
+- `MAX_RETRIES` - Maximum retries for both rate-limit and non-rate-limit errors (default: `15`)
 
 ## Summary output
 
@@ -107,6 +107,31 @@ After completion, the script displays comprehensive statistics:
 - **Primary rate limits hit** - How many times the script hit GitHub's primary rate limit
 - **Secondary rate limits hit** - How many times the script hit GitHub's secondary rate limit
 - List of missing categories that need manual creation
+
+### Example summary output
+
+```text
+[2025-10-02 19:38:44] ============================================================
+[2025-10-02 19:38:44] Discussion copy completed!
+[2025-10-02 19:38:44] Total discussions found: 10
+[2025-10-02 19:38:44] Discussions created: 10
+[2025-10-02 19:38:44] Discussions skipped: 0
+[2025-10-02 19:38:44] Total comments found: 9
+[2025-10-02 19:38:44] Comments copied: 9
+[2025-10-02 19:38:44] Primary rate limits hit: 0
+[2025-10-02 19:38:44] Secondary rate limits hit: 0
+[2025-10-02 19:38:44] WARNING: 
+The following categories were missing and need to be created manually:
+[2025-10-02 19:38:44] WARNING:   - Blog posts!
+[2025-10-02 19:38:44] WARNING: 
+[2025-10-02 19:38:44] WARNING: To create categories manually:
+[2025-10-02 19:38:44] WARNING: 1. Go to https://github.com/joshjohanning-emu/discussions-test/discussions
+[2025-10-02 19:38:44] WARNING: 2. Click 'New discussion'
+[2025-10-02 19:38:44] WARNING: 3. Look for category management options
+[2025-10-02 19:38:44] WARNING: 4. Create the missing categories with appropriate names and descriptions
+[2025-10-02 19:38:44] 
+All done! ✨
+```
 
 ## Notes
 
@@ -136,7 +161,7 @@ After completion, the script displays comprehensive statistics:
   - No more than 500 content-generating requests per hour
 - The script stays under 1 discussion or comment created every 3 seconds (GitHub's recommendation)
 - Automatic retry with wait times from GitHub's `retry-after` headers
-- If rate limits are consistently hit, the script will retry up to 3 times before failing
+- If rate limits are consistently hit, the script will retry up to 15 times before failing
 
 ### Resume capability
 

@@ -37,7 +37,7 @@
 const INCLUDE_POLL_MERMAID_CHART = true; // Set to false to disable Mermaid pie chart for polls
 const RATE_LIMIT_SLEEP_SECONDS = 0.5; // Default sleep duration between API calls to avoid rate limiting
 const DISCUSSION_PROCESSING_DELAY_SECONDS = 3; // Delay between processing discussions (GitHub recommends 1 discussion per 3 seconds)
-const MAX_RETRIES = 3; // Maximum number of retries for failed operations (rate limits handled automatically by Octokit)
+const MAX_RETRIES = 15; // Maximum number of retries for both rate-limit and non-rate-limit errors
 
 const { Octokit } = require("octokit");
 
@@ -141,8 +141,8 @@ const throttleOptions = {
   onRateLimit: (retryAfter, options, octokit) => {
     primaryRateLimitHits++;
     warn(`Primary rate limit exhausted for request ${options.method} ${options.url}`);
-    if (options.request.retryCount <= 2) {
-      warn(`Retrying after ${retryAfter} seconds (retry ${options.request.retryCount + 1}/3)`);
+    if (options.request.retryCount < MAX_RETRIES) {
+      warn(`Retrying after ${retryAfter} seconds (retry ${options.request.retryCount + 1}/${MAX_RETRIES})`);
       return true;
     }
     error(`Max retries reached for rate limit`);
@@ -151,8 +151,8 @@ const throttleOptions = {
   onSecondaryRateLimit: (retryAfter, options, octokit) => {
     secondaryRateLimitHits++;
     warn(`Secondary rate limit detected for request ${options.method} ${options.url}`);
-    if (options.request.retryCount <= 2) {
-      warn(`Retrying after ${retryAfter} seconds (retry ${options.request.retryCount + 1}/3)`);
+    if (options.request.retryCount < MAX_RETRIES) {
+      warn(`Retrying after ${retryAfter} seconds (retry ${options.request.retryCount + 1}/${MAX_RETRIES})`);
       return true;
     }
     error(`Max retries reached for secondary rate limit`);
