@@ -29,13 +29,14 @@
 // GitHub limits content-generating requests to avoid abuse:
 // - No more than 80 content-generating requests per minute
 // - No more than 500 content-generating requests per hour
+// - Try to stay under 1 discussion or comment created every 3 seconds
 // This script includes automatic retry logic and rate limit handling to stay within these limits.
 // See: https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#about-secondary-rate-limits
 
 // Configuration
 const INCLUDE_POLL_MERMAID_CHART = true; // Set to false to disable Mermaid pie chart for polls
 const RATE_LIMIT_SLEEP_SECONDS = 0.5; // Default sleep duration between API calls to avoid rate limiting
-const DISCUSSION_PROCESSING_DELAY_SECONDS = 5; // Delay between processing discussions
+const DISCUSSION_PROCESSING_DELAY_SECONDS = 3; // Delay between processing discussions (GitHub recommends 1 discussion per 3 seconds)
 const MAX_RETRIES = 3; // Maximum number of retries for failed operations (rate limits handled automatically by Octokit)
 
 const { Octokit } = require("octokit");
@@ -965,8 +966,14 @@ async function copyDiscussionComments(octokit, discussionId, comments, answerCom
             replyCreated,
             reply.reactionGroups || []
           );
+          
+          // Delay between replies to avoid rate limits (1 comment per 3 seconds)
+          await sleep(DISCUSSION_PROCESSING_DELAY_SECONDS);
         }
       }
+      
+      // Delay between comments to avoid rate limits (1 comment per 3 seconds)
+      await sleep(DISCUSSION_PROCESSING_DELAY_SECONDS);
     } else {
       warn(`Failed to copy comment by @${author}, skipping replies`);
     }
