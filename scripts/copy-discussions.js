@@ -24,6 +24,13 @@
 // Note: This script copies discussion content, comments, replies, polls, reactions, locked status,
 // and pinned status. Reactions are copied as read-only summaries.
 // Attachments (images and files) will not copy over - they need manual handling.
+//
+// Secondary Rate Limit Guidelines:
+// GitHub limits content-generating requests to avoid abuse:
+// - No more than 80 content-generating requests per minute
+// - No more than 500 content-generating requests per hour
+// This script includes automatic retry logic and rate limit handling to stay within these limits.
+// See: https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#about-secondary-rate-limits
 
 // Configuration
 const INCLUDE_POLL_MERMAID_CHART = true; // Set to false to disable Mermaid pie chart for polls
