@@ -65,24 +65,29 @@ function logIssue(message) {
   console.log(`${issueCount}. ${message}`);
 }
 
+// Helper function to determine if a path is a directory, file, or doesn't exist
+function getItemType(itemPath) {
+  if (!fs.existsSync(itemPath)) {
+    return null; // doesn't exist
+  }
+  return fs.statSync(itemPath).isDirectory() ? 'directory' : 'file';
+}
+
 // Check if each file/directory is mentioned in the README.md
 allScripts.forEach(file => {
   if (!readme.includes(`${headingLevel} ${file}`)) {
     const filePath = path.join(directoryPath, file);
-    let type = 'file';
-    if (fs.existsSync(filePath)) {
-      type = fs.statSync(filePath).isDirectory() ? 'directory' : 'file';
-    } else {
-      type = 'file/directory'; // or 'script' as generic term
-    }
+    const type = getItemType(filePath) || 'file/directory';
     logIssue(`📝 The ${type} ${file} is not mentioned in the README.md`);
   }
 });
 
 // Check that all files follow the kebab-case naming convention
-allScripts.forEach(file => {
-  if (!/^([a-z0-9]+-)*[a-z0-9]+(\.[a-z0-9]+)*$/.test(file)) {
-    logIssue(`🔤 The file ${file} does not follow the kebab-case naming convention`);
+allScripts.forEach(item => {
+  if (!/^([a-z0-9]+-)*[a-z0-9]+(\.[a-z0-9]+)*$/.test(item)) {
+    const itemPath = path.join(directoryPath, item);
+    const type = getItemType(itemPath) || 'file';
+    logIssue(`🔤 The ${type} ${item} does not follow the kebab-case naming convention`);
   }
 });
 
@@ -155,7 +160,7 @@ headings.forEach(heading => {
   }
 });
 
-// Check that certain short words are not used in the .sh file names
+// Check that certain short words are not used in file/directory names
 const shortWords = {
   'repo': 'repository',
   'repos': 'repositories',
@@ -163,11 +168,13 @@ const shortWords = {
   'orgs': 'organizations'
 };
 
-allScripts.forEach(file => {
+allScripts.forEach(item => {
   Object.keys(shortWords).forEach(word => {
     const regex = new RegExp(`\\b${word}\\b`, 'g');
-    if (regex.test(file)) {
-      logIssue(`📏 The file name "${file}" uses the short word "${word}". Consider using "${shortWords[word]}" instead.`);
+    if (regex.test(item)) {
+      const itemPath = path.join(directoryPath, item);
+      const type = getItemType(itemPath) || 'file';
+      logIssue(`📏 The ${type} name "${item}" uses the short word "${word}". Consider using "${shortWords[word]}" instead.`);
     }
   });
 });
