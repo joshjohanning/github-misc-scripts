@@ -14,6 +14,7 @@ When creating or modifying scripts in the `gh-cli` and `scripts` directories:
 - Do not leave any trailing whitespace at the end of lines
 - With `gh api` commands, prefer `--jq` versus piping to `jq` when possible
 - Include the header `-H "X-Github-Next-Global-ID: 1"` in GraphQL queries to retrieve the new global ID format - see the [GitHub migration guide for global node IDs](https://docs.github.com/en/graphql/guides/migrating-graphql-global-node-ids) for details
+- Complex scripts in the `./scripts` directory should have its own folder (so a `package.json` can be included for example)
 
 ## README.md documentation
 
