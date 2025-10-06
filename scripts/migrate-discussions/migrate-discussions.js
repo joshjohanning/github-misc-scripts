@@ -6,10 +6,10 @@
 // using different GitHub tokens for authentication to support cross-enterprise copying
 //
 // Usage:
-//   node copy-discussions.js <source_org> <source_repo> <target_org> <target_repo>
+//   node migrate-discussions.js <source_org> <source_repo> <target_org> <target_repo>
 //
 // Example:
-//   node copy-discussions.js source-org repo1 target-org repo2
+//   node migrate-discussions.js source-org repo1 target-org repo2
 //
 // Prerequisites:
 // - SOURCE_TOKEN environment variable with read access to source repository discussions
@@ -49,7 +49,7 @@ if (args.includes('--help') || args.includes('-h')) {
   console.log('Copy Discussions between GitHub repositories');
   console.log('');
   console.log('Usage:');
-  console.log('  node copy-discussions.js <source_org> <source_repo> <target_org> <target_repo> [options]');
+  console.log('  node migrate-discussions.js <source_org> <source_repo> <target_org> <target_repo> [options]');
   console.log('');
   console.log('Arguments:');
   console.log('  source_org    Source organization name');
@@ -69,17 +69,17 @@ if (args.includes('--help') || args.includes('-h')) {
   console.log('  TARGET_API_URL   API endpoint for target (defaults to https://api.github.com)');
   console.log('');
   console.log('Example:');
-  console.log('  node copy-discussions.js source-org repo1 target-org repo2');
+  console.log('  node migrate-discussions.js source-org repo1 target-org repo2');
   console.log('');
   console.log('Example with resume from discussion #50:');
-  console.log('  node copy-discussions.js source-org repo1 target-org repo2 --start-from 50');
+  console.log('  node migrate-discussions.js source-org repo1 target-org repo2 --start-from 50');
   console.log('');
   console.log('Example with GHES:');
   console.log('  SOURCE_API_URL=https://github.mycompany.com/api/v3 \\');
   console.log('  TARGET_API_URL=https://api.github.com \\');
   console.log('  SOURCE_TOKEN=ghp_xxx \\');
   console.log('  TARGET_TOKEN=ghp_yyy \\');
-  console.log('  node copy-discussions.js source-org repo1 target-org repo2');
+  console.log('  node migrate-discussions.js source-org repo1 target-org repo2');
   console.log('');
   console.log('Note:');
   console.log('  - Both tokens must have the "repo" scope');
@@ -108,11 +108,11 @@ if (startFromIndex !== -1) {
 }
 
 if (args.length !== 4) {
-  console.error("Usage: node copy-discussions.js <source_org> <source_repo> <target_org> <target_repo> [--start-from <number>]");
+  console.error("Usage: node migrate-discussions.js <source_org> <source_repo> <target_org> <target_repo> [--start-from <number>]");
   console.error("\nExample:");
-  console.error("  node copy-discussions.js source-org repo1 target-org repo2");
+  console.error("  node migrate-discussions.js source-org repo1 target-org repo2");
   console.error("\nExample with resume:");
-  console.error("  node copy-discussions.js source-org repo1 target-org repo2 --start-from 50");
+  console.error("  node migrate-discussions.js source-org repo1 target-org repo2 --start-from 50");
   console.error("\nFor more information, use --help");
   process.exit(1);
 }
