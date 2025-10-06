@@ -2,9 +2,10 @@
 
 ## scripts in the `gh-cli` and `scripts` directories
 
-When creating or modifying scripts in the `gh-cli` directory:
+When creating or modifying scripts in the `gh-cli` and `scripts` directories:
 
 - Ensure the script has input parameters
+- Include input validation and meaningful error messages
 - Ensure the script has a basic description and usage examples at the top
 - Make sure to paginate (`--paginate`) when retrieving results
 - Note any special permissions/token requirements
@@ -28,7 +29,7 @@ When adding new scripts to any directory:
 - Don't be too verbose - keep descriptions and usage instructions concise and to the point
 - Don't use periods after bullet points for consistency
 
-## Script naming and structure
+## script naming and structure
 
 - Use kebab-case for all script filenames (e.g., `get-organization-repositories.sh`)
 - Include appropriate file extensions (.sh, .ps1, .js, .py)
@@ -45,7 +46,7 @@ When adding new scripts to any directory:
 - For scripts requiring special permissions, mention this in both script comments and README
 - Add hostname support for GitHub Enterprise instances / ghe.com when applicable
 
-## Commit messages
+## commit messages
 
 Prefer the Conventional Commits specification:
 
