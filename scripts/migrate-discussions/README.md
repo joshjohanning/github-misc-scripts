@@ -1,0 +1,170 @@
+# migrate-discussions.js
+
+Migrate GitHub Discussions between repositories, including categories, labels, comments, and replies. This script can migrate discussions across different GitHub instances and enterprises with comprehensive rate limit handling and resume capabilities.
+
+## Prerequisites
+
+- `SOURCE_TOKEN` environment variable with GitHub PAT that has `repo` scope and read access to source repository discussions
+  - Alternatively, use a GitHub App token (recommended for better rate limits and security)
+- `TARGET_TOKEN` environment variable with GitHub PAT that has `repo` scope and write access to target repository discussions
+  - Alternatively, use a GitHub App token (recommended for better rate limits, security, and authorship) (✨ **recommended for target token!**)
+- Dependencies installed via `npm i`
+- Both source and target repositories must have GitHub Discussions enabled
+
+### Using a GitHub App (Recommended)
+
+GitHub Apps provide better rate limits and security compared to personal access tokens. To use a GitHub App:
+
+1. Create or use an existing GitHub App with `repo` permissions
+2. Install the app on the source and/or target repositories
+3. Generate a token using the GitHub CLI and [`gh-token`](https://github.com/Link-/gh-token) extension:
+
+```bash
+export SOURCE_TOKEN=$(gh token generate --app-id YOUR_SOURCE_APP_ID --installation-id YOUR_SOURCE_INSTALLATION_ID --key /path/to/source/private-key.pem --token-only)
+export TARGET_TOKEN=$(gh token generate --app-id YOUR_TARGET_APP_ID --installation-id YOUR_TARGET_INSTALLATION_ID --key /path/to/target/private-key.pem --token-only)
+```
+
+## Script usage
+
+Basic usage:
+
+```bash
+export SOURCE_TOKEN=ghp_abc
+export TARGET_TOKEN=ghp_xyz
+# export SOURCE_TOKEN=$(gh token generate --app-id YOUR_SOURCE_APP_ID --installation-id YOUR_SOURCE_INSTALLATION_ID --key /path/to/source/private-key.pem --token-only)
+# export TARGET_TOKEN=$(gh token generate --app-id YOUR_TARGET_APP_ID --installation-id YOUR_TARGET_INSTALLATION_ID --key /path/to/target/private-key.pem --token-only)
+# export SOURCE_API_URL= # if GHES
+# export TARGET_API_URL= # if GHES/ghe.com
+cd ./scripts/migrate-discussions
+npm i
+node ./migrate-discussions.js source-org source-repo target-org target-repo
+```
+
+Resume from a specific discussion number (useful if interrupted):
+
+```bash
+node ./migrate-discussions.js source-org source-repo target-org target-repo --start-from 50
+```
+
+## Optional environment variables
+
+- `SOURCE_API_URL` - API endpoint for source (defaults to `https://api.github.com`)
+- `TARGET_API_URL` - API endpoint for target (defaults to `https://api.github.com`)
+
+Example with GitHub Enterprise Server:
+
+```bash
+export SOURCE_API_URL=https://github.mycompany.com/api/v3
+export TARGET_API_URL=https://api.github.com
+export SOURCE_TOKEN=ghp_abc
+export TARGET_TOKEN=ghp_xyz
+node ./migrate-discussions.js source-org source-repo target-org target-repo
+```
+
+## Features
+
+### Content Migration
+
+- Automatically creates missing discussion categories in the target repository
+- Creates labels in the target repository if they don't exist
+- Copies all comments and threaded replies with proper attribution
+- Copies poll results as static snapshots (with table and optional Mermaid chart)
+- Preserves reaction counts on discussions, comments, and replies
+- Maintains locked status of discussions
+- Indicates pinned discussions with a visual indicator
+- Marks answered discussions and preserves the accepted answer
+
+### Rate limiting and reliability
+
+- **Automatic rate limit handling** with Octokit's built-in throttling plugin
+- **Intelligent retry logic** with configurable retries for both rate-limit and non-rate-limit errors
+- **GitHub-recommended delays** - 3 seconds between discussions/comments to stay under secondary rate limits
+- **Resume capability** - Use `--start-from <number>` to resume from a specific discussion if interrupted
+- **Rate limit tracking** - Summary shows how many times primary and secondary rate limits were hit
+
+### User experience
+
+- Colored console output with timestamps for better visibility
+- Comprehensive summary statistics at completion
+- Detailed progress logging for each discussion, comment, and reply
+
+## Configuration options
+
+Edit these constants at the top of the script:
+
+- `INCLUDE_POLL_MERMAID_CHART` - Set to `false` to disable Mermaid pie charts for polls (default: `true`)
+- `RATE_LIMIT_SLEEP_SECONDS` - Sleep duration between API calls (default: `0.5` seconds)
+- `DISCUSSION_PROCESSING_DELAY_SECONDS` - Delay between processing discussions/comments (default: `3` seconds)
+- `MAX_RETRIES` - Maximum retries for both rate-limit and non-rate-limit errors (default: `15`)
+
+## Summary output
+
+After completion, the script displays comprehensive statistics:
+
+- Total discussions found and created
+- Discussions skipped (when using `--start-from`)
+- Total comments found and copied
+- **Primary rate limits hit** - How many times the script hit GitHub's primary rate limit
+- **Secondary rate limits hit** - How many times the script hit GitHub's secondary rate limit
+- List of missing categories that need manual creation
+
+### Example summary output
+
+```text
+[2025-10-02 19:38:44] ============================================================
+[2025-10-02 19:38:44] Discussion copy completed!
+[2025-10-02 19:38:44] Total discussions found: 10
+[2025-10-02 19:38:44] Discussions created: 10
+[2025-10-02 19:38:44] Discussions skipped: 0
+[2025-10-02 19:38:44] Total comments found: 9
+[2025-10-02 19:38:44] Comments copied: 9
+[2025-10-02 19:38:44] Primary rate limits hit: 0
+[2025-10-02 19:38:44] Secondary rate limits hit: 0
+[2025-10-02 19:38:44] WARNING: 
+The following categories were missing and need to be created manually:
+[2025-10-02 19:38:44] WARNING:   - Blog posts!
+[2025-10-02 19:38:44] WARNING: 
+[2025-10-02 19:38:44] WARNING: To create categories manually:
+[2025-10-02 19:38:44] WARNING: 1. Go to https://github.com/joshjohanning-emu/discussions-test/discussions
+[2025-10-02 19:38:44] WARNING: 2. Click 'New discussion'
+[2025-10-02 19:38:44] WARNING: 3. Look for category management options
+[2025-10-02 19:38:44] WARNING: 4. Create the missing categories with appropriate names and descriptions
+[2025-10-02 19:38:44] 
+All done! ✨
+```
+
+## Notes
+
+### Category handling
+
+- If a category doesn't exist in the target repository, discussions will be created in the "General" category as a fallback
+- Missing categories are tracked and reported at the end of the script
+
+### Content preservation
+
+- The script preserves discussion metadata by adding attribution text to the body and comments
+- Poll results are copied as static snapshots - voting is not available in copied discussions
+- Reactions are copied as read-only summaries (users cannot add new reactions to the migrated content)
+- Attachments (images and files) will not copy over and require manual handling
+
+### Discussion states
+
+- Locked discussions will be locked in the target repository
+- Closed discussions will be closed in the target repository
+- Answered discussions will have the same comment marked as the answer
+- Pinned status is indicated in the discussion body (GitHub API doesn't allow pinning via GraphQL)
+
+### Rate limiting
+
+- GitHub limits content-generating requests to avoid abuse
+  - No more than 80 content-generating requests per minute
+  - No more than 500 content-generating requests per hour
+- The script stays under 1 discussion or comment created every 3 seconds (GitHub's recommendation)
+- Automatic retry with wait times from GitHub's `retry-after` headers
+- If rate limits are consistently hit, the script will retry up to 15 times before failing
+
+### Resume capability
+
+- Use `--start-from <number>` to skip discussions before a specific discussion number
+- Useful for resuming after interruptions or failures
+- Discussion numbers are the user-friendly numbers (e.g., #50), not GraphQL IDs

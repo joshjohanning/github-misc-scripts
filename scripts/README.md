@@ -94,6 +94,10 @@ My use case is to use this list to determine who needs to be added to a organiza
 1. Run: `./new-users-to-add-to-project.sh <org> <repo> <file>`
 2. Don't delete the `<file>` as it functions as your user database
 
+## migrate-discussions
+
+See: [migrate-discussions](./migrate-discussions/README.md)
+
 ## migrate-docker-containers-between-github-instances.sh
 
 Migrate Docker Containers in GitHub Packages (GitHub Container Registry) from one GitHub organization to another.
