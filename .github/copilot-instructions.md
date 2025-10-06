@@ -7,7 +7,7 @@ When creating or modifying scripts in the `gh-cli` and `scripts` directories:
 - Ensure the script has input parameters
 - Include input validation and meaningful error messages
 - Ensure the script has a basic description and usage examples at the top
-- Make sure to paginate (`--paginate`) when retrieving results
+- Make sure to paginate (`--paginate` and/or `octokit.paginate`) when retrieving results
 - Note any special permissions/token requirements
 - If modifying input parameters to a script, make sure to update the respective `README.md` in the script directory (if applicable)
 - Use only `2` spaces for indentation - not `4`
