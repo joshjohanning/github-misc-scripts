@@ -109,7 +109,7 @@ My use case is to use this list to determine who needs to be added to a organiza
 1. Run: `./new-users-to-add-to-project.sh <org> <repo> <file>`
 2. Don't delete the `<file>` as it functions as your user database
 
-## github-app-manifest-scripts
+## github-app-manifest-flow
 
 Scripts to create GitHub Apps using the [GitHub App Manifest flow](https://docs.github.com/en/apps/sharing-github-apps/registering-a-github-app-from-a-manifest). The manifest flow allows you to create a GitHub App by posting a JSON manifest to GitHub, which then generates the app credentials.
 
