@@ -4,14 +4,16 @@
 # Script to create a JWT (JSON Web Token) signed with a private RSA key.
 #
 # Usage:
-#   ./create-app-jwt.sh <client_id> <private_key_file>
+#   ./create-app-jwt.sh <app_id_or_client_id> <private_key_file>
 #
 # Arguments:
-#   <client_id>         The client ID to use as the JWT issuer (iss).
-#   <private_key_file>  Path to the PEM-encoded RSA private key file.
+#   <app_id_or_client_id>  The GitHub App ID (integer) or Client ID (Iv1.xxx)
+#                          to use as the JWT issuer (iss). Both work.
+#   <private_key_file>     Path to the PEM-encoded RSA private key file.
 #
 # Example:
-#   ./create-app-jwt.sh my-client-id /path/to/private-key.pem
+#   ./create-app-jwt.sh 123456 /path/to/private-key.pem
+#   ./create-app-jwt.sh Iv1.abc123def456 /path/to/private-key.pem
 #
 # The script outputs the generated JWT to stdout.
 # -----------------------------------------------------------------------------
@@ -20,11 +22,11 @@ set -o pipefail
 # Input validation for required parameters
 if [ -z "$1" ] || [ -z "$2" ]; then
     echo "Error: Missing required parameters." >&2
-    echo "Usage: $0 <client_id> <path_to_private_key_pem>" >&2
+    echo "Usage: $0 <app_id_or_client_id> <path_to_private_key_pem>" >&2
     exit 1
 fi
 
-client_id=$1 # Client ID as first argument
+app_id_or_client_id=$1 # App ID (integer) or Client ID (Iv1.xxx) - both work
 
 # Check if the private key file exists and is readable
 if [ ! -f "$2" ] || [ ! -r "$2" ]; then
@@ -49,7 +51,7 @@ header=$( echo -n "${header_json}" | b64enc )
 payload_json="{
     \"iat\":${iat},
     \"exp\":${exp},
-    \"iss\":\"${client_id}\"
+    \"iss\":\"${app_id_or_client_id}\"
 }"
 # Payload encode
 payload=$( echo -n "${payload_json}" | b64enc )
