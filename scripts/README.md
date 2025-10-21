@@ -36,15 +36,7 @@ Configuration values to change in the script:
 
 Migrate work items from Azure DevOps to GitHub issues - this just links out to a [separate repo](https://github.com/joshjohanning/ado_workitems_to_github_issues)
 
-## delete-branch-protection-rules.ps1
-
-Delete branch protection rules programmatically based on a pattern.
-
-## gei-clean-up-azure-storage-account.sh
-
-Clean up Azure Storage Account Containers from GEI migrations.
-
-## get-app-jwt.py
+## create-app-jwt.py
 
 This script will generate a JWT for a GitHub App. It will use the private key and app ID from the GitHub App's settings page.
 
@@ -54,6 +46,29 @@ This script will generate a JWT for a GitHub App. It will use the private key an
     - The JWT is valid for 10 minutes (maximum)
 
 Script sourced from [GitHub docs](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app#example-using-python-to-generate-a-jwt).
+
+## create-app-jwt.sh
+
+Generate a JWT (JSON Web Token) for a GitHub App using bash. This is a shell script alternative to `create-app-jwt.py`.
+
+Usage:
+
+```bash
+./create-app-jwt.sh <client-id> <path-to-private-key.pem>
+```
+
+The script generates a JWT that is valid for 10 minutes, which can be used to authenticate as a GitHub App and obtain installation tokens.
+
+> [!NOTE]
+> Requires `openssl` to be installed. The JWT can be used with the GitHub API to generate installation access tokens.
+
+## delete-branch-protection-rules.ps1
+
+Delete branch protection rules programmatically based on a pattern.
+
+## gei-clean-up-azure-storage-account.sh
+
+Clean up Azure Storage Account Containers from GEI migrations.
 
 ## get-app-tokens-for-each-installation.sh
 
@@ -93,6 +108,26 @@ My use case is to use this list to determine who needs to be added to a organiza
 
 1. Run: `./new-users-to-add-to-project.sh <org> <repo> <file>`
 2. Don't delete the `<file>` as it functions as your user database
+
+## github-app-manifest-flow
+
+Scripts to create GitHub Apps using the [GitHub App Manifest flow](https://docs.github.com/en/apps/sharing-github-apps/registering-a-github-app-from-a-manifest). The manifest flow allows you to create a GitHub App by posting a JSON manifest to GitHub, which then generates the app credentials.
+
+**Workflow:**
+
+1. **Generate HTML form**: Run `generate-github-app-manifest-form.sh [organization]` to create an HTML file
+2. **Start local server**: Serve the HTML file (e.g., `python3 -m http.server 8000`)
+3. **Create app via browser**: Open the form, submit it to GitHub, and get redirected back with a manifest code
+4. **Convert manifest code**: Use `create-github-app-from-manifest.sh` to convert the code into app credentials
+
+**Scripts:**
+
+- **generate-github-app-manifest-form.sh**: Generates an HTML form for the manifest flow
+- **create-github-app-from-manifest.sh**: Converts manifest code into app credentials with detailed output and error handling
+- **github-app-manifest-form-example.html**: Example HTML form (generated output)
+
+> [!NOTE]
+> Requires `curl`, `jq`, and a classic GitHub personal access token (`ghp_*`). Fine-grained tokens are not supported for the manifest conversion endpoint.
 
 ## migrate-discussions
 

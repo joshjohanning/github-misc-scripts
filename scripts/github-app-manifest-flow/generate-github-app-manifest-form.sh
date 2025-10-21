@@ -1,0 +1,214 @@
+#!/bin/bash
+
+# Generate GitHub App Manifest HTML Form
+# This script creates an HTML file that demonstrates the GitHub App Manifest flow
+#
+# Usage: ./generate-github-app-manifest-form.sh [organization]
+#
+# Example: ./generate-github-app-manifest-form.sh my-org
+#          ./generate-github-app-manifest-form.sh  # for personal account
+#
+# This creates an HTML file that you can open in a browser to test the manifest flow.
+# After submitting the form, GitHub will redirect back with a code that you can use
+# with the create-github-app-from-manifest.sh script.
+#
+# Reference: https://docs.github.com/en/apps/sharing-github-apps/registering-a-github-app-from-a-manifest
+
+set -e
+
+ORGANIZATION="$1"
+OUTPUT_FILE="github-app-manifest-form.html"
+
+# Determine the action URL based on whether an organization is specified
+if [ -n "$ORGANIZATION" ]; then
+  ACTION_URL="https://github.com/organizations/$ORGANIZATION/settings/apps/new?state=abc123"
+  TARGET_TEXT="organization '$ORGANIZATION'"
+else
+  ACTION_URL="https://github.com/settings/apps/new?state=abc123"
+  TARGET_TEXT="your personal account"
+fi
+
+echo "Generating GitHub App Manifest form for $TARGET_TEXT..."
+
+cat >"$OUTPUT_FILE" <<'EOF'
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>GitHub App Manifest Test</title>
+    <style>
+      body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+      .container { background: #f6f8fa; padding: 20px; border-radius: 8px; border: 1px solid #d1d9e0; }
+      textarea { width: 100%; height: 300px; font-family: monospace; }
+      button { background: #2ea043; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; }
+      button:hover { background: #2c974b; }
+      .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 4px; margin: 10px 0; }
+      .info { background: #d1ecf1; border: 1px solid #bee5eb; padding: 10px; border-radius: 4px; margin: 10px 0; }
+      .success { background: #d4edda; border: 1px solid #c3e6cb; padding: 10px; border-radius: 4px; margin: 10px 0; }
+      .code-block { background: #f1f3f4; border: 1px solid #d1d5da; padding: 15px; border-radius: 6px; font-family: monospace; white-space: pre-wrap; margin: 10px 0; }
+      .hidden { display: none; }
+      details { margin: 10px 0; }
+      summary { cursor: pointer; font-weight: bold; padding: 5px; }
+      .dropdown-content { padding: 10px; background: #f8f9fa; border-radius: 4px; margin-top: 5px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>GitHub App Manifest Test</h1>
+
+      <div class="info">
+        <strong>What happens next:</strong>
+        <ol>
+          <li>Start a local server (see instructions below)</li>
+          <li>Click "Create GitHub App" below</li>
+          <li>GitHub will redirect you to review and create the app</li>
+          <li>After creation, GitHub redirects back with a temporary code</li>
+          <li>The code will be automatically displayed and you can copy it</li>
+        </ol>
+      </div>
+
+      <details>
+        <summary>🚀 How to start local server (click to expand)</summary>
+        <div class="dropdown-content">
+          <p>Before using this form, you need to serve this HTML file over HTTP. Run one of these commands in the directory containing this file:</p>
+          <div class="code-block">
+# Python 3
+python3 -m http.server 8000
+
+# Python 2
+python -m SimpleHTTPServer 8000
+
+# Node.js (if you have npx)
+npx http-server -p 8000
+
+# PHP
+php -S localhost:8000
+          </div>
+          <p>Then open: <strong>http://localhost:8000/github-app-manifest-form.html</strong></p>
+        </div>
+      </details>
+
+      <details>
+        <summary>⚠️ Important Notes (click to expand)</summary>
+        <div class="dropdown-content">
+          <div class="warning">
+            <ul>
+              <li><strong>This will create a real GitHub App!</strong> Make sure you understand what you're doing.</li>
+              <li>The app will be created for TARGET_PLACEHOLDER.</li>
+              <li>You can delete the app later from GitHub's settings if needed.</li>
+              <li>Make sure you're accessing this page via http://localhost:8000, not file://</li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <!-- Success message when code is received -->
+      <div id="success-message" class="success hidden">
+        <strong>Success!</strong> Received the manifest code from GitHub:
+        <div class="code-block" id="manifest-code"></div>
+        <p>You can now use this code with the script:</p>
+        <div class="code-block" id="script-command"></div>
+      </div>
+
+      <form action="ACTION_URL_PLACEHOLDER" method="post">
+        <h3>App Manifest Configuration:</h3>
+        <textarea name="manifest" id="manifest" readonly></textarea>
+        <br><br>
+        <button type="submit">Create GitHub App from Manifest</button>
+      </form>
+
+      <details>
+        <summary>📋 How to use the manifest code (click to expand)</summary>
+        <div class="dropdown-content">
+          <p>Once you get the code back from GitHub, you can use it with the conversion script:</p>
+          <div class="code-block">
+./create-github-app-from-manifest.sh YOUR_CODE_HERE
+          </div>
+          <p>Or manually with gh CLI:</p>
+          <div class="code-block">
+gh api \
+  --method POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  /app-manifests/YOUR_CODE_HERE/conversions
+          </div>
+        </div>
+      </details>
+    </div>
+
+      <script>
+      // Determine the current URL - use localhost if we're on a local server
+      let redirectUrl = 'http://localhost:8000/github-app-manifest-form.html';
+
+      // If we're already on a proper HTTP server, use the current location
+      if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+        redirectUrl = window.location.href.split('?')[0]; // Remove any existing query params
+      }
+
+      // Sample manifest configuration
+      const manifest = {
+        "name": "Test App from Manifest",
+        "url": "https://www.example.com",
+        "hook_attributes": {
+          "url": "https://example.com/github/events"
+        },
+        "redirect_url": redirectUrl,
+        "callback_urls": [
+          redirectUrl
+        ],
+        "public": false,
+        "default_permissions": {
+          "metadata": "read",
+          "contents": "read",
+          "issues": "write"
+        },
+        "default_events": [
+          "issues",
+          "issue_comment",
+          "push"
+        ]
+      };
+
+      // Populate the textarea with the manifest JSON
+      document.getElementById('manifest').value = JSON.stringify(manifest, null, 2);
+
+      // Check if we're returning from GitHub with a code
+      window.addEventListener('load', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const state = urlParams.get('state');
+
+        if (code) {
+          // Show success message
+          document.getElementById('success-message').classList.remove('hidden');
+          document.getElementById('manifest-code').textContent = code;
+          document.getElementById('script-command').textContent = `./create-github-app-from-manifest.sh ${code}`;
+
+          // Scroll to success message
+          document.getElementById('success-message').scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    </script>
+  </body>
+</html>
+EOF
+
+# Replace placeholders with actual values
+# Cross-platform approach (works everywhere)
+sed "s|ACTION_URL_PLACEHOLDER|$ACTION_URL|g" "$OUTPUT_FILE" > "$OUTPUT_FILE.tmp"
+mv "$OUTPUT_FILE.tmp" "$OUTPUT_FILE"
+sed "s|TARGET_PLACEHOLDER|$TARGET_TEXT|g" "$OUTPUT_FILE" > "$OUTPUT_FILE.tmp"
+mv "$OUTPUT_FILE.tmp" "$OUTPUT_FILE"
+
+echo "✅ Generated HTML form: $OUTPUT_FILE"
+echo ""
+echo "Next steps:"
+echo "1. Start a local HTTP server in this directory:"
+echo "   python3 -m http.server 8000"
+echo "2. Open http://localhost:8000/$OUTPUT_FILE in your browser"
+echo "3. Click 'Create GitHub App from Manifest'"
+echo "4. Follow GitHub's prompts to create the app"
+echo "5. GitHub will redirect back with a code parameter automatically displayed"
+echo "6. Use that code with: ./create-github-app-from-manifest.sh <code>"
+echo ""
+echo "The form now includes local server setup instructions and automatic code handling!"
