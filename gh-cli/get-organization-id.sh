@@ -2,7 +2,7 @@
 
 if [ -z "$1" ]; then
   echo "Usage: $0 <org>"
-  echo "Example: ./get-enterprise-id.sh joshjohanning-org"
+  echo "Example: ./get-organization-id.sh joshjohanning-org"
   exit 1
 fi
 
@@ -14,7 +14,7 @@ query ($organization: String!)
   { organization(login: $organization) {
     login
     name
-    id 
+    id
   }
 }
 '
