@@ -931,6 +931,19 @@ The list will contain the repository name, source (CODEOWNERS file), and kind of
 
 Repositories with no CODEONWERS files or CODEOWNERS errors will not be listed.
 
+### get-organization-database-id-for-vnet.sh
+
+Retrieves the databaseId of an organization for use with VNet injection configuration.
+
+Usage:
+
+```shell
+./get-organization-databaseId-for-vnet.sh <organization>
+```
+
+> [!NOTE]
+> See [Configuring private networking for GitHub-hosted runners in your organization](https://docs.github.com/en/organizations/managing-organization-settings/configuring-private-networking-for-github-hosted-runners-in-your-organization#1-obtain-the-databaseid-for-your-organization) for more information on using the databaseId with VNet injection
+
 ### get-organization-id.sh
 
 Get the organization ID used for other GraphQL calls. Use the login of the Organization as the input.
