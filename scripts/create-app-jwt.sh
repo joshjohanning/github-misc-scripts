@@ -26,6 +26,11 @@ fi
 
 client_id=$1 # Client ID as first argument
 
+# Check if the private key file exists and is readable
+if [ ! -f "$2" ] || [ ! -r "$2" ]; then
+    echo "Error: Private key file '$2' does not exist or is not readable." >&2
+    exit 1
+fi
 pem=$( cat "$2" ) # file path of the private key as second argument
 
 now=$(date +%s)
