@@ -14,7 +14,7 @@ query ($organization: String!)
   { organization(login: $organization) {
     login
     name
-    id 
+    id
   }
 }
 '
