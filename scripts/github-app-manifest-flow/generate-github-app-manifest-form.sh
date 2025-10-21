@@ -194,9 +194,11 @@ gh api \
 EOF
 
 # Replace placeholders with actual values
-sed -i.bak "s|ACTION_URL_PLACEHOLDER|$ACTION_URL|g" "$OUTPUT_FILE"
-sed -i.bak "s|TARGET_PLACEHOLDER|$TARGET_TEXT|g" "$OUTPUT_FILE"
-rm "$OUTPUT_FILE.bak"
+# Cross-platform approach (works everywhere)
+sed "s|ACTION_URL_PLACEHOLDER|$ACTION_URL|g" "$OUTPUT_FILE" > "$OUTPUT_FILE.tmp"
+mv "$OUTPUT_FILE.tmp" "$OUTPUT_FILE"
+sed "s|TARGET_PLACEHOLDER|$TARGET_TEXT|g" "$OUTPUT_FILE" > "$OUTPUT_FILE.tmp"
+mv "$OUTPUT_FILE.tmp" "$OUTPUT_FILE"
 
 echo "✅ Generated HTML form: $OUTPUT_FILE"
 echo ""
