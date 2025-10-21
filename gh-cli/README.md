@@ -938,7 +938,7 @@ Retrieves the databaseId of an organization for use with VNet injection configur
 Usage:
 
 ```shell
-./get-organization-databaseId-for-vnet.sh <organization>
+./get-organization-database-id-for-vnet.sh <organization>
 ```
 
 > [!NOTE]
