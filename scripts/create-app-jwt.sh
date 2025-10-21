@@ -1,9 +1,32 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
+# -----------------------------------------------------------------------------
+# Script to create a JWT (JSON Web Token) signed with a private RSA key.
+#
+# Usage:
+#   ./create-app-jwt.sh <client_id> <private_key_file>
+#
+# Arguments:
+#   <client_id>         The client ID to use as the JWT issuer (iss).
+#   <private_key_file>  Path to the PEM-encoded RSA private key file.
+#
+# Example:
+#   ./create-app-jwt.sh my-client-id /path/to/private-key.pem
+#
+# The script outputs the generated JWT to stdout.
+# -----------------------------------------------------------------------------
 set -o pipefail
+
+# Input validation for required parameters
+if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "Error: Missing required parameters." >&2
+    echo "Usage: $0 <client_id> <path_to_private_key_pem>" >&2
+    exit 1
+fi
+
 client_id=$1 # Client ID as first argument
 
-pem=$( cat $2 ) # file path of the private key as second argument
+pem=$( cat "$2" ) # file path of the private key as second argument
 
 now=$(date +%s)
 iat=$((${now} - 60)) # Issues 60 seconds in the past

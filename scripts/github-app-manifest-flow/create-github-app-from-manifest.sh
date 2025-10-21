@@ -142,5 +142,5 @@ echo "Important: Save the client_secret, webhook_secret, and pem values securely
 echo "The pem field contains the full RSA private key for the app."
 echo "These credentials cannot be retrieved again through the API."
 echo ""
-echo "� Private key automatically saved to: $PEM_FILENAME"
+echo "🔑 Private key automatically saved to: $PEM_FILENAME"
 echo "💡 You can use this file for GitHub App authentication and JWT generation."
