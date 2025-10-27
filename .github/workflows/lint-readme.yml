@@ -27,7 +27,7 @@ jobs:
 
       - name: Upload lint results
         if: steps.lint.outcome == 'failure' || steps.lint.outcome == 'success'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: gh-cli-readme-lint-results
           path: gh-cli-readme-lint-results.txt
@@ -50,7 +50,7 @@ jobs:
 
       - name: Upload lint results
         if: steps.lint.outcome == 'failure' || steps.lint.outcome == 'success'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: scripts-readme-lint-results
           path: scripts-readme-lint-results.txt
