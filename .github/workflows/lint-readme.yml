@@ -67,7 +67,7 @@ jobs:
 
     steps:
       - name: Download lint results
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           path: ./lint-results/
 
