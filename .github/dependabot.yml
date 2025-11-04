@@ -10,7 +10,7 @@ updates:
     schedule:
       interval: 'weekly'
     commit-message:
-      prefix: 'ci'
+      prefix: 'ci(deps)'
     groups:
       github-actions:
         patterns:
