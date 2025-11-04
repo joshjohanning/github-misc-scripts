@@ -1,0 +1,20 @@
+# The name, including owner of a GitHub repository in the format "ownerName/repoName".
+repo:
+  - joshjohanning/approveops
+  - joshjohanning/bulk-github-repo-settings-sync-action
+  - joshjohanning/bulk-github-repo-sync-action
+  - joshjohanning/nodejs-actions-starter-template
+  - joshjohanning/npm-version-check-action
+  - joshjohanning/organization-readme-badge-generator
+  - joshjohanning/twistlock-results-json-to-markdown-action
+  - joshjohanning/publish-github-action
+  - joshjohanning/generate-org-repos-sbom-action
+  - joshjohanning/actions-ref-linter
+  - joshjohanning/enforce-github-pat-expiration
+  - joshjohanning/revoke-github-ssh-key-sso-authorization
+  - joshjohanning/text-to-emoji-action
+  - joshjohanning/azdo_commit_message_validator
+  - joshjohanning/sync-github-repo-settings
+  - joshjohanning/hsa-expense-analyzer-cli
+  - joshjohanning/make-coverage-badge-better
+  - joshjohanning/github-misc-scripts
