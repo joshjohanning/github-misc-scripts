@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 # Validates that all PRs in a list have the same title
 #
@@ -16,18 +16,18 @@ if [ ! -f "$pr_list_file" ]; then
   exit 1
 fi
 
-typeset -A titles
-typeset -A title_urls
-first_title=""
+# Temporary file to store title|url pairs
+temp_file=$(mktemp)
+trap "rm -f $temp_file" EXIT
 
 while IFS= read -r pr_url || [ -n "$pr_url" ]; do
   [ -z "$pr_url" ] || [[ "$pr_url" == \#* ]] && continue
   pr_url=$(echo "$pr_url" | xargs)
 
   if [[ "$pr_url" =~ ^https://github\.com/([^/]+)/([^/]+)/pull/([0-9]+) ]]; then
-    owner="${match[1]}"
-    repo="${match[2]}"
-    pr_number="${match[3]}"
+    owner="${BASH_REMATCH[1]}"
+    repo="${BASH_REMATCH[2]}"
+    pr_number="${BASH_REMATCH[3]}"
   else
     echo "⚠️  Invalid URL: $pr_url"
     continue
@@ -40,45 +40,32 @@ while IFS= read -r pr_url || [ -n "$pr_url" ]; do
   fi
 
   echo "📋 $owner/$repo#$pr_number: $title"
-
-  if [ -z "$first_title" ]; then
-    first_title="$title"
-  fi
-
-  titles[$title]=$((${titles[$title]:-0} + 1))
-  # Append URL to the list for this title
-  if [ -z "${title_urls[$title]}" ]; then
-    title_urls[$title]="$pr_url"
-  else
-    title_urls[$title]="${title_urls[$title]}|$pr_url"
-  fi
+  echo "$title|$pr_url" >> "$temp_file"
 done < "$pr_list_file"
 
 echo ""
 echo "========================================"
 echo "Title Summary:"
 
-# Find the majority count
-max_count=0
-for title in "${(@k)titles}"; do
-  if [ ${titles[$title]} -gt $max_count ]; then
-    max_count=${titles[$title]}
-  fi
-done
+# Get unique titles with counts, sorted by count descending
+title_counts=$(cut -d'|' -f1 "$temp_file" | sort | uniq -c | sort -rn)
+unique_count=$(echo "$title_counts" | wc -l | xargs)
+max_count=$(echo "$title_counts" | head -1 | awk '{print $1}')
 
-for title in "${(@k)titles}"; do
-  echo "  (${titles[$title]}x) $title"
+echo "$title_counts" | while read -r count title; do
+  echo "  (${count}x) $title"
   # Show URLs for non-majority titles
-  if [ ${titles[$title]} -lt $max_count ]; then
-    echo "${title_urls[$title]}" | tr '|' '\n' | while read -r url; do
+  if [ "$count" -lt "$max_count" ]; then
+    grep "^${title}|" "$temp_file" | cut -d'|' -f2 | while read -r url; do
       echo "       └─ $url"
     done
   fi
 done
+
 echo "========================================"
 
-if [ ${#titles[@]} -eq 1 ]; then
+if [ "$unique_count" -eq 1 ]; then
   echo "✅ All PRs have the same title"
 else
-  echo "⚠️  PRs have ${#titles[@]} different titles"
+  echo "⚠️  PRs have $unique_count different titles"
 fi
