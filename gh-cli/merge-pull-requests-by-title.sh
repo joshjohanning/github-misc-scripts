@@ -135,9 +135,9 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
     jq_pattern="$pr_title_pattern"
   fi
 
-  # Get open PRs and filter by title
-  matching_prs=$(gh pr list --repo "$repo" --state open --json number,title,author --limit 100 2>/dev/null | \
-    jq -r --arg pattern "$jq_pattern" ".[] | $jq_filter | \"\(.number)|\(.title)|\(.author.login)\"")
+  # Get open PRs and filter by title (paginate to get all PRs)
+  matching_prs=$(gh api --paginate "/repos/$repo/pulls?state=open" 2>/dev/null | \
+    jq -r --arg pattern "$jq_pattern" ".[] | $jq_filter | \"\(.number)|\(.title)|\(.user.login)\"")
 
   if [ -z "$matching_prs" ]; then
     echo "  📭 No matching PRs found"
