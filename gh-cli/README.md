@@ -903,7 +903,7 @@ Output:
 🌐 Source URL: https://github.com/joshjohanning-org/export-actions-usage-report
 📍 Migration Source: GHEC Source
 📊 State: SUCCEEDED
-❌ Failure Reason: 
+❌ Failure Reason:
 
 ✅ Migration information retrieved successfully
 ```
@@ -1429,6 +1429,60 @@ Adds users to an organization team from a CSV input list.
 
 Creates a (mostly) empty migration for a given organization repository so that it can create a lock.
 
+### merge-pull-requests-by-title.sh
+
+Finds and merges pull requests matching a title pattern across multiple repositories. Useful for batch merging Dependabot PRs or other automated PRs with similar titles.
+
+```bash
+# Find and merge PRs with exact title match
+./merge-pull-requests-by-title.sh repos.txt "chore(deps-dev): bump eslint from 8.0.0 to 9.0.0"
+
+# Use wildcard to match partial titles
+./merge-pull-requests-by-title.sh repos.txt "chore(deps-dev): bump eslint*"
+
+# With custom commit title
+./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" squash "chore(deps): update dependencies"
+
+# Dry run to preview
+./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" squash "" --dry-run
+```
+
+Input file format (`repos.txt`):
+
+```
+https://github.com/joshjohanning/repo1
+https://github.com/joshjohanning/repo2
+https://github.com/joshjohanning/repo3
+```
+
+### merge-pull-requests-from-list.sh
+
+Merges a list of pull requests from a file containing PR URLs with customizable commit messages. Useful for batch merging similar PRs across multiple repositories (e.g., Dependabot updates). Supports dry-run mode to preview merges.
+
+```bash
+# Basic usage (uses squash merge)
+./merge-pull-requests-from-list.sh prs.txt
+
+# Specify merge method
+./merge-pull-requests-from-list.sh prs.txt merge
+
+# Custom commit title with template variables
+./merge-pull-requests-from-list.sh prs.txt squash "chore(deps): {title}"
+
+# Dry run to preview merges
+./merge-pull-requests-from-list.sh prs.txt squash "" "" --dry-run
+```
+
+Input file format (`prs.txt`):
+
+```
+https://github.com/joshjohanning/repo1/pull/25
+https://github.com/joshjohanning/repo2/pull/37
+https://github.com/joshjohanning/repo3/pull/43
+```
+
+Template variables: `{title}` (PR title), `{number}` (PR number), `{body}` (PR body)
+
 ### parent-organization-teams.sh
 
 Sets the parents of teams in an target organization based on existing child/parent relationship on a source organization teams.
@@ -1598,6 +1652,22 @@ Adds your account to an organization in an enterprise as an owner, member, or le
 ### update-issue-issue-type.sh
 
 Updates / sets the issue type for an issue. See: [Community Discussions Post](https://github.com/orgs/community/discussions/139933)
+
+### validate-pr-titles.sh
+
+Validates that all pull requests in a list have the same title. Useful for checking Dependabot PRs before batch merging to ensure consistency. Shows the majority title and lists any outliers with their URLs.
+
+```bash
+./validate-pr-titles.sh prs.txt
+```
+
+Input file format (`prs.txt`):
+
+```txt
+https://github.com/joshjohanning/repo1/pull/25
+https://github.com/joshjohanning/repo2/pull/37
+https://github.com/joshjohanning/repo3/pull/43
+```
 
 ### verify-team-membership.sh
 
