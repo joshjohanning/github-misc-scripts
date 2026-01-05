@@ -23,6 +23,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "@octokit/auth-app": "^7.0.0",
     "octokit": "^4.0.0"
   },
   "repository": {

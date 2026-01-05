@@ -14,7 +14,7 @@ Generate a comprehensive code scanning coverage report for all repositories in a
 ## Prerequisites
 
 - Node.js 18 or later
-- A GitHub token with `repo` scope
+- A GitHub token with `repo` scope, or GitHub App credentials
 
 ## Installation
 
@@ -72,10 +72,59 @@ node get-code-scanning-coverage-report.js my-org --concurrency 5 --output report
 
 ## Environment Variables
 
+Two authentication methods are supported:
+
+- **Personal Access Token (PAT)**: Simple setup, good for testing or small organizations
+- **GitHub App**: Recommended for production use - provides higher rate limits (5,000 vs 15,000 requests/hour)
+
+### Token Authentication
+
 | Variable | Description |
 |----------|-------------|
-| `GITHUB_TOKEN` | GitHub token with `repo` scope (required) |
+| `GITHUB_TOKEN` | GitHub token with `repo` scope |
 | `GITHUB_API_URL` | API endpoint (defaults to `https://api.github.com`) |
+
+### GitHub App Authentication (recommended)
+
+| Variable | Description |
+|----------|-------------|
+| `GITHUB_APP_ID` | GitHub App ID |
+| `GITHUB_APP_PRIVATE_KEY_PATH` | Path to GitHub App private key file (.pem) |
+| `GITHUB_APP_INSTALLATION_ID` | GitHub App installation ID for the organization |
+| `GITHUB_API_URL` | API endpoint (defaults to `https://api.github.com`) |
+
+**Required GitHub App Permissions:**
+
+Repository permissions:
+
+| Permission | Access | Required For |
+|------------|--------|--------------|
+| Code scanning alerts | Read | Code scanning status, analyses, and alert counts |
+| Metadata | Read | Detecting repository languages (automatic) |
+| Contents | Read | Checking for workflow files (only if using --check-actions) |
+| Actions | Read | Workflow run status (only if using --check-workflows) |
+
+Organization permissions:
+
+| Permission | Access | Required For |
+|------------|--------|--------------|
+| Administration | Read | Listing all repositories in the organization |
+
+**Note:** The app must be installed on the organization with access to the repositories you want to scan (either "All repositories" or selected repositories). The app can only report on repositories it has been granted access to.
+
+**Note:** If GitHub App credentials are provided, they take precedence over `GITHUB_TOKEN`.
+
+### GitHub App Usage Example
+
+```shell
+# Set GitHub App credentials
+export GITHUB_APP_ID=123456
+export GITHUB_APP_PRIVATE_KEY_PATH=/path/to/private-key.pem
+export GITHUB_APP_INSTALLATION_ID=12345678
+
+# Run the report
+node get-code-scanning-coverage-report.js my-org --output report.csv
+```
 
 ## Output Columns
 

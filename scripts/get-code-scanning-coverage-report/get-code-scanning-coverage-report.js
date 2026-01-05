@@ -16,14 +16,20 @@
 //   --help                Show help
 //
 // Environment Variables:
-//   GITHUB_TOKEN          GitHub token with repo scope (required)
-//   GITHUB_API_URL        API endpoint (defaults to https://api.github.com)
+//   GITHUB_TOKEN                    GitHub PAT with repo scope (required if not using App auth)
+//   GITHUB_API_URL                  API endpoint (defaults to https://api.github.com)
+//
+//   GitHub App Authentication (alternative to GITHUB_TOKEN, recommended for higher rate limits):
+//   GITHUB_APP_ID                   GitHub App ID
+//   GITHUB_APP_PRIVATE_KEY_PATH     Path to GitHub App private key file (.pem)
+//   GITHUB_APP_INSTALLATION_ID      GitHub App installation ID for the organization
 //
 // Example:
 //   node get-code-scanning-coverage-report.js my-org --output report.csv
 //
 
 const { Octokit } = require("octokit");
+const { createAppAuth } = require("@octokit/auth-app");
 const fs = require('fs');
 const path = require('path');
 
@@ -157,13 +163,56 @@ Sub-reports (generated with --output):
 
 // Initialize Octokit
 function createOctokit() {
-  const token = process.env.GITHUB_TOKEN;
-  if (!token) {
-    console.error("ERROR: GITHUB_TOKEN environment variable is required");
-    process.exit(1);
+  const baseUrl = process.env.GITHUB_API_URL || 'https://api.github.com';
+
+  // Check for GitHub App authentication
+  const appId = process.env.GITHUB_APP_ID;
+  const privateKeyPath = process.env.GITHUB_APP_PRIVATE_KEY_PATH;
+  const installationId = process.env.GITHUB_APP_INSTALLATION_ID;
+
+  if (appId && privateKeyPath && installationId) {
+    // Use GitHub App authentication
+    console.error('Using GitHub App authentication...');
+
+    // Read private key from file
+    let privateKey;
+    try {
+      privateKey = fs.readFileSync(privateKeyPath, 'utf8');
+    } catch (error) {
+      console.error(`ERROR: Failed to read private key file: ${privateKeyPath}`);
+      console.error(error.message);
+      process.exit(1);
+    }
+
+    return new Octokit({
+      authStrategy: createAppAuth,
+      auth: {
+        appId: parseInt(appId, 10),
+        privateKey,
+        installationId: parseInt(installationId, 10)
+      },
+      baseUrl,
+      throttle: {
+        onRateLimit: (retryAfter, options, octokit) => {
+          console.error(`Rate limit hit, retrying after ${retryAfter} seconds...`);
+          return true;
+        },
+        onSecondaryRateLimit: (retryAfter, options, octokit) => {
+          console.error(`Secondary rate limit hit, retrying after ${retryAfter} seconds...`);
+          return true;
+        }
+      }
+    });
   }
 
-  const baseUrl = process.env.GITHUB_API_URL || 'https://api.github.com';
+  // Fall back to token authentication
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) {
+    console.error("ERROR: Authentication required. Set either:");
+    console.error("  - GITHUB_TOKEN environment variable, or");
+    console.error("  - GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY_PATH, and GITHUB_APP_INSTALLATION_ID");
+    process.exit(1);
+  }
 
   return new Octokit({
     auth: token,
