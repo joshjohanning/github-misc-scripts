@@ -762,6 +762,20 @@ Gets the branch protection status check contexts.
 
 See the [docs](https://docs.github.com/en/rest/branches/branch-protection?apiVersion=2022-11-28#get-all-status-check-contexts) for more information.
 
+### get-code-scanning-coverage-report.sh
+
+Generates a comprehensive code scanning coverage report for all repositories in an organization. The report includes the default branch, last repository update time, detected languages, CodeQL enablement status, latest scan date, scanned languages, unscanned CodeQL-supported languages, open alerts count, and analysis errors/warnings. This helps identify coverage gaps (e.g., a scan done 2 years ago indicates the team is not actively using Code Scanning).
+
+See the script header comments for usage details.
+
+When using `--output`, the script generates actionable sub-reports:
+
+- `*-disabled.csv` - Repos with CodeQL disabled or no scans
+- `*-stale.csv` - Repos modified >90 days after last scan
+- `*-missing-languages.csv` - Repos scanning but missing some CodeQL languages
+- `*-open-alerts.csv` - Repos with open code scanning alerts
+- `*-analysis-issues.csv` - Repos with analysis errors or warnings
+
 ### get-code-scanning-status-for-every-repository.sh
 
 Get code scanning analyses status for every repository in an organization.
