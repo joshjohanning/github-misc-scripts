@@ -70,10 +70,6 @@ Delete branch protection rules programmatically based on a pattern.
 
 Clean up Azure Storage Account Containers from GEI migrations.
 
-## get-code-scanning-coverage-report
-
-See: [get-code-scanning-coverage-report](./get-code-scanning-coverage-report/README.md)
-
 ## get-app-tokens-for-each-installation.sh
 
 This script will generate generate a JWT for a GitHub app and use that JWT to generate installation tokens for each org installation. The installation tokens, returned as `ghs_abc`, can then be used for normal API calls. It will use the private key and app ID from the GitHub App's settings page and the `get-app-jwt.py` script to generate the JWT, and then use the JWT to generate the installation tokens for each org installation.
@@ -99,6 +95,10 @@ Docs:
 - [Generate a JWT for a GitHub App](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app#example-using-python-to-generate-a-jwt)
 - [Generating an installation access token for a GitHub App](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app#generating-an-installation-access-token)
 - [List installations for the authenticated app](https://docs.github.com/en/rest/apps/apps?apiVersion=2022-11-28#list-installations-for-the-authenticated-app)
+
+## get-code-scanning-coverage-report
+
+See: [get-code-scanning-coverage-report](./get-code-scanning-coverage-report/README.md)
 
 ## get-list-of-resolved-secret-scanning-alerts.sh
 
