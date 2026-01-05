@@ -484,9 +484,9 @@ get_unscanned_codeql_languages() {
 
 # CSV header (conditionally include Workflow Status column)
 if [ "$CHECK_WORKFLOWS" -eq 1 ]; then
-  CSV_HEADER="Repository,Default Branch,Last Updated,Languages,CodeQL Enabled,Last Default Branch Scan Date,Scanned Languages,Unscanned CodeQL Languages,Open Alerts,Analysis Errors,Analysis Warnings,Workflow Status"
+  CSV_HEADER="Repository,Default Branch,Last Updated,Archived,Languages,CodeQL Enabled,Last Default Branch Scan Date,Scanned Languages,Unscanned CodeQL Languages,Open Alerts,Analysis Errors,Analysis Warnings,Workflow Status"
 else
-  CSV_HEADER="Repository,Default Branch,Last Updated,Languages,CodeQL Enabled,Last Default Branch Scan Date,Scanned Languages,Unscanned CodeQL Languages,Open Alerts,Analysis Errors,Analysis Warnings"
+  CSV_HEADER="Repository,Default Branch,Last Updated,Archived,Languages,CodeQL Enabled,Last Default Branch Scan Date,Scanned Languages,Unscanned CodeQL Languages,Open Alerts,Analysis Errors,Analysis Warnings"
 fi
 
 # Output function
@@ -521,11 +521,12 @@ if [ -n "$REPO_NAME" ]; then
     repository(owner: $org, name: $repo) {
       name
       updatedAt
+      isArchived
       defaultBranchRef {
         name
       }
     }
-  }' --template '{{.data.repository.name}}|{{.data.repository.updatedAt}}|{{if .data.repository.defaultBranchRef}}{{.data.repository.defaultBranchRef.name}}{{else}}main{{end}}')
+  }' --template '{{.data.repository.name}}|{{.data.repository.updatedAt}}|{{if .data.repository.defaultBranchRef}}{{.data.repository.defaultBranchRef.name}}{{else}}main{{end}}|{{.data.repository.isArchived}}')
 
   if [ -z "$repo_info" ] || [ "$repo_info" = "||" ]; then
     error "Repository $ORG_NAME/$REPO_NAME not found or not accessible"
@@ -548,13 +549,14 @@ query($org: String!, $endCursor: String) {
       nodes {
         name
         updatedAt
+        isArchived
         defaultBranchRef {
           name
         }
       }
     }
   }
-}' --template '{{range .data.organization.repositories.nodes}}{{.name}}|{{.updatedAt}}|{{if .defaultBranchRef}}{{.defaultBranchRef.name}}{{else}}main{{end}}{{"\n"}}{{end}}')
+}' --template '{{range .data.organization.repositories.nodes}}{{.name}}|{{.updatedAt}}|{{if .defaultBranchRef}}{{.defaultBranchRef.name}}{{else}}main{{end}}|{{.isArchived}}{{"\n"}}{{end}}')
 
   # If sample mode, randomly select SAMPLE_SIZE repos
   if [ "$SAMPLE_MODE" -eq 1 ]; then
@@ -564,7 +566,7 @@ query($org: String!, $endCursor: String) {
   fi
 fi
 
-while IFS='|' read -r repo_name repo_updated_raw default_branch; do
+while IFS='|' read -r repo_name repo_updated_raw default_branch is_archived; do
   if [ -z "$repo_name" ]; then
     continue
   fi
@@ -573,6 +575,12 @@ while IFS='|' read -r repo_name repo_updated_raw default_branch; do
   # Default to 'main' if no default branch is set (empty repos)
   if [ -z "$default_branch" ]; then
     default_branch="main"
+  fi
+  # Normalize archived status to Yes/No
+  if [ "$is_archived" = "true" ]; then
+    archived_display="Yes"
+  else
+    archived_display="No"
   fi
 
   total_repos=$((total_repos + 1))
@@ -622,9 +630,9 @@ while IFS='|' read -r repo_name repo_updated_raw default_branch; do
   if [ "$CHECK_WORKFLOWS" -eq 1 ]; then
     # Get CodeQL workflow status (only when --check-workflows is enabled)
     workflow_status=$(get_codeql_workflow_status "$repo_name")
-    csv_line="$repo_name,$default_branch,$repo_updated,$languages,$codeql_status,$last_scan_display,$scanned_languages,$unscanned,$open_alerts,\"$analysis_error\",\"$analysis_warning\",$workflow_status"
+    csv_line="$repo_name,$default_branch,$repo_updated,$archived_display,$languages,$codeql_status,$last_scan_display,$scanned_languages,$unscanned,$open_alerts,\"$analysis_error\",\"$analysis_warning\",$workflow_status"
   else
-    csv_line="$repo_name,$default_branch,$repo_updated,$languages,$codeql_status,$last_scan_display,$scanned_languages,$unscanned,$open_alerts,\"$analysis_error\",\"$analysis_warning\""
+    csv_line="$repo_name,$default_branch,$repo_updated,$archived_display,$languages,$codeql_status,$last_scan_display,$scanned_languages,$unscanned,$open_alerts,\"$analysis_error\",\"$analysis_warning\""
   fi
   output_line "$csv_line"
 
@@ -641,21 +649,22 @@ if [ -n "$OUTPUT_FILE" ]; then
   base_name="${OUTPUT_FILE%.csv}"
 
   # Sub-report 1: Repos with disabled CodeQL (Disabled, No, Requires GHAS, No Scans)
+  # Excludes archived repos since they can't be remediated
   disabled_report="${base_name}-disabled.csv"
   echo "$CSV_HEADER" > "$disabled_report"
-  # Column 5 is CodeQL Enabled
-  awk -F',' 'NR>1 && ($5 ~ /Disabled|^No$|Requires GHAS|No Scans/) {print $0}' "$OUTPUT_FILE" >> "$disabled_report"
+  # Column 4 is Archived, Column 6 is CodeQL Enabled
+  awk -F',' 'NR>1 && $4 != "Yes" && ($6 ~ /Disabled|^No$|Requires GHAS|No Scans/) {print $0}' "$OUTPUT_FILE" >> "$disabled_report"
   disabled_count=$(($(wc -l < "$disabled_report") - 1))
   echo "  - Disabled/Not scanning: $disabled_report ($disabled_count repos)" >&2
 
   # Sub-report 2: Repos with stale scans (repo modified more than 90 days after last scan)
   stale_report="${base_name}-stale.csv"
   echo "$CSV_HEADER" > "$stale_report"
-  # Column 3 is Last Updated, Column 6 is Last Default Branch Scan Date
+  # Column 3 is Last Updated, Column 7 is Last Default Branch Scan Date
   # Stale = repo was modified more than 90 days after the last scan
-  awk -F',' 'NR>1 && $6 != "Never" && $6 != "" {
+  awk -F',' 'NR>1 && $7 != "Never" && $7 != "" {
     last_updated = $3
-    last_scan = $6
+    last_scan = $7
     if (last_updated != "" && last_scan != "") {
       # Add 90 days to last_scan and compare with last_updated
       split(last_scan, d, "-")
@@ -673,27 +682,27 @@ if [ -n "$OUTPUT_FILE" ]; then
   # Sub-report 3: Repos with missing CodeQL languages (only if already scanning something)
   missing_langs_report="${base_name}-missing-languages.csv"
   echo "$CSV_HEADER" > "$missing_langs_report"
-  # Column 5 is CodeQL Enabled (must be "Yes"), Column 8 is Unscanned CodeQL Languages
+  # Column 6 is CodeQL Enabled (must be "Yes"), Column 9 is Unscanned CodeQL Languages
   # Only include repos that are actively scanning but missing some languages
-  awk -F',' 'NR>1 && $5 == "Yes" && $8 != "" && $8 != "None" && $8 != "N/A" {print $0}' "$OUTPUT_FILE" >> "$missing_langs_report"
+  awk -F',' 'NR>1 && $6 == "Yes" && $9 != "" && $9 != "None" && $9 != "N/A" {print $0}' "$OUTPUT_FILE" >> "$missing_langs_report"
   missing_count=$(($(wc -l < "$missing_langs_report") - 1))
   echo "  - Missing CodeQL languages: $missing_langs_report ($missing_count repos)" >&2
 
   # Sub-report 4: Repos with open alerts
   alerts_report="${base_name}-open-alerts.csv"
   echo "$CSV_HEADER" > "$alerts_report"
-  # Column 9 is Open Alerts - filter where > 0
-  awk -F',' 'NR>1 && $9 ~ /^[0-9]+$/ && $9 > 0 {print $0}' "$OUTPUT_FILE" >> "$alerts_report"
+  # Column 10 is Open Alerts - filter where > 0
+  awk -F',' 'NR>1 && $10 ~ /^[0-9]+$/ && $10 > 0 {print $0}' "$OUTPUT_FILE" >> "$alerts_report"
   alerts_count=$(($(wc -l < "$alerts_report") - 1))
   echo "  - Repos with open alerts: $alerts_report ($alerts_count repos)" >&2
 
   # Sub-report 5: Repos with analysis errors or warnings
   errors_report="${base_name}-analysis-issues.csv"
   echo "$CSV_HEADER" > "$errors_report"
-  # Column 10 is Analysis Errors (quoted), Column 11 is Analysis Warnings (quoted)
+  # Column 11 is Analysis Errors (quoted), Column 12 is Analysis Warnings (quoted)
   # Filter where not "None" and not empty (accounting for quotes)
   awk -F',' 'NR>1 {
-    err = $10; warn = $11
+    err = $11; warn = $12
     gsub(/"/, "", err); gsub(/"/, "", warn)
     if ((err != "" && err != "None") || (warn != "" && warn != "None")) print $0
   }' "$OUTPUT_FILE" >> "$errors_report"
