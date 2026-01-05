@@ -1,0 +1,33 @@
+{
+  "name": "get-code-scanning-coverage-report",
+  "version": "1.0.0",
+  "description": "Generate a comprehensive code scanning coverage report for all repositories in a GitHub organization",
+  "main": "get-code-scanning-coverage-report.js",
+  "scripts": {
+    "start": "node get-code-scanning-coverage-report.js",
+    "help": "node get-code-scanning-coverage-report.js --help"
+  },
+  "keywords": [
+    "github",
+    "code-scanning",
+    "codeql",
+    "security",
+    "coverage",
+    "report",
+    "github-api",
+    "octokit"
+  ],
+  "author": "Josh Johanning",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "octokit": "^4.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joshjohanning/github-misc-scripts.git",
+    "directory": "scripts/get-code-scanning-coverage-report"
+  }
+}

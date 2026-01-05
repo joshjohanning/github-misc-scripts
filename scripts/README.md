@@ -70,6 +70,10 @@ Delete branch protection rules programmatically based on a pattern.
 
 Clean up Azure Storage Account Containers from GEI migrations.
 
+## get-code-scanning-coverage-report
+
+See: [get-code-scanning-coverage-report](./get-code-scanning-coverage-report/README.md)
+
 ## get-app-tokens-for-each-installation.sh
 
 This script will generate generate a JWT for a GitHub app and use that JWT to generate installation tokens for each org installation. The installation tokens, returned as `ghs_abc`, can then be used for normal API calls. It will use the private key and app ID from the GitHub App's settings page and the `get-app-jwt.py` script to generate the JWT, and then use the JWT to generate the installation tokens for each org installation.
