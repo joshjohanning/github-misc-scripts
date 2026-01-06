@@ -12,6 +12,7 @@
 //   --sample              Sample 25 random repositories
 //   --check-workflows     Include CodeQL workflow run status column
 //   --check-actions       Check for unscanned GitHub Actions workflows
+//   --check-alerts        Fetch open alert counts (uses more API calls)
 //   --concurrency <n>     Number of concurrent API calls (default: 10)
 //   --help                Show help
 //
@@ -31,7 +32,6 @@
 const { Octokit } = require("octokit");
 const { createAppAuth } = require("@octokit/auth-app");
 const fs = require('fs');
-const path = require('path');
 
 // CodeQL supported languages
 const CODEQL_LANGUAGES = new Set([
@@ -66,6 +66,7 @@ function parseArgs() {
     sample: false,
     checkWorkflows: false,
     checkActions: false,
+    checkAlerts: false,
     concurrency: DEFAULT_CONCURRENCY,
     help: false
   };
@@ -91,6 +92,9 @@ function parseArgs() {
         break;
       case '--check-actions':
         config.checkActions = true;
+        break;
+      case '--check-alerts':
+        config.checkAlerts = true;
         break;
       case '--concurrency':
         config.concurrency = parseInt(args[++i], 10) || DEFAULT_CONCURRENCY;
@@ -124,6 +128,7 @@ Options:
   --sample              Sample ${SAMPLE_SIZE} random repositories
   --check-workflows     Include CodeQL workflow run status column
   --check-actions       Check for unscanned GitHub Actions workflows
+  --check-alerts        Fetch open alert counts (uses more API calls)
   --concurrency <n>     Number of concurrent API calls (default: ${DEFAULT_CONCURRENCY})
   --help                Show this help message
 
@@ -193,11 +198,11 @@ function createOctokit() {
       },
       baseUrl,
       throttle: {
-        onRateLimit: (retryAfter, options, octokit) => {
+        onRateLimit: (retryAfter, _options, _octokit) => {
           console.error(`Rate limit hit, retrying after ${retryAfter} seconds...`);
           return true;
         },
-        onSecondaryRateLimit: (retryAfter, options, octokit) => {
+        onSecondaryRateLimit: (retryAfter, _options, _octokit) => {
           console.error(`Secondary rate limit hit, retrying after ${retryAfter} seconds...`);
           return true;
         }
@@ -218,11 +223,11 @@ function createOctokit() {
     auth: token,
     baseUrl,
     throttle: {
-      onRateLimit: (retryAfter, options, octokit) => {
+      onRateLimit: (retryAfter, _options, _octokit) => {
         console.error(`Rate limit hit, retrying after ${retryAfter} seconds...`);
         return true;
       },
-      onSecondaryRateLimit: (retryAfter, options, octokit) => {
+      onSecondaryRateLimit: (retryAfter, _options, _octokit) => {
         console.error(`Secondary rate limit hit, retrying after ${retryAfter} seconds...`);
         return true;
       }
@@ -312,7 +317,7 @@ async function fetchRepoLanguages(octokit, org, repo) {
 }
 
 // Check CodeQL/code scanning status
-async function checkCodeQLStatus(octokit, org, repo) {
+async function checkCodeQLStatus(octokit, org, repo, isArchived = false) {
   try {
     const { data } = await octokit.rest.codeScanning.listRecentAnalyses({
       owner: org,
@@ -333,7 +338,11 @@ async function checkCodeQLStatus(octokit, org, repo) {
       return 'No Scans';
     }
     if (error.status === 404 || error.status === 403) {
-      return 'No';
+      // Archived repos return 403 - not actionable, so mark as N/A
+      if (isArchived) {
+        return 'N/A';
+      }
+      return 'Disabled';
     }
     return 'Unknown';
   }
@@ -529,9 +538,9 @@ function getUnscannedLanguages(repoLanguages, scannedLanguages, hasWorkflows, ch
 async function processRepository(octokit, org, repo, config) {
   const [languages, codeqlStatus, scanningInfo, openAlerts, hasWorkflows, workflowStatus] = await Promise.all([
     fetchRepoLanguages(octokit, org, repo.name),
-    checkCodeQLStatus(octokit, org, repo.name),
+    checkCodeQLStatus(octokit, org, repo.name, repo.isArchived),
     fetchScanningInfo(octokit, org, repo.name, repo.defaultBranch),
-    fetchOpenAlertsCount(octokit, org, repo.name),
+    config.checkAlerts ? fetchOpenAlertsCount(octokit, org, repo.name) : Promise.resolve(null),
     config.checkActions ? hasGitHubWorkflows(octokit, org, repo.name) : Promise.resolve(false),
     config.checkWorkflows ? fetchCodeQLWorkflowStatus(octokit, org, repo.name) : Promise.resolve(null)
   ]);
@@ -571,7 +580,8 @@ async function processRepositories(octokit, org, repos, config) {
     const batchResults = await Promise.all(
       batch.map((repo, idx) => {
         const num = i + idx + 1;
-        process.stderr.write(`[${num}/${total}] Processing: ${repo.name}\n`);
+        const pct = Math.round((num / total) * 100);
+        process.stderr.write(`[${num}/${total}] (${pct}%) Processing: ${repo.name}\n`);
         return processRepository(octokit, org, repo, config);
       })
     );
@@ -579,6 +589,37 @@ async function processRepositories(octokit, org, repos, config) {
   }
 
   return results;
+}
+
+// Escape CSV field (handles commas, quotes, newlines)
+function escapeCSV(value) {
+  const str = String(value ?? '');
+  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+// Build a CSV row from a result object
+function buildCSVRow(r, config) {
+  const row = [
+    escapeCSV(r.repository),
+    escapeCSV(r.defaultBranch),
+    r.lastUpdated,
+    r.isArchived ? 'Yes' : 'No',
+    escapeCSV(r.languages),
+    r.codeqlEnabled,
+    r.lastScanDate,
+    escapeCSV(r.scannedLanguages),
+    escapeCSV(r.unscannedLanguages),
+    r.openAlerts,
+    escapeCSV(r.analysisError),
+    escapeCSV(r.analysisWarning)
+  ];
+  if (config.checkWorkflows) {
+    row.push(r.workflowStatus);
+  }
+  return row.join(',');
 }
 
 // Generate CSV output
@@ -602,29 +643,7 @@ function generateCSV(results, config) {
     headers.push('Workflow Status');
   }
 
-  const rows = results.map(r => {
-    const row = [
-      r.repository,
-      r.defaultBranch,
-      r.lastUpdated,
-      r.isArchived ? 'Yes' : 'No',
-      r.languages,
-      r.codeqlEnabled,
-      r.lastScanDate,
-      r.scannedLanguages,
-      r.unscannedLanguages,
-      r.openAlerts,
-      `"${r.analysisError}"`,
-      `"${r.analysisWarning}"`
-    ];
-
-    if (config.checkWorkflows) {
-      row.push(r.workflowStatus);
-    }
-
-    return row.join(',');
-  });
-
+  const rows = results.map(r => buildCSVRow(r, config));
   return [headers.join(','), ...rows].join('\n');
 }
 
@@ -633,28 +652,11 @@ function generateSubReports(results, outputFile, config) {
   const baseName = outputFile.replace(/\.csv$/, '');
   const headers = generateCSV([], config).split('\n')[0];
 
-  // Helper to write sub-report
+  // Helper to write sub-report (skips if no matching repos)
   const writeSubReport = (filename, filter, description) => {
     const filtered = results.filter(filter);
-    const csv = [headers, ...filtered.map(r => {
-      const row = [
-        r.repository,
-        r.defaultBranch,
-        r.lastUpdated,
-        r.isArchived ? 'Yes' : 'No',
-        r.languages,
-        r.codeqlEnabled,
-        r.lastScanDate,
-        r.scannedLanguages,
-        r.unscannedLanguages,
-        r.openAlerts,
-        `"${r.analysisError}"`,
-        `"${r.analysisWarning}"`
-      ];
-      if (config.checkWorkflows) row.push(r.workflowStatus);
-      return row.join(',');
-    })].join('\n');
-
+    if (filtered.length === 0) return; // Skip empty sub-reports
+    const csv = [headers, ...filtered.map(r => buildCSVRow(r, config))].join('\n');
     fs.writeFileSync(filename, csv);
     console.error(`  - ${description}: ${filename} (${filtered.length} repos)`);
   };
@@ -727,7 +729,18 @@ async function main() {
     process.exit(1);
   }
 
+  if (config.sample && config.repo) {
+    console.error("ERROR: --sample and --repo cannot be used together");
+    process.exit(1);
+  }
+
   const octokit = createOctokit();
+
+  // Display rate limit info
+  const { data: rateLimit } = await octokit.rest.rateLimit.get();
+  const core = rateLimit.resources.core;
+  const resetTime = new Date(core.reset * 1000).toLocaleTimeString();
+  console.error(`Rate limit: ${core.remaining}/${core.limit} remaining (resets at ${resetTime})`);
 
   // Fetch repositories
   console.error(`Generating code scanning coverage report for: ${config.org}`);
@@ -750,14 +763,56 @@ async function main() {
   // Generate output
   const csv = generateCSV(results, config);
 
+  // Generate summary statistics
+  const summary = results.reduce((acc, r) => {
+    acc[r.codeqlEnabled] = (acc[r.codeqlEnabled] || 0) + 1;
+    if (r.isArchived) acc.archived = (acc.archived || 0) + 1;
+    // Count stale repos (modified >90 days after last scan)
+    if (r.lastScanDate !== 'Never' && r.lastUpdated) {
+      const scanDate = new Date(r.lastScanDate);
+      const cutoffDate = new Date(scanDate);
+      cutoffDate.setDate(cutoffDate.getDate() + 90);
+      if (new Date(r.lastUpdated) > cutoffDate) {
+        acc.stale = (acc.stale || 0) + 1;
+      }
+    }
+    // Count repos with missing languages (only if already scanning)
+    if (r.codeqlEnabled === 'Yes' && r.unscannedLanguages !== 'None' && r.unscannedLanguages !== 'N/A') {
+      acc.missingLanguages = (acc.missingLanguages || 0) + 1;
+    }
+    // Count repos with open alerts
+    if (typeof r.openAlerts === 'number' && r.openAlerts > 0) {
+      acc.openAlerts = (acc.openAlerts || 0) + 1;
+    }
+    // Count repos with analysis issues
+    if ((r.analysisError && r.analysisError !== 'None') || (r.analysisWarning && r.analysisWarning !== 'None')) {
+      acc.analysisIssues = (acc.analysisIssues || 0) + 1;
+    }
+    return acc;
+  }, {});
+
+  const summaryParts = [];
+  if (summary['Yes']) summaryParts.push(`${summary['Yes']} enabled`);
+  if (summary['No Scans']) summaryParts.push(`${summary['No Scans']} no scans`);
+  if (summary['Disabled']) summaryParts.push(`${summary['Disabled']} disabled`);
+  if (summary['Requires GHAS']) summaryParts.push(`${summary['Requires GHAS']} requires GHAS`);
+  if (summary['Unknown']) summaryParts.push(`${summary['Unknown']} unknown`);
+  if (summary.archived) summaryParts.push(`${summary.archived} archived`);
+  if (summary.stale) summaryParts.push(`${summary.stale} stale`);
+  if (summary.missingLanguages) summaryParts.push(`${summary.missingLanguages} missing languages`);
+  if (summary.openAlerts) summaryParts.push(`${summary.openAlerts} with alerts`);
+  if (summary.analysisIssues) summaryParts.push(`${summary.analysisIssues} analysis issues`);
+
   if (config.output) {
     fs.writeFileSync(config.output, csv);
     console.error(`\nReport complete. Processed ${results.length} repositories.`);
+    console.error(`Summary: ${summaryParts.join(', ')}`);
     console.error(`Report saved to: ${config.output}`);
     generateSubReports(results, config.output, config);
   } else {
     console.log(csv);
     console.error(`\nReport complete. Processed ${results.length} repositories.`);
+    console.error(`Summary: ${summaryParts.join(', ')}`);
   }
 }
 
