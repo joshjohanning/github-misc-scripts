@@ -272,6 +272,11 @@ async function fetchRepositories(octokit, org) {
             defaultBranchRef {
               name
             }
+            languages(first: 20) {
+              nodes {
+                name
+              }
+            }
           }
         }
       }
@@ -285,7 +290,8 @@ async function fetchRepositories(octokit, org) {
       name: repo.name,
       updatedAt: repo.updatedAt,
       isArchived: repo.isArchived,
-      defaultBranch: repo.defaultBranchRef?.name || 'main'
+      defaultBranch: repo.defaultBranchRef?.name || 'main',
+      languages: repo.languages?.nodes?.map(l => l.name) || []
     })));
     cursor = data.pageInfo.hasNextPage ? data.pageInfo.endCursor : null;
   } while (cursor);
@@ -304,6 +310,11 @@ async function fetchSingleRepository(octokit, org, repoName) {
         defaultBranchRef {
           name
         }
+        languages(first: 20) {
+          nodes {
+            name
+          }
+        }
       }
     }
   `;
@@ -319,18 +330,9 @@ async function fetchSingleRepository(octokit, org, repoName) {
     name: repo.name,
     updatedAt: repo.updatedAt,
     isArchived: repo.isArchived,
-    defaultBranch: repo.defaultBranchRef?.name || 'main'
+    defaultBranch: repo.defaultBranchRef?.name || 'main',
+    languages: repo.languages?.nodes?.map(l => l.name) || []
   }];
-}
-
-// Fetch repository languages
-async function fetchRepoLanguages(octokit, org, repo) {
-  try {
-    const { data } = await octokit.rest.repos.listLanguages({ owner: org, repo });
-    return Object.keys(data);
-  } catch {
-    return [];
-  }
 }
 
 // Check CodeQL/code scanning status
@@ -553,8 +555,10 @@ function getUnscannedLanguages(repoLanguages, scannedLanguages, hasWorkflows, ch
 
 // Process a single repository
 async function processRepository(octokit, org, repo, config) {
-  const [languages, codeqlStatus, scanningInfo, criticalAlerts, hasWorkflows, workflowStatus] = await Promise.all([
-    fetchRepoLanguages(octokit, org, repo.name),
+  // Languages are now fetched in the initial GraphQL query
+  const languages = repo.languages || [];
+
+  const [codeqlStatus, scanningInfo, criticalAlerts, hasWorkflows, workflowStatus] = await Promise.all([
     checkCodeQLStatus(octokit, org, repo.name, repo.isArchived),
     fetchScanningInfo(octokit, org, repo.name, repo.defaultBranch),
     config.checkAlerts ? fetchCriticalAlertsCount(octokit, org, repo.name) : Promise.resolve(null),
