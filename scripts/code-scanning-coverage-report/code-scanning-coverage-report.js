@@ -39,6 +39,9 @@ const CODEQL_LANGUAGES = new Set([
   'javascript', 'typescript', 'python', 'ruby', 'swift'
 ]);
 
+// API call counter
+let apiCallCount = 0;
+
 // Language normalization map (GitHub language -> CodeQL language name)
 const LANGUAGE_NORMALIZE = {
   'c#': 'csharp',
@@ -152,7 +155,7 @@ Output Columns:
   - Last Default Branch Scan Date: Date of most recent scan on default branch
   - Scanned Languages: Languages scanned by CodeQL
   - Unscanned CodeQL Languages: CodeQL-supported languages not being scanned
-  - Open Alerts: Number of open code scanning alerts
+  - Critical Alerts: Number of open critical severity alerts
   - Analysis Errors: Errors from most recent analysis
   - Analysis Warnings: Warnings from most recent analysis
   - Workflow Status: (with --check-workflows) CodeQL workflow run status
@@ -161,7 +164,7 @@ Sub-reports (generated with --output):
   - *-disabled.csv: Repos with CodeQL disabled or no scans
   - *-stale.csv: Repos modified >90 days after last scan
   - *-missing-languages.csv: Repos scanning but missing some CodeQL languages
-  - *-open-alerts.csv: Repos with open code scanning alerts
+  - *-critical-alerts.csv: Repos with open critical severity alerts
   - *-analysis-issues.csv: Repos with analysis errors or warnings
 `);
 }
@@ -189,7 +192,7 @@ function createOctokit() {
       process.exit(1);
     }
 
-    return new Octokit({
+    const octokit = new Octokit({
       authStrategy: createAppAuth,
       auth: {
         appId: appId,
@@ -208,6 +211,13 @@ function createOctokit() {
         }
       }
     });
+
+    // Add hook to count API calls
+    octokit.hook.before('request', () => {
+      apiCallCount++;
+    });
+
+    return octokit;
   }
 
   // Fall back to token authentication
@@ -219,7 +229,7 @@ function createOctokit() {
     process.exit(1);
   }
 
-  return new Octokit({
+  const octokit = new Octokit({
     auth: token,
     baseUrl,
     throttle: {
@@ -233,6 +243,13 @@ function createOctokit() {
       }
     }
   });
+
+  // Add hook to count API calls
+  octokit.hook.before('request', () => {
+    apiCallCount++;
+  });
+
+  return octokit;
 }
 
 // Fetch all repositories in an organization using GraphQL
@@ -396,13 +413,13 @@ async function fetchScanningInfo(octokit, org, repo, defaultBranch) {
   }
 }
 
-// Get open alerts count
-async function fetchOpenAlertsCount(octokit, org, repo) {
+// Get critical alerts count
+async function fetchCriticalAlertsCount(octokit, org, repo) {
   try {
     let count = 0;
     for await (const response of octokit.paginate.iterator(
       octokit.rest.codeScanning.listAlertsForRepo,
-      { owner: org, repo, state: 'open', per_page: 100 }
+      { owner: org, repo, state: 'open', severity: 'critical', per_page: 100 }
     )) {
       count += response.data.length;
     }
@@ -536,11 +553,11 @@ function getUnscannedLanguages(repoLanguages, scannedLanguages, hasWorkflows, ch
 
 // Process a single repository
 async function processRepository(octokit, org, repo, config) {
-  const [languages, codeqlStatus, scanningInfo, openAlerts, hasWorkflows, workflowStatus] = await Promise.all([
+  const [languages, codeqlStatus, scanningInfo, criticalAlerts, hasWorkflows, workflowStatus] = await Promise.all([
     fetchRepoLanguages(octokit, org, repo.name),
     checkCodeQLStatus(octokit, org, repo.name, repo.isArchived),
     fetchScanningInfo(octokit, org, repo.name, repo.defaultBranch),
-    config.checkAlerts ? fetchOpenAlertsCount(octokit, org, repo.name) : Promise.resolve(null),
+    config.checkAlerts ? fetchCriticalAlertsCount(octokit, org, repo.name) : Promise.resolve(null),
     config.checkActions ? hasGitHubWorkflows(octokit, org, repo.name) : Promise.resolve(false),
     config.checkWorkflows ? fetchCodeQLWorkflowStatus(octokit, org, repo.name) : Promise.resolve(null)
   ]);
@@ -562,7 +579,7 @@ async function processRepository(octokit, org, repo, config) {
     lastScanDate: scanningInfo.lastScanDate ? scanningInfo.lastScanDate.split('T')[0] : 'Never',
     scannedLanguages: scanningInfo.scannedLanguages.join(';'),
     unscannedLanguages: unscanned === null ? 'N/A' : (unscanned.length === 0 ? 'None' : unscanned.join(';')),
-    openAlerts: openAlerts === null ? 'N/A' : openAlerts,
+    criticalAlerts: criticalAlerts === null ? 'N/A' : criticalAlerts,
     analysisError: scanningInfo.analysisError || 'None',
     analysisWarning: scanningInfo.analysisWarning || 'None',
     workflowStatus
@@ -612,7 +629,7 @@ function buildCSVRow(r, config) {
     r.lastScanDate,
     escapeCSV(r.scannedLanguages),
     escapeCSV(r.unscannedLanguages),
-    r.openAlerts,
+    r.criticalAlerts,
     escapeCSV(r.analysisError),
     escapeCSV(r.analysisWarning)
   ];
@@ -634,7 +651,7 @@ function generateCSV(results, config) {
     'Last Default Branch Scan Date',
     'Scanned Languages',
     'Unscanned CodeQL Languages',
-    'Open Alerts',
+    'Critical Alerts',
     'Analysis Errors',
     'Analysis Warnings'
   ];
@@ -688,11 +705,11 @@ function generateSubReports(results, outputFile, config) {
     'Missing CodeQL languages'
   );
 
-  // Open alerts
+  // Critical alerts
   writeSubReport(
-    `${baseName}-open-alerts.csv`,
-    r => typeof r.openAlerts === 'number' && r.openAlerts > 0,
-    'Repos with open alerts'
+    `${baseName}-critical-alerts.csv`,
+    r => typeof r.criticalAlerts === 'number' && r.criticalAlerts > 0,
+    'Repos with critical alerts'
   );
 
   // Analysis issues
@@ -780,9 +797,9 @@ async function main() {
     if (r.codeqlEnabled === 'Yes' && r.unscannedLanguages !== 'None' && r.unscannedLanguages !== 'N/A') {
       acc.missingLanguages = (acc.missingLanguages || 0) + 1;
     }
-    // Count repos with open alerts
-    if (typeof r.openAlerts === 'number' && r.openAlerts > 0) {
-      acc.openAlerts = (acc.openAlerts || 0) + 1;
+    // Count repos with critical alerts
+    if (typeof r.criticalAlerts === 'number' && r.criticalAlerts > 0) {
+      acc.criticalAlerts = (acc.criticalAlerts || 0) + 1;
     }
     // Count repos with analysis issues
     if ((r.analysisError && r.analysisError !== 'None') || (r.analysisWarning && r.analysisWarning !== 'None')) {
@@ -800,7 +817,7 @@ async function main() {
   if (summary.archived) summaryParts.push(`${summary.archived} archived`);
   if (summary.stale) summaryParts.push(`${summary.stale} stale`);
   if (summary.missingLanguages) summaryParts.push(`${summary.missingLanguages} missing languages`);
-  if (summary.openAlerts) summaryParts.push(`${summary.openAlerts} with alerts`);
+  if (summary.criticalAlerts) summaryParts.push(`${summary.criticalAlerts} with critical alerts`);
   if (summary.analysisIssues) summaryParts.push(`${summary.analysisIssues} analysis issues`);
 
   if (config.output) {
@@ -814,6 +831,9 @@ async function main() {
     console.error(`\nReport complete. Processed ${results.length} repositories.`);
     console.error(`Summary: ${summaryParts.join(', ')}`);
   }
+
+  // Display API call count
+  console.error(`API calls used: ${apiCallCount}`);
 }
 
 main().catch(err => {
