@@ -982,8 +982,7 @@ describe('generateSubReports', () => {
 
     // Stale file should not exist (no stale repos)
     const staleFile = testOutputFile.replace('.csv', '-stale.csv');
-    // The file might exist from previous test, so we check the content or re-run
-    // Actually the afterEach cleans up, so if it exists it should have content
+    expect(fs.existsSync(staleFile)).toBe(false);
   });
 });
 
