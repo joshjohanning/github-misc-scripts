@@ -20,7 +20,7 @@
 //   GITHUB_API_URL                  API endpoint (defaults to https://api.github.com)
 //
 //   GitHub App Authentication (alternative to GITHUB_TOKEN, recommended for higher rate limits):
-//   GITHUB_APP_ID                   GitHub App ID
+//   GITHUB_APP_ID                   GitHub App ID (numeric) or Client ID (starts with "Iv")
 //   GITHUB_APP_PRIVATE_KEY_PATH     Path to GitHub App private key file (.pem)
 //   GITHUB_APP_INSTALLATION_ID      GitHub App installation ID for the organization
 //
@@ -187,7 +187,7 @@ function createOctokit() {
     return new Octokit({
       authStrategy: createAppAuth,
       auth: {
-        appId: parseInt(appId, 10),
+        appId: appId,
         privateKey,
         installationId: parseInt(installationId, 10)
       },
