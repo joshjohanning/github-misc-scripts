@@ -4,7 +4,7 @@
 // Generate a comprehensive code scanning coverage report for all repositories in a GitHub organization
 //
 // Usage:
-//   node get-code-scanning-coverage-report.js <organization> [options]
+//   node code-scanning-coverage-report.js <organization> [options]
 //
 // Options:
 //   --output <file>       Write CSV to file (also generates sub-reports)
@@ -25,7 +25,7 @@
 //   GITHUB_APP_INSTALLATION_ID      GitHub App installation ID for the organization
 //
 // Example:
-//   node get-code-scanning-coverage-report.js my-org --output report.csv
+//   node code-scanning-coverage-report.js my-org --output report.csv
 //
 
 const { Octokit } = require("octokit");
@@ -113,7 +113,7 @@ function showHelp() {
 Generate a comprehensive code scanning coverage report for all repositories in a GitHub organization.
 
 Usage:
-  node get-code-scanning-coverage-report.js <organization> [options]
+  node code-scanning-coverage-report.js <organization> [options]
 
 Arguments:
   organization          GitHub organization name
@@ -132,11 +132,11 @@ Environment Variables:
   GITHUB_API_URL        API endpoint (defaults to https://api.github.com)
 
 Examples:
-  node get-code-scanning-coverage-report.js my-org
-  node get-code-scanning-coverage-report.js my-org --output report.csv
-  node get-code-scanning-coverage-report.js my-org --repo my-repo
-  node get-code-scanning-coverage-report.js my-org --sample --output sample.csv
-  node get-code-scanning-coverage-report.js my-org --check-workflows --check-actions
+  node code-scanning-coverage-report.js my-org
+  node code-scanning-coverage-report.js my-org --output report.csv
+  node code-scanning-coverage-report.js my-org --repo my-repo
+  node code-scanning-coverage-report.js my-org --sample --output sample.csv
+  node code-scanning-coverage-report.js my-org --check-workflows --check-actions
 
 Output Columns:
   - Repository: Repository name
@@ -722,7 +722,7 @@ async function main() {
 
   if (!config.org) {
     console.error("ERROR: Organization name is required");
-    console.error("Usage: node get-code-scanning-coverage-report.js <organization> [options]");
+    console.error("Usage: node code-scanning-coverage-report.js <organization> [options]");
     console.error("Use --help for more information");
     process.exit(1);
   }

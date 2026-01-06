@@ -1,11 +1,11 @@
 {
-  "name": "get-code-scanning-coverage-report",
+  "name": "code-scanning-coverage-report",
   "version": "1.0.0",
   "description": "Generate a comprehensive code scanning coverage report for all repositories in a GitHub organization",
-  "main": "get-code-scanning-coverage-report.js",
+  "main": "code-scanning-coverage-report.js",
   "scripts": {
-    "start": "node get-code-scanning-coverage-report.js",
-    "help": "node get-code-scanning-coverage-report.js --help"
+    "start": "node code-scanning-coverage-report.js",
+    "help": "node code-scanning-coverage-report.js --help"
   },
   "keywords": [
     "github",
@@ -29,6 +29,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/joshjohanning/github-misc-scripts.git",
-    "directory": "scripts/get-code-scanning-coverage-report"
+    "directory": "scripts/code-scanning-coverage-report"
   }
 }

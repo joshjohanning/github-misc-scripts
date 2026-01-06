@@ -1,4 +1,4 @@
-# get-code-scanning-coverage-report
+# code-scanning-coverage-report
 
 Generate a comprehensive code scanning coverage report for all repositories in a GitHub organization.
 
@@ -19,7 +19,7 @@ Generate a comprehensive code scanning coverage report for all repositories in a
 ## Installation
 
 ```shell
-cd scripts/get-code-scanning-coverage-report
+cd scripts/code-scanning-coverage-report
 npm install
 ```
 
@@ -33,29 +33,29 @@ export GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 # export GITHUB_TOKEN=$(gh auth token)
 
 # Basic usage - output to stdout
-node get-code-scanning-coverage-report.js my-org
+node code-scanning-coverage-report.js my-org
 
 # Output to file (also generates sub-reports)
-node get-code-scanning-coverage-report.js my-org --output report.csv
+node code-scanning-coverage-report.js my-org --output report.csv
 
 # Check a single repository
-node get-code-scanning-coverage-report.js my-org --repo my-repo
+node code-scanning-coverage-report.js my-org --repo my-repo
 
 # Sample 25 random repositories
-node get-code-scanning-coverage-report.js my-org --sample --output sample.csv
+node code-scanning-coverage-report.js my-org --sample --output sample.csv
 
 # Include workflow status column
-node get-code-scanning-coverage-report.js my-org --check-workflows --output report.csv
+node code-scanning-coverage-report.js my-org --check-workflows --output report.csv
 
 # Check for unscanned GitHub Actions workflows
-node get-code-scanning-coverage-report.js my-org --check-actions --output report.csv
+node code-scanning-coverage-report.js my-org --check-actions --output report.csv
 
 # Use with GitHub Enterprise Server
 export GITHUB_API_URL=https://github.example.com/api/v3
-node get-code-scanning-coverage-report.js my-org --output report.csv
+node code-scanning-coverage-report.js my-org --output report.csv
 
 # Adjust concurrency (default: 10)
-node get-code-scanning-coverage-report.js my-org --concurrency 5 --output report.csv
+node code-scanning-coverage-report.js my-org --concurrency 5 --output report.csv
 ```
 
 ## Options
@@ -123,7 +123,7 @@ export GITHUB_APP_PRIVATE_KEY_PATH=/path/to/private-key.pem
 export GITHUB_APP_INSTALLATION_ID=12345678
 
 # Run the report
-node get-code-scanning-coverage-report.js my-org --output report.csv
+node code-scanning-coverage-report.js my-org --output report.csv
 ```
 
 ## Output Columns
@@ -180,7 +180,7 @@ new-project,main,2025-12-20,Go;Python,No Scans,Never,,go;python,N/A,"",""
 <!-- Remove this section when the bash script is deleted
 ## Comparison with Bash Version
 
-This Node.js version offers several advantages over the bash script (`gh-cli/get-code-scanning-coverage-report.sh`):
+This Node.js version offers several advantages over the bash script (`gh-cli/code-scanning-coverage-report.sh`):
 
 - **Faster**: Parallel API calls (configurable concurrency)
 - **More reliable**: Proper JSON handling, no regex parsing issues

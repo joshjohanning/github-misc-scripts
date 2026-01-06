@@ -96,9 +96,9 @@ Docs:
 - [Generating an installation access token for a GitHub App](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app#generating-an-installation-access-token)
 - [List installations for the authenticated app](https://docs.github.com/en/rest/apps/apps?apiVersion=2022-11-28#list-installations-for-the-authenticated-app)
 
-## get-code-scanning-coverage-report
+## code-scanning-coverage-report
 
-See: [get-code-scanning-coverage-report](./get-code-scanning-coverage-report/README.md)
+See: [code-scanning-coverage-report](./code-scanning-coverage-report/README.md)
 
 ## get-list-of-resolved-secret-scanning-alerts.sh
 
