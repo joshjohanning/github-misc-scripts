@@ -45,10 +45,10 @@ node code-scanning-coverage-report.js my-org --repo my-repo
 node code-scanning-coverage-report.js my-org --sample --output sample.csv
 
 # Include workflow status column
-node code-scanning-coverage-report.js my-org --check-workflows --output report.csv
+node code-scanning-coverage-report.js my-org --check-workflow-status --output report.csv
 
 # Check for unscanned GitHub Actions workflows
-node code-scanning-coverage-report.js my-org --check-actions --output report.csv
+node code-scanning-coverage-report.js my-org --check-unscanned-actions --output report.csv
 
 # Use with GitHub Enterprise Server
 export GITHUB_API_URL=https://github.example.com/api/v3
@@ -65,10 +65,27 @@ node code-scanning-coverage-report.js my-org --concurrency 5 --output report.csv
 | `--output <file>` | Write CSV to file (also generates sub-reports) |
 | `--repo <repo>` | Check a single repository instead of all repos |
 | `--sample` | Sample 25 random repositories |
-| `--check-workflows` | Include CodeQL workflow run status column |
-| `--check-actions` | Check for unscanned GitHub Actions workflows |
+| `--check-workflow-status` | Check CodeQL workflow run status (success/failure) |
+| `--check-unscanned-actions` | Check if repos have Actions workflows not being scanned |
 | `--concurrency <n>` | Number of concurrent API calls (default: 10) |
 | `--help` | Show help message |
+
+## API Usage
+
+Default options use approximately **2 API calls per repository**:
+
+- With a **Personal Access Token** (5,000 requests/hour): supports up to ~2,500 repos
+- With **GitHub App authentication** (15,000 requests/hour): supports up to ~7,500 repos
+
+Optional flags increase API usage:
+
+| Flag | Additional Calls |
+|------|------------------|
+| `--fetch-alerts` | +1 call per repo (paginated for repos with many alerts) |
+| `--check-workflow-status` | +1-2 calls per repo |
+| `--check-unscanned-actions` | +1 call per repo |
+
+The script displays your current rate limit at startup and total API calls used at completion.
 
 ## Environment Variables
 
@@ -102,7 +119,7 @@ Repository permissions:
 | Code scanning alerts | Read | Code scanning status, analyses, and alert counts |
 | Contents | Read | Listing repositories and checking for workflow files |
 | Metadata | Read | Detecting repository languages (this is automatically added) |
-| Actions | Read | Workflow run status (only if using --check-workflows) |
+| Actions | Read | Workflow run status (only if using --check-workflow-status) |
 
 Organization permissions:
 
@@ -141,7 +158,7 @@ node code-scanning-coverage-report.js my-org --output report.csv
 | Open Alerts | Number of open code scanning alerts |
 | Analysis Errors | Errors from most recent analysis |
 | Analysis Warnings | Warnings from most recent analysis |
-| Workflow Status | (with `--check-workflows`) `OK`, `Failing`, `No workflow`, or `Unknown` |
+| Workflow Status | (with `--check-workflow-status`) `OK`, `Failing`, `No workflow`, or `Unknown` |
 
 ## Sub-reports
 

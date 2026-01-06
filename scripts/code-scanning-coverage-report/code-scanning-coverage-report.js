@@ -10,9 +10,9 @@
 //   --output <file>       Write CSV to file (also generates sub-reports)
 //   --repo <repo>         Check a single repository instead of all repos
 //   --sample              Sample 25 random repositories
-//   --check-workflows     Include CodeQL workflow run status column
-//   --check-actions       Check for unscanned GitHub Actions workflows
-//   --check-alerts        Fetch open alert counts (uses more API calls)
+//   --check-workflow-status    Check CodeQL workflow run status (success/failure)
+//   --check-unscanned-actions  Check if repos have Actions workflows not being scanned
+//   --fetch-alerts        Fetch open alert counts (uses more API calls)
 //   --concurrency <n>     Number of concurrent API calls (default: 10)
 //   --help                Show help
 //
@@ -68,9 +68,9 @@ function parseArgs() {
     output: null,
     repo: null,
     sample: false,
-    checkWorkflows: false,
-    checkActions: false,
-    checkAlerts: false,
+    checkWorkflowStatus: false,
+    checkUnscannedActions: false,
+    fetchAlerts: false,
     concurrency: DEFAULT_CONCURRENCY,
     help: false
   };
@@ -91,14 +91,14 @@ function parseArgs() {
       case '--sample':
         config.sample = true;
         break;
-      case '--check-workflows':
-        config.checkWorkflows = true;
+      case '--check-workflow-status':
+        config.checkWorkflowStatus = true;
         break;
-      case '--check-actions':
-        config.checkActions = true;
+      case '--check-unscanned-actions':
+        config.checkUnscannedActions = true;
         break;
-      case '--check-alerts':
-        config.checkAlerts = true;
+      case '--fetch-alerts':
+        config.fetchAlerts = true;
         break;
       case '--concurrency':
         config.concurrency = parseInt(args[++i], 10) || DEFAULT_CONCURRENCY;
@@ -130,9 +130,9 @@ Options:
   --output <file>       Write CSV to file (also generates sub-reports)
   --repo <repo>         Check a single repository instead of all repos
   --sample              Sample ${SAMPLE_SIZE} random repositories
-  --check-workflows     Include CodeQL workflow run status column
-  --check-actions       Check for unscanned GitHub Actions workflows
-  --check-alerts        Fetch open alert counts (uses more API calls)
+  --check-workflow-status    Check CodeQL workflow run status (success/failure)
+  --check-unscanned-actions  Check if repos have Actions workflows not being scanned
+  --fetch-alerts        Fetch open alert counts (uses more API calls)
   --concurrency <n>     Number of concurrent API calls (default: ${DEFAULT_CONCURRENCY})
   --help                Show this help message
 
@@ -145,7 +145,7 @@ Examples:
   node code-scanning-coverage-report.js my-org --output report.csv
   node code-scanning-coverage-report.js my-org --repo my-repo
   node code-scanning-coverage-report.js my-org --sample --output sample.csv
-  node code-scanning-coverage-report.js my-org --check-workflows --check-actions
+  node code-scanning-coverage-report.js my-org --check-workflow-status --check-unscanned-actions
 
 Output Columns:
   - Repository: Repository name
@@ -159,7 +159,7 @@ Output Columns:
   - Critical Alerts: Number of open critical severity alerts
   - Analysis Errors: Errors from most recent analysis
   - Analysis Warnings: Warnings from most recent analysis
-  - Workflow Status: (with --check-workflows) CodeQL workflow run status
+  - Workflow Status: (with --check-workflow-status) CodeQL workflow run status
 
 Sub-reports (generated with --output):
   - *-disabled.csv: Repos with CodeQL disabled or no scans
@@ -167,6 +167,11 @@ Sub-reports (generated with --output):
   - *-missing-languages.csv: Repos scanning but missing some CodeQL languages
   - *-critical-alerts.csv: Repos with open critical severity alerts
   - *-analysis-issues.csv: Repos with analysis errors or warnings
+
+API Usage:
+  Default options use ~2 API calls per repository. With GitHub App auth
+  (15,000 requests/hour), this supports organizations up to ~7,500 repos.
+  Optional flags like --fetch-alerts and --check-workflow-status increase API usage.
 `);
 }
 
@@ -562,16 +567,16 @@ async function processRepository(octokit, org, repo, config) {
   const [codeqlStatus, scanningInfo, criticalAlerts, hasWorkflows, workflowStatus] = await Promise.all([
     checkCodeQLStatus(octokit, org, repo.name, repo.isArchived),
     fetchScanningInfo(octokit, org, repo.name, repo.defaultBranch),
-    config.checkAlerts ? fetchCriticalAlertsCount(octokit, org, repo.name) : Promise.resolve(null),
-    config.checkActions ? hasGitHubWorkflows(octokit, org, repo.name) : Promise.resolve(false),
-    config.checkWorkflows ? fetchCodeQLWorkflowStatus(octokit, org, repo.name) : Promise.resolve(null)
+    config.fetchAlerts ? fetchCriticalAlertsCount(octokit, org, repo.name) : Promise.resolve(null),
+    config.checkUnscannedActions ? hasGitHubWorkflows(octokit, org, repo.name) : Promise.resolve(false),
+    config.checkWorkflowStatus ? fetchCodeQLWorkflowStatus(octokit, org, repo.name) : Promise.resolve(null)
   ]);
 
   const unscanned = getUnscannedLanguages(
     languages,
     scanningInfo.scannedLanguages,
     hasWorkflows,
-    config.checkActions
+    config.checkUnscannedActions
   );
 
   return {
@@ -638,7 +643,7 @@ function buildCSVRow(r, config) {
     escapeCSV(r.analysisError),
     escapeCSV(r.analysisWarning)
   ];
-  if (config.checkWorkflows) {
+  if (config.checkWorkflowStatus) {
     row.push(r.workflowStatus);
   }
   return row.join(',');
@@ -661,7 +666,7 @@ function generateCSV(results, config) {
     'Analysis Warnings'
   ];
 
-  if (config.checkWorkflows) {
+  if (config.checkWorkflowStatus) {
     headers.push('Workflow Status');
   }
 
