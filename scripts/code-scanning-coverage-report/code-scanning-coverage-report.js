@@ -29,9 +29,10 @@
 //   node code-scanning-coverage-report.js my-org --output report.csv
 //
 
-const { Octokit } = require("octokit");
-const { createAppAuth } = require("@octokit/auth-app");
-const fs = require('fs');
+import { Octokit } from "octokit";
+import { createAppAuth } from "@octokit/auth-app";
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 
 // CodeQL supported languages
 const CODEQL_LANGUAGES = new Set([
@@ -840,7 +841,30 @@ async function main() {
   console.error(`API calls used: ${apiCallCount}`);
 }
 
-main().catch(err => {
-  console.error(`ERROR: ${err.message}`);
-  process.exit(1);
-});
+// Only run main() if this is the entry point (not being imported for testing)
+const isMainModule = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
+if (isMainModule) {
+  main().catch(err => {
+    console.error(`ERROR: ${err.message}`);
+    process.exit(1);
+  });
+}
+
+// Export functions for testing
+export {
+  checkCodeQLStatus,
+  fetchScanningInfo,
+  fetchCriticalAlertsCount,
+  hasGitHubWorkflows,
+  fetchCodeQLWorkflowStatus,
+  isCodeQLLanguage,
+  getUnscannedLanguages,
+  processRepository,
+  processRepositories,
+  escapeCSV,
+  buildCSVRow,
+  generateCSV,
+  generateSubReports,
+  CODEQL_LANGUAGES,
+  LANGUAGE_NORMALIZE
+};
