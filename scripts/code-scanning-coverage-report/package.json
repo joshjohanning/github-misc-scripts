@@ -26,7 +26,8 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "octokit": "^5.0.0"
+    "octokit": "^5.0.0",
+    "@octokit/auth-app": "7.1.5"
   },
   "devDependencies": {
     "jest": "^30.0.0"
