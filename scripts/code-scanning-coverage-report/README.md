@@ -100,8 +100,8 @@ Repository permissions:
 | Permission | Access | Required For |
 |------------|--------|--------------|
 | Code scanning alerts | Read | Code scanning status, analyses, and alert counts |
-| Metadata | Read | Detecting repository languages (automatic) |
-| Contents | Read | Checking for workflow files (only if using --check-actions) |
+| Contents | Read | Listing repositories and checking for workflow files |
+| Metadata | Read | Detecting repository languages (this is automatically added) |
 | Actions | Read | Workflow run status (only if using --check-workflows) |
 
 Organization permissions:
