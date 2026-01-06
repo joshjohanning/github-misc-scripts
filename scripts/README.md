@@ -36,6 +36,10 @@ Configuration values to change in the script:
 
 Migrate work items from Azure DevOps to GitHub issues - this just links out to a [separate repo](https://github.com/joshjohanning/ado_workitems_to_github_issues)
 
+## code-scanning-coverage-report
+
+See: [code-scanning-coverage-report](./code-scanning-coverage-report/README.md)
+
 ## create-app-jwt.py
 
 This script will generate a JWT for a GitHub App. It will use the private key and app ID from the GitHub App's settings page.
@@ -95,10 +99,6 @@ Docs:
 - [Generate a JWT for a GitHub App](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app#example-using-python-to-generate-a-jwt)
 - [Generating an installation access token for a GitHub App](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app#generating-an-installation-access-token)
 - [List installations for the authenticated app](https://docs.github.com/en/rest/apps/apps?apiVersion=2022-11-28#list-installations-for-the-authenticated-app)
-
-## code-scanning-coverage-report
-
-See: [code-scanning-coverage-report](./code-scanning-coverage-report/README.md)
 
 ## get-list-of-resolved-secret-scanning-alerts.sh
 
