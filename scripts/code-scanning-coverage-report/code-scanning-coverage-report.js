@@ -75,6 +75,16 @@ function parseArgs() {
     help: false
   };
 
+  // Helper to get required argument value
+  const getRequiredValue = (option, index) => {
+    const value = args[index];
+    if (value === undefined || value.startsWith('-')) {
+      console.error(`ERROR: ${option} requires a value`);
+      process.exit(1);
+    }
+    return value;
+  };
+
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     switch (arg) {
@@ -83,10 +93,10 @@ function parseArgs() {
         config.help = true;
         break;
       case '--output':
-        config.output = args[++i];
+        config.output = getRequiredValue('--output', ++i);
         break;
       case '--repo':
-        config.repo = args[++i];
+        config.repo = getRequiredValue('--repo', ++i);
         break;
       case '--sample':
         config.sample = true;
@@ -100,14 +110,21 @@ function parseArgs() {
       case '--fetch-alerts':
         config.fetchAlerts = true;
         break;
-      case '--concurrency':
-        config.concurrency = parseInt(args[++i], 10) || DEFAULT_CONCURRENCY;
+      case '--concurrency': {
+        const value = getRequiredValue('--concurrency', ++i);
+        const parsed = parseInt(value, 10);
+        if (isNaN(parsed) || parsed < 1) {
+          console.error(`ERROR: --concurrency must be a positive number`);
+          process.exit(1);
+        }
+        config.concurrency = parsed;
         break;
+      }
       default:
         if (!arg.startsWith('-')) {
           config.org = arg;
         } else {
-          console.error(`Unknown option: ${arg}`);
+          console.error(`ERROR: Unknown option: ${arg}`);
           process.exit(1);
         }
     }
