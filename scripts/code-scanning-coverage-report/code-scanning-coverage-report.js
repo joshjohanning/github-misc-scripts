@@ -173,6 +173,7 @@ Output Columns:
   - Last Default Branch Scan Date: Date of most recent scan on default branch
   - Scanned Languages: Languages scanned by CodeQL
   - Unscanned CodeQL Languages: CodeQL-supported languages not being scanned
+  - Open Alerts: Total number of open code scanning alerts
   - Critical Alerts: Number of open critical severity alerts
   - Analysis Errors: Errors from most recent analysis
   - Analysis Warnings: Warnings from most recent analysis
@@ -438,17 +439,19 @@ async function fetchScanningInfo(octokit, org, repo, defaultBranch) {
   }
 }
 
-// Get critical alerts count
-async function fetchCriticalAlertsCount(octokit, org, repo) {
+// Get alert counts (total open and critical)
+async function fetchAlertCounts(octokit, org, repo) {
   try {
-    let count = 0;
+    let totalOpen = 0;
+    let critical = 0;
     for await (const response of octokit.paginate.iterator(
       octokit.rest.codeScanning.listAlertsForRepo,
-      { owner: org, repo, state: 'open', severity: 'critical', per_page: 100 }
+      { owner: org, repo, state: 'open', per_page: 100 }
     )) {
-      count += response.data.length;
+      totalOpen += response.data.length;
+      critical += response.data.filter(a => a.rule?.security_severity_level === 'critical').length;
     }
-    return count;
+    return { totalOpen, critical };
   } catch {
     return null;
   }
@@ -581,10 +584,10 @@ async function processRepository(octokit, org, repo, config) {
   // Languages are now fetched in the initial GraphQL query
   const languages = repo.languages || [];
 
-  const [codeqlStatus, scanningInfo, criticalAlerts, hasWorkflows, workflowStatus] = await Promise.all([
+  const [codeqlStatus, scanningInfo, alertCounts, hasWorkflows, workflowStatus] = await Promise.all([
     checkCodeQLStatus(octokit, org, repo.name, repo.isArchived),
     fetchScanningInfo(octokit, org, repo.name, repo.defaultBranch),
-    config.fetchAlerts ? fetchCriticalAlertsCount(octokit, org, repo.name) : Promise.resolve(null),
+    config.fetchAlerts ? fetchAlertCounts(octokit, org, repo.name) : Promise.resolve(null),
     config.checkUnscannedActions ? hasGitHubWorkflows(octokit, org, repo.name) : Promise.resolve(false),
     config.checkWorkflowStatus ? fetchCodeQLWorkflowStatus(octokit, org, repo.name) : Promise.resolve(null)
   ]);
@@ -606,7 +609,8 @@ async function processRepository(octokit, org, repo, config) {
     lastScanDate: scanningInfo.lastScanDate ? scanningInfo.lastScanDate.split('T')[0] : 'Never',
     scannedLanguages: scanningInfo.scannedLanguages.join(';'),
     unscannedLanguages: unscanned === null ? 'N/A' : (unscanned.length === 0 ? 'None' : unscanned.join(';')),
-    criticalAlerts: criticalAlerts === null ? 'N/A' : criticalAlerts,
+    openAlerts: alertCounts === null ? 'N/A' : alertCounts.totalOpen,
+    criticalAlerts: alertCounts === null ? 'N/A' : alertCounts.critical,
     analysisError: scanningInfo.analysisError || 'None',
     analysisWarning: scanningInfo.analysisWarning || 'None',
     workflowStatus
@@ -656,6 +660,7 @@ function buildCSVRow(r, config) {
     r.lastScanDate,
     escapeCSV(r.scannedLanguages),
     escapeCSV(r.unscannedLanguages),
+    r.openAlerts,
     r.criticalAlerts,
     escapeCSV(r.analysisError),
     escapeCSV(r.analysisWarning)
@@ -678,6 +683,7 @@ function generateCSV(results, config) {
     'Last Default Branch Scan Date',
     'Scanned Languages',
     'Unscanned CodeQL Languages',
+    'Open Alerts',
     'Critical Alerts',
     'Analysis Errors',
     'Analysis Warnings'
@@ -876,7 +882,7 @@ if (isMainModule) {
 export {
   checkCodeQLStatus,
   fetchScanningInfo,
-  fetchCriticalAlertsCount,
+  fetchAlertCounts,
   hasGitHubWorkflows,
   fetchCodeQLWorkflowStatus,
   isCodeQLLanguage,

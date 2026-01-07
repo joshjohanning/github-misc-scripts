@@ -65,6 +65,7 @@ node code-scanning-coverage-report.js my-org --concurrency 5 --output report.csv
 | `--output <file>` | Write CSV to file (also generates sub-reports) |
 | `--repo <repo>` | Check a single repository instead of all repos |
 | `--sample` | Sample 25 random repositories |
+| `--fetch-alerts` | Include alert counts in report (increases API usage) |
 | `--check-workflow-status` | Check CodeQL workflow run status (success/failure) |
 | `--check-unscanned-actions` | Check if repos have Actions workflows not being scanned |
 | `--concurrency <n>` | Number of concurrent API calls (default: 10) |
@@ -155,7 +156,8 @@ node code-scanning-coverage-report.js my-org --output report.csv
 | Last Default Branch Scan Date | Date of most recent scan on default branch |
 | Scanned Languages | Languages scanned by CodeQL (semicolon-separated) |
 | Unscanned CodeQL Languages | CodeQL-supported languages not being scanned |
-| Open Alerts | Number of open code scanning alerts |
+| Open Alerts | (with `--fetch-alerts`) Total number of open code scanning alerts |
+| Critical Alerts | (with `--fetch-alerts`) Number of critical severity alerts |
 | Analysis Errors | Errors from most recent analysis |
 | Analysis Warnings | Warnings from most recent analysis |
 | Workflow Status | (with `--check-workflow-status`) `OK`, `Failing`, `No workflow`, or `Unknown` |
@@ -188,10 +190,10 @@ The script recognizes these CodeQL-supported languages:
 ## Example Output
 
 ```csv
-Repository,Default Branch,Last Updated,Languages,CodeQL Enabled,Last Default Branch Scan Date,Scanned Languages,Unscanned CodeQL Languages,Open Alerts,Analysis Errors,Analysis Warnings
-my-app,main,2025-12-01,JavaScript;TypeScript;Python,Yes,2025-12-15,javascript-typescript;python,None,3,"None","None"
-legacy-service,master,2024-06-15,Java,Yes,2024-01-10,java-kotlin,None,0,"None","None"
-new-project,main,2025-12-20,Go;Python,No Scans,Never,,go;python,N/A,"",""
+Repository,Default Branch,Last Updated,Languages,CodeQL Enabled,Last Default Branch Scan Date,Scanned Languages,Unscanned CodeQL Languages,Open Alerts,Critical Alerts,Analysis Errors,Analysis Warnings
+my-app,main,2025-12-01,JavaScript;TypeScript;Python,Yes,2025-12-15,javascript-typescript;python,None,5,1,"None","None"
+legacy-service,master,2024-06-15,Java,Yes,2024-01-10,java-kotlin,None,0,0,"None","None"
+new-project,main,2025-12-20,Go;Python,No Scans,Never,,go;python,N/A,N/A,"",""
 ```
 
 <!-- Remove this section when the bash script is deleted

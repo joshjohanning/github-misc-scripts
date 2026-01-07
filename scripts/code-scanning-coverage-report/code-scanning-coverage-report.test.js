@@ -2,7 +2,7 @@ import { jest } from '@jest/globals';
 import {
   checkCodeQLStatus,
   fetchScanningInfo,
-  fetchCriticalAlertsCount,
+  fetchAlertCounts,
   hasGitHubWorkflows,
   fetchCodeQLWorkflowStatus,
   isCodeQLLanguage,
@@ -185,13 +185,13 @@ const MOCK_ANALYSES = {
   }
 };
 
-// Mock critical alerts count
+// Mock alert counts (totalOpen and critical)
 const MOCK_ALERTS = {
-  'repo-fully-enabled': 0,
-  'repo-missing-languages': 0,
-  'repo-with-alerts': 5,
-  'repo-analysis-error': 2,
-  'repo-stale': 1
+  'repo-fully-enabled': { totalOpen: 0, critical: 0 },
+  'repo-missing-languages': { totalOpen: 3, critical: 0 },
+  'repo-with-alerts': { totalOpen: 8, critical: 5 },
+  'repo-analysis-error': { totalOpen: 5, critical: 2 },
+  'repo-stale': { totalOpen: 2, critical: 1 }
 };
 
 // ============================================================================
@@ -265,9 +265,19 @@ function createMockOctokit(customResponses = {}) {
     },
     paginate: {
       iterator: jest.fn(function* (method, params) {
-        // For alert pagination
-        if (params.severity === 'critical' && MOCK_ALERTS[params.repo] !== undefined) {
-          yield { data: Array(MOCK_ALERTS[params.repo]).fill({ state: 'open', severity: 'critical' }) };
+        // For alert pagination - return alerts with security_severity_level
+        const alertData = MOCK_ALERTS[params.repo];
+        if (alertData) {
+          const alerts = [];
+          // Add critical alerts
+          for (let i = 0; i < alertData.critical; i++) {
+            alerts.push({ state: 'open', rule: { security_severity_level: 'critical' } });
+          }
+          // Add non-critical alerts
+          for (let i = 0; i < (alertData.totalOpen - alertData.critical); i++) {
+            alerts.push({ state: 'open', rule: { security_severity_level: 'high' } });
+          }
+          yield { data: alerts };
         } else {
           yield { data: [] };
         }
@@ -437,6 +447,7 @@ describe('generateCSV', () => {
       lastScanDate: '2026-01-05',
       scannedLanguages: 'javascript-typescript;python',
       unscannedLanguages: 'None',
+      openAlerts: 0,
       criticalAlerts: 0,
       analysisError: 'None',
       analysisWarning: 'None',
@@ -583,17 +594,19 @@ describe('Full Report Generation', () => {
 // Additional tests for missing function coverage
 // ============================================================================
 
-describe('fetchCriticalAlertsCount', () => {
-  test('returns count of critical alerts', async () => {
+describe('fetchAlertCounts', () => {
+  test('returns count of total and critical alerts', async () => {
     const octokit = createMockOctokit();
-    const result = await fetchCriticalAlertsCount(octokit, 'test-org', 'repo-with-alerts');
-    expect(result).toBe(5);
+    const result = await fetchAlertCounts(octokit, 'test-org', 'repo-with-alerts');
+    expect(result.totalOpen).toBe(8);
+    expect(result.critical).toBe(5);
   });
 
-  test('returns 0 when no critical alerts', async () => {
+  test('returns 0 when no alerts', async () => {
     const octokit = createMockOctokit();
-    const result = await fetchCriticalAlertsCount(octokit, 'test-org', 'repo-fully-enabled');
-    expect(result).toBe(0);
+    const result = await fetchAlertCounts(octokit, 'test-org', 'repo-fully-enabled');
+    expect(result.totalOpen).toBe(0);
+    expect(result.critical).toBe(0);
   });
 
   test('returns null on API error', async () => {
@@ -602,7 +615,7 @@ describe('fetchCriticalAlertsCount', () => {
     octokit.paginate.iterator = jest.fn(function* () {
       throw new Error('API Error');
     });
-    const result = await fetchCriticalAlertsCount(octokit, 'test-org', 'repo-error');
+    const result = await fetchAlertCounts(octokit, 'test-org', 'repo-error');
     expect(result).toBeNull();
   });
 });
@@ -670,6 +683,7 @@ describe('buildCSVRow', () => {
       lastScanDate: '2026-01-05',
       scannedLanguages: 'javascript-typescript;python',
       unscannedLanguages: 'None',
+      openAlerts: 10,
       criticalAlerts: 3,
       analysisError: 'None',
       analysisWarning: 'None',
@@ -696,6 +710,7 @@ describe('buildCSVRow', () => {
       lastScanDate: '2026-01-05',
       scannedLanguages: 'javascript-typescript',
       unscannedLanguages: 'None',
+      openAlerts: 0,
       criticalAlerts: 0,
       analysisError: 'None',
       analysisWarning: 'None',
@@ -718,6 +733,7 @@ describe('buildCSVRow', () => {
       lastScanDate: '2026-01-05',
       scannedLanguages: 'javascript-typescript',
       unscannedLanguages: 'None',
+      openAlerts: 0,
       criticalAlerts: 0,
       analysisError: 'Error: "build failed"',
       analysisWarning: 'None',
@@ -761,6 +777,7 @@ describe('processRepository - with optional flags', () => {
 
     const result = await processRepository(octokit, 'test-org', repo, config);
 
+    expect(result.openAlerts).toBe(8);
     expect(result.criticalAlerts).toBe(5);
   });
 
@@ -771,6 +788,7 @@ describe('processRepository - with optional flags', () => {
 
     const result = await processRepository(octokit, 'test-org', repo, config);
 
+    expect(result.openAlerts).toBe('N/A');
     expect(result.criticalAlerts).toBe('N/A');
   });
 
@@ -808,6 +826,7 @@ describe('generateSubReports', () => {
       lastScanDate: '2026-01-05',
       scannedLanguages: 'javascript-typescript',
       unscannedLanguages: 'None',
+      openAlerts: 0,
       criticalAlerts: 0,
       analysisError: 'None',
       analysisWarning: 'None',
@@ -823,6 +842,7 @@ describe('generateSubReports', () => {
       lastScanDate: 'Never',
       scannedLanguages: '',
       unscannedLanguages: 'python',
+      openAlerts: 'N/A',
       criticalAlerts: 'N/A',
       analysisError: 'None',
       analysisWarning: 'None',
@@ -838,6 +858,7 @@ describe('generateSubReports', () => {
       lastScanDate: '2026-01-05',
       scannedLanguages: 'javascript-typescript',
       unscannedLanguages: 'None',
+      openAlerts: 8,
       criticalAlerts: 5,
       analysisError: 'None',
       analysisWarning: 'None',
@@ -853,6 +874,7 @@ describe('generateSubReports', () => {
       lastScanDate: '2026-01-05',
       scannedLanguages: 'c-cpp',
       unscannedLanguages: 'None',
+      openAlerts: 0,
       criticalAlerts: 0,
       analysisError: 'Build failed',
       analysisWarning: 'None',
@@ -868,6 +890,7 @@ describe('generateSubReports', () => {
       lastScanDate: '2025-06-01',  // Stale - >90 days before lastUpdated
       scannedLanguages: 'python',
       unscannedLanguages: 'None',
+      openAlerts: 0,
       criticalAlerts: 0,
       analysisError: 'None',
       analysisWarning: 'None',
@@ -883,6 +906,7 @@ describe('generateSubReports', () => {
       lastScanDate: '2026-01-05',
       scannedLanguages: 'javascript-typescript',
       unscannedLanguages: 'python;go',
+      openAlerts: 0,
       criticalAlerts: 0,
       analysisError: 'None',
       analysisWarning: 'None',
