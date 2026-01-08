@@ -911,6 +911,11 @@ async function main() {
     process.exit(1);
   }
 
+  if (config.orgsFile && config.org) {
+    console.error("ERROR: --orgs-file and organization argument cannot be used together");
+    process.exit(1);
+  }
+
   if (config.repo && orgs.length > 1) {
     console.error("ERROR: --repo cannot be used with multiple organizations");
     process.exit(1);
