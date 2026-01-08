@@ -4,6 +4,9 @@
 
 # need: `gh auth refresh -h github.com -s read:org -s read:enterprise`
 
+# if you just want a list of organizations without the JSON, you can something like:
+# ./get-enterprise-organizations.sh <enterprise-slug> | jq -r '.organizations[] > orgs.txt'
+
 if [ -z "$1" ]; then
   echo "Usage: $(basename $0) <enterprise-slug> <hostname>"
   exit 1
