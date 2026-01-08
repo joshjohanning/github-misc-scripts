@@ -116,8 +116,9 @@ Two authentication methods are supported:
 |----------|-------------|
 | `GITHUB_APP_ID` | GitHub App ID |
 | `GITHUB_APP_PRIVATE_KEY_PATH` | Path to GitHub App private key file (.pem) |
-| `GITHUB_APP_INSTALLATION_ID` | GitHub App installation ID for the organization |
 | `GITHUB_API_URL` | API endpoint (defaults to `https://api.github.com`) |
+
+The script automatically looks up the installation ID for each organization being processed. This enables scanning multiple organizations with a single command using `--orgs-file`.
 
 **Required GitHub App Permissions:**
 
@@ -146,7 +147,13 @@ Organization permissions:
 # Set GitHub App credentials
 export GITHUB_APP_ID=123456
 export GITHUB_APP_PRIVATE_KEY_PATH=/path/to/private-key.pem
-export GITHUB_APP_INSTALLATION_ID=12345678
+
+# Run the report for a single org
+node code-scanning-coverage-report.js my-org --output report.csv
+
+# Run the report for multiple orgs (installation ID is looked up automatically)
+node code-scanning-coverage-report.js --orgs-file orgs.txt --output report.csv
+```
 
 # Run the report
 node code-scanning-coverage-report.js my-org --output report.csv

@@ -26,7 +26,6 @@
 //   GitHub App Authentication (alternative to GITHUB_TOKEN, recommended for higher rate limits):
 //   GITHUB_APP_ID                   GitHub App ID (numeric) or Client ID (starts with "Iv")
 //   GITHUB_APP_PRIVATE_KEY_PATH     Path to GitHub App private key file (.pem)
-//   GITHUB_APP_INSTALLATION_ID      GitHub App installation ID for the organization
 //
 // Example:
 //   node code-scanning-coverage-report.js my-org --output report.csv
@@ -179,8 +178,12 @@ Options:
   --help                Show this help message
 
 Environment Variables:
-  GITHUB_TOKEN          GitHub token with repo scope (required)
+  GITHUB_TOKEN          GitHub token with repo scope (required if not using App auth)
   GITHUB_API_URL        API endpoint (defaults to https://api.github.com)
+
+  GitHub App Authentication (recommended for multi-org and higher rate limits):
+  GITHUB_APP_ID                   GitHub App ID
+  GITHUB_APP_PRIVATE_KEY_PATH     Path to GitHub App private key file (.pem)
 
 Examples:
   node code-scanning-coverage-report.js my-org
@@ -219,67 +222,142 @@ API Usage:
 `);
 }
 
-// Initialize Octokit
-function createOctokit() {
-  const baseUrl = process.env.GITHUB_API_URL || 'https://api.github.com';
+// Shared configuration
+const baseUrl = process.env.GITHUB_API_URL || 'https://api.github.com';
 
-  // Check for GitHub App authentication
-  const appId = process.env.GITHUB_APP_ID;
-  const privateKeyPath = process.env.GITHUB_APP_PRIVATE_KEY_PATH;
-  const installationId = process.env.GITHUB_APP_INSTALLATION_ID;
+// GitHub App configuration (cached)
+let appPrivateKey = null;
+const appId = process.env.GITHUB_APP_ID;
+const privateKeyPath = process.env.GITHUB_APP_PRIVATE_KEY_PATH;
 
-  if (appId && privateKeyPath && installationId) {
-    // Use GitHub App authentication
-    console.error('Using GitHub App authentication...');
+// Check if GitHub App auth is configured
+function isGitHubAppAuth() {
+  return !!(appId && privateKeyPath);
+}
 
-    // Read private key from file
-    let privateKey;
-    try {
-      privateKey = fs.readFileSync(privateKeyPath, 'utf8');
-    } catch (error) {
-      console.error(`ERROR: Failed to read private key file: ${privateKeyPath}`);
-      console.error(error.message);
-      process.exit(1);
-    }
+// Get the private key (cached)
+function getPrivateKey() {
+  if (appPrivateKey) return appPrivateKey;
+  if (!privateKeyPath) return null;
 
-    const octokit = new Octokit({
-      authStrategy: createAppAuth,
-      auth: {
-        appId: appId,
-        privateKey,
-        installationId: parseInt(installationId, 10)
-      },
-      baseUrl,
-      throttle: {
-        onRateLimit: (retryAfter, _options, _octokit) => {
-          console.error(`Rate limit hit, retrying after ${retryAfter} seconds...`);
-          return true;
-        },
-        onSecondaryRateLimit: (retryAfter, _options, _octokit) => {
-          console.error(`Secondary rate limit hit, retrying after ${retryAfter} seconds...`);
-          return true;
-        }
-      }
-    });
+  try {
+    appPrivateKey = fs.readFileSync(privateKeyPath, 'utf8');
+    return appPrivateKey;
+  } catch (error) {
+    console.error(`ERROR: Failed to read private key file: ${privateKeyPath}`);
+    console.error(error.message);
+    process.exit(1);
+  }
+}
 
-    // Add hook to count API calls
-    octokit.hook.before('request', () => {
-      apiCallCount++;
-    });
-
-    return octokit;
+// Create an app-level Octokit (JWT auth) for looking up installations
+function createAppOctokit() {
+  const privateKey = getPrivateKey();
+  if (!privateKey || !appId) {
+    throw new Error('GitHub App credentials not configured');
   }
 
-  // Fall back to token authentication
+  const octokit = new Octokit({
+    authStrategy: createAppAuth,
+    auth: {
+      appId: appId,
+      privateKey
+    },
+    baseUrl,
+    throttle: {
+      onRateLimit: (retryAfter, _options, _octokit) => {
+        console.error(`Rate limit hit, retrying after ${retryAfter} seconds...`);
+        return true;
+      },
+      onSecondaryRateLimit: (retryAfter, _options, _octokit) => {
+        console.error(`Secondary rate limit hit, retrying after ${retryAfter} seconds...`);
+        return true;
+      }
+    }
+  });
+
+  octokit.hook.before('request', () => {
+    apiCallCount++;
+  });
+
+  return octokit;
+}
+
+// Create an installation-level Octokit for a specific org
+function createInstallationOctokit(installationId) {
+  const privateKey = getPrivateKey();
+  if (!privateKey || !appId) {
+    throw new Error('GitHub App credentials not configured');
+  }
+
+  const octokit = new Octokit({
+    authStrategy: createAppAuth,
+    auth: {
+      appId: appId,
+      privateKey,
+      installationId: installationId
+    },
+    baseUrl,
+    throttle: {
+      onRateLimit: (retryAfter, _options, _octokit) => {
+        console.error(`Rate limit hit, retrying after ${retryAfter} seconds...`);
+        return true;
+      },
+      onSecondaryRateLimit: (retryAfter, _options, _octokit) => {
+        console.error(`Secondary rate limit hit, retrying after ${retryAfter} seconds...`);
+        return true;
+      }
+    }
+  });
+
+  octokit.hook.before('request', () => {
+    apiCallCount++;
+  });
+
+  return octokit;
+}
+
+// Get installation ID for an organization
+async function getInstallationIdForOrg(appOctokit, org) {
+  try {
+    const { data } = await appOctokit.rest.apps.getOrgInstallation({ org });
+    return data.id;
+  } catch (error) {
+    if (error.status === 404) {
+      throw new Error(`GitHub App is not installed on organization: ${org}`);
+    }
+    throw error;
+  }
+}
+
+// Create Octokit for an organization (handles both token and app auth)
+async function createOctokitForOrg(org, appOctokit = null) {
+  if (isGitHubAppAuth()) {
+    if (!appOctokit) {
+      appOctokit = createAppOctokit();
+    }
+    const installationId = await getInstallationIdForOrg(appOctokit, org);
+    return createInstallationOctokit(installationId);
+  }
+
+  // Token authentication - return a shared instance
+  return createTokenOctokit();
+}
+
+// Create a token-authenticated Octokit
+let tokenOctokit = null;
+function createTokenOctokit() {
+  if (tokenOctokit) return tokenOctokit;
+
   const token = process.env.GITHUB_TOKEN;
   if (!token) {
     console.error("ERROR: Authentication required. Set either:");
     console.error("  - GITHUB_TOKEN environment variable, or");
-    console.error("  - GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY_PATH, and GITHUB_APP_INSTALLATION_ID");
+    console.error("  - GITHUB_APP_ID and GITHUB_APP_PRIVATE_KEY_PATH");
     process.exit(1);
   }
 
-  const octokit = new Octokit({
+  tokenOctokit = new Octokit({
     auth: token,
     baseUrl,
     throttle: {
@@ -294,12 +372,11 @@ function createOctokit() {
     }
   });
 
-  // Add hook to count API calls
-  octokit.hook.before('request', () => {
+  tokenOctokit.hook.before('request', () => {
     apiCallCount++;
   });
 
-  return octokit;
+  return tokenOctokit;
 }
 
 // Fetch all repositories in an organization using GraphQL
@@ -839,13 +916,24 @@ async function main() {
     process.exit(1);
   }
 
-  const octokit = createOctokit();
+  // Initialize authentication
+  let appOctokit = null;
+  let rateLimitOctokit = null;
 
-  // Display rate limit info
-  const { data: rateLimit } = await octokit.rest.rateLimit.get();
-  const core = rateLimit.resources.core;
-  const resetTime = new Date(core.reset * 1000).toLocaleTimeString();
-  console.error(`Rate limit: ${core.remaining}/${core.limit} remaining (resets at ${resetTime})`);
+  if (isGitHubAppAuth()) {
+    console.error('Using GitHub App authentication...');
+    appOctokit = createAppOctokit();
+    // For rate limit check, we need an installation-authenticated Octokit
+    // Use the first org to get an installation token
+    try {
+      rateLimitOctokit = await createOctokitForOrg(orgs[0], appOctokit);
+    } catch (error) {
+      console.error(`ERROR: Failed to authenticate for ${orgs[0]}: ${error.message}`);
+      process.exit(1);
+    }
+  } else {
+    rateLimitOctokit = createTokenOctokit();
+  }
 
   // Process each organization
   const allResults = [];
@@ -857,6 +945,22 @@ async function main() {
       console.error(`\n[${ orgIndex + 1}/${orgs.length}] Processing organization: ${org}`);
     } else {
       console.error(`Generating code scanning coverage report for: ${org}`);
+    }
+
+    // Track API calls for this org
+    const orgStartApiCalls = apiCallCount;
+
+    // Get an Octokit instance for this organization
+    let octokit;
+    try {
+      octokit = await createOctokitForOrg(org, appOctokit);
+    } catch (error) {
+      console.error(`ERROR: Failed to authenticate for ${org}: ${error.message}`);
+      if (isMultiOrg) {
+        console.error(`Skipping organization: ${org}`);
+        continue;
+      }
+      process.exit(1);
     }
 
     let repos;
@@ -887,6 +991,10 @@ async function main() {
     results.forEach(r => r.organization = org);
 
     allResults.push(...results);
+
+    // Display API calls used for this org
+    const orgApiCalls = apiCallCount - orgStartApiCalls;
+    console.error(`API calls used for ${org}: ${orgApiCalls}`);
   }
 
   // Generate output
@@ -945,7 +1053,7 @@ async function main() {
   }
 
   // Display API call count
-  console.error(`API calls used: ${apiCallCount}`);
+  console.error(`\nTotal API calls used across ${orgs.length} org(s): ${apiCallCount}`);
 }
 
 // Only run main() if this is the entry point (not being imported for testing)
