@@ -34,6 +34,13 @@ import { createAppAuth } from "@octokit/auth-app";
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 
+// =============================================================================
+// Configuration
+// =============================================================================
+const SAMPLE_SIZE = 25;
+const DEFAULT_CONCURRENCY = 10;
+const DEFAULT_STALE_DAYS = 90; // Days after last scan to consider repo stale
+
 // CodeQL supported languages
 const CODEQL_LANGUAGES = new Set([
   'c', 'c++', 'cpp', 'csharp', 'c#', 'go', 'java', 'kotlin',
@@ -56,10 +63,6 @@ const LANGUAGE_NORMALIZE = {
   'kotlin': 'java-kotlin'
 };
 
-// Configuration
-const SAMPLE_SIZE = 25;
-const DEFAULT_CONCURRENCY = 10;
-
 // Parse command line arguments
 function parseArgs() {
   const args = process.argv.slice(2);
@@ -72,6 +75,7 @@ function parseArgs() {
     checkUnscannedActions: false,
     fetchAlerts: false,
     concurrency: DEFAULT_CONCURRENCY,
+    staleDays: DEFAULT_STALE_DAYS,
     help: false
   };
 
@@ -120,6 +124,16 @@ function parseArgs() {
         config.concurrency = parsed;
         break;
       }
+      case '--stale-days': {
+        const value = getRequiredValue('--stale-days', ++i);
+        const parsed = parseInt(value, 10);
+        if (isNaN(parsed) || parsed < 1) {
+          console.error(`ERROR: --stale-days must be a positive number`);
+          process.exit(1);
+        }
+        config.staleDays = parsed;
+        break;
+      }
       default:
         if (!arg.startsWith('-')) {
           config.org = arg;
@@ -151,6 +165,7 @@ Options:
   --check-unscanned-actions  Check if repos have Actions workflows not being scanned
   --fetch-alerts        Fetch open alert counts (uses more API calls)
   --concurrency <n>     Number of concurrent API calls (default: ${DEFAULT_CONCURRENCY})
+  --stale-days <n>      Days after last scan to consider repo stale (default: ${DEFAULT_STALE_DAYS})
   --help                Show this help message
 
 Environment Variables:
@@ -181,7 +196,7 @@ Output Columns:
 
 Sub-reports (generated with --output):
   - *-disabled.csv: Repos with CodeQL disabled or no scans
-  - *-stale.csv: Repos modified >90 days after last scan
+  - *-stale.csv: Repos modified after last scan (configurable with --stale-days)
   - *-missing-languages.csv: Repos scanning but missing some CodeQL languages
   - *-critical-alerts.csv: Repos with open critical severity alerts
   - *-analysis-issues.csv: Repos with analysis errors or warnings
@@ -701,6 +716,7 @@ function generateCSV(results, config) {
 function generateSubReports(results, outputFile, config) {
   const baseName = outputFile.replace(/\.csv$/, '');
   const headers = generateCSV([], config).split('\n')[0];
+  const staleDays = config.staleDays;
 
   // Helper to write sub-report (skips if no matching repos)
   const writeSubReport = (filename, filter, description) => {
@@ -718,17 +734,17 @@ function generateSubReports(results, outputFile, config) {
     'Disabled/Not scanning'
   );
 
-  // Stale repos (modified >90 days after last scan)
+  // Stale repos (modified after last scan by configured days)
   writeSubReport(
     `${baseName}-stale.csv`,
     r => {
       if (r.lastScanDate === 'Never' || !r.lastUpdated) return false;
       const scanDate = new Date(r.lastScanDate);
       const cutoffDate = new Date(scanDate);
-      cutoffDate.setDate(cutoffDate.getDate() + 90);
+      cutoffDate.setDate(cutoffDate.getDate() + staleDays);
       return new Date(r.lastUpdated) > cutoffDate;
     },
-    'Stale scans (modified >90 days after scan)'
+    `Stale scans (modified >${staleDays} days after scan)`
   );
 
   // Missing languages (only if already scanning)
@@ -817,11 +833,11 @@ async function main() {
   const summary = results.reduce((acc, r) => {
     acc[r.codeqlEnabled] = (acc[r.codeqlEnabled] || 0) + 1;
     if (r.isArchived) acc.archived = (acc.archived || 0) + 1;
-    // Count stale repos (modified >90 days after last scan)
+    // Count stale repos (modified after last scan by configured days)
     if (r.lastScanDate !== 'Never' && r.lastUpdated) {
       const scanDate = new Date(r.lastScanDate);
       const cutoffDate = new Date(scanDate);
-      cutoffDate.setDate(cutoffDate.getDate() + 90);
+      cutoffDate.setDate(cutoffDate.getDate() + config.staleDays);
       if (new Date(r.lastUpdated) > cutoffDate) {
         acc.stale = (acc.stale || 0) + 1;
       }
