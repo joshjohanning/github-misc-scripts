@@ -5,8 +5,10 @@
 //
 // Usage:
 //   node code-scanning-coverage-report.js <organization> [options]
+//   node code-scanning-coverage-report.js --orgs-file <file> [options]
 //
 // Options:
+//   --orgs-file <file>    File containing list of organizations (one per line)
 //   --output <file>       Write CSV to file (also generates sub-reports)
 //   --repo <repo>         Check a single repository instead of all repos
 //   --sample              Sample 25 random repositories
@@ -14,6 +16,7 @@
 //   --check-unscanned-actions  Check if repos have Actions workflows not being scanned
 //   --fetch-alerts        Fetch open alert counts (uses more API calls)
 //   --concurrency <n>     Number of concurrent API calls (default: 10)
+//   --stale-days <n>      Days after last scan to consider repo stale (default: 90)
 //   --help                Show help
 //
 // Environment Variables:
@@ -27,6 +30,7 @@
 //
 // Example:
 //   node code-scanning-coverage-report.js my-org --output report.csv
+//   node code-scanning-coverage-report.js --orgs-file orgs.txt --output report.csv
 //
 
 import { Octokit } from "octokit";
@@ -68,6 +72,7 @@ function parseArgs() {
   const args = process.argv.slice(2);
   const config = {
     org: null,
+    orgsFile: null,
     output: null,
     repo: null,
     sample: false,
@@ -134,6 +139,9 @@ function parseArgs() {
         config.staleDays = parsed;
         break;
       }
+      case '--orgs-file':
+        config.orgsFile = getRequiredValue('--orgs-file', ++i);
+        break;
       default:
         if (!arg.startsWith('-')) {
           config.org = arg;
@@ -153,11 +161,13 @@ Generate a comprehensive code scanning coverage report for all repositories in a
 
 Usage:
   node code-scanning-coverage-report.js <organization> [options]
+  node code-scanning-coverage-report.js --orgs-file <file> [options]
 
 Arguments:
   organization          GitHub organization name
 
 Options:
+  --orgs-file <file>    File containing list of organizations (one per line)
   --output <file>       Write CSV to file (also generates sub-reports)
   --repo <repo>         Check a single repository instead of all repos
   --sample              Sample ${SAMPLE_SIZE} random repositories
@@ -178,6 +188,7 @@ Examples:
   node code-scanning-coverage-report.js my-org --repo my-repo
   node code-scanning-coverage-report.js my-org --sample --output sample.csv
   node code-scanning-coverage-report.js my-org --check-workflow-status --check-unscanned-actions
+  node code-scanning-coverage-report.js --orgs-file orgs.txt --output report.csv
 
 Output Columns:
   - Repository: Repository name
@@ -666,6 +677,7 @@ function escapeCSV(value) {
 // Build a CSV row from a result object
 function buildCSVRow(r, config) {
   const row = [
+    escapeCSV(r.organization),
     escapeCSV(r.repository),
     escapeCSV(r.defaultBranch),
     r.lastUpdated,
@@ -689,6 +701,7 @@ function buildCSVRow(r, config) {
 // Generate CSV output
 function generateCSV(results, config) {
   const headers = [
+    'Organization',
     'Repository',
     'Default Branch',
     'Last Updated',
@@ -788,15 +801,41 @@ async function main() {
     process.exit(0);
   }
 
-  if (!config.org) {
-    console.error("ERROR: Organization name is required");
+  // Determine list of organizations to process
+  let orgs = [];
+  if (config.orgsFile) {
+    try {
+      const fileContent = fs.readFileSync(config.orgsFile, 'utf8');
+      orgs = fileContent
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line && !line.startsWith('#')); // Skip empty lines and comments
+      if (orgs.length === 0) {
+        console.error(`ERROR: No organizations found in ${config.orgsFile}`);
+        process.exit(1);
+      }
+    } catch (error) {
+      console.error(`ERROR: Failed to read organizations file: ${config.orgsFile}`);
+      console.error(error.message);
+      process.exit(1);
+    }
+  } else if (config.org) {
+    orgs = [config.org];
+  } else {
+    console.error("ERROR: Organization name or --orgs-file is required");
     console.error("Usage: node code-scanning-coverage-report.js <organization> [options]");
+    console.error("       node code-scanning-coverage-report.js --orgs-file <file> [options]");
     console.error("Use --help for more information");
     process.exit(1);
   }
 
   if (config.sample && config.repo) {
     console.error("ERROR: --sample and --repo cannot be used together");
+    process.exit(1);
+  }
+
+  if (config.repo && orgs.length > 1) {
+    console.error("ERROR: --repo cannot be used with multiple organizations");
     process.exit(1);
   }
 
@@ -808,29 +847,53 @@ async function main() {
   const resetTime = new Date(core.reset * 1000).toLocaleTimeString();
   console.error(`Rate limit: ${core.remaining}/${core.limit} remaining (resets at ${resetTime})`);
 
-  // Fetch repositories
-  console.error(`Generating code scanning coverage report for: ${config.org}`);
-  let repos;
+  // Process each organization
+  const allResults = [];
+  for (let orgIndex = 0; orgIndex < orgs.length; orgIndex++) {
+    const org = orgs[orgIndex];
+    const isMultiOrg = orgs.length > 1;
 
-  if (config.repo) {
-    repos = await fetchSingleRepository(octokit, config.org, config.repo);
-  } else {
-    repos = await fetchRepositories(octokit, config.org);
-    if (config.sample) {
-      const totalAvailable = repos.length;
-      repos = shuffle(repos).slice(0, SAMPLE_SIZE);
-      console.error(`Sample mode: selecting ${SAMPLE_SIZE} random repos from ${totalAvailable} available`);
+    if (isMultiOrg) {
+      console.error(`\n[${ orgIndex + 1}/${orgs.length}] Processing organization: ${org}`);
+    } else {
+      console.error(`Generating code scanning coverage report for: ${org}`);
     }
+
+    let repos;
+    try {
+      if (config.repo) {
+        repos = await fetchSingleRepository(octokit, org, config.repo);
+      } else {
+        repos = await fetchRepositories(octokit, org);
+        if (config.sample) {
+          const totalAvailable = repos.length;
+          repos = shuffle(repos).slice(0, SAMPLE_SIZE);
+          console.error(`Sample mode: selecting ${SAMPLE_SIZE} random repos from ${totalAvailable} available`);
+        }
+      }
+    } catch (error) {
+      console.error(`ERROR: Failed to fetch repositories for ${org}: ${error.message}`);
+      if (isMultiOrg) {
+        console.error(`Skipping organization: ${org}`);
+        continue;
+      }
+      process.exit(1);
+    }
+
+    // Process repositories
+    const results = await processRepositories(octokit, org, repos, config);
+
+    // Add organization to each result
+    results.forEach(r => r.organization = org);
+
+    allResults.push(...results);
   }
 
-  // Process repositories
-  const results = await processRepositories(octokit, config.org, repos, config);
-
   // Generate output
-  const csv = generateCSV(results, config);
+  const csv = generateCSV(allResults, config);
 
   // Generate summary statistics
-  const summary = results.reduce((acc, r) => {
+  const summary = allResults.reduce((acc, r) => {
     acc[r.codeqlEnabled] = (acc[r.codeqlEnabled] || 0) + 1;
     if (r.isArchived) acc.archived = (acc.archived || 0) + 1;
     // Count stale repos (modified after last scan by configured days)
@@ -871,13 +934,13 @@ async function main() {
 
   if (config.output) {
     fs.writeFileSync(config.output, csv);
-    console.error(`\nReport complete. Processed ${results.length} repositories.`);
+    console.error(`\nReport complete. Processed ${allResults.length} repositories across ${orgs.length} organization(s).`);
     console.error(`Summary: ${summaryParts.join(', ')}`);
     console.error(`Report saved to: ${config.output}`);
-    generateSubReports(results, config.output, config);
+    generateSubReports(allResults, config.output, config);
   } else {
     console.log(csv);
-    console.error(`\nReport complete. Processed ${results.length} repositories.`);
+    console.error(`\nReport complete. Processed ${allResults.length} repositories across ${orgs.length} organization(s).`);
     console.error(`Summary: ${summaryParts.join(', ')}`);
   }
 

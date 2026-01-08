@@ -56,12 +56,19 @@ node code-scanning-coverage-report.js my-org --output report.csv
 
 # Adjust concurrency (default: 10)
 node code-scanning-coverage-report.js my-org --concurrency 5 --output report.csv
+
+# Process multiple organizations from a file
+node code-scanning-coverage-report.js --orgs-file orgs.txt --output report.csv
+
+# Customize stale threshold (default: 90 days)
+node code-scanning-coverage-report.js my-org --stale-days 60 --output report.csv
 ```
 
 ## Options
 
 | Option | Description |
 |--------|-------------|
+| `--orgs-file <file>` | File containing list of organizations (one per line) |
 | `--output <file>` | Write CSV to file (also generates sub-reports) |
 | `--repo <repo>` | Check a single repository instead of all repos |
 | `--sample` | Sample 25 random repositories |
@@ -69,6 +76,7 @@ node code-scanning-coverage-report.js my-org --concurrency 5 --output report.csv
 | `--check-workflow-status` | Check CodeQL workflow run status (success/failure) |
 | `--check-unscanned-actions` | Check if repos have Actions workflows not being scanned |
 | `--concurrency <n>` | Number of concurrent API calls (default: 10) |
+| `--stale-days <n>` | Days after last scan to consider repo stale (default: 90) |
 | `--help` | Show help message |
 
 ## API Usage
@@ -148,6 +156,7 @@ node code-scanning-coverage-report.js my-org --output report.csv
 
 | Column | Description |
 |--------|-------------|
+| Organization | Organization name |
 | Repository | Repository name |
 | Default Branch | The default branch of the repository |
 | Last Updated | When the repository was last updated |
@@ -169,7 +178,7 @@ When using `--output`, the script generates actionable sub-reports:
 | File | Description |
 |------|-------------|
 | `*-disabled.csv` | Repos with CodeQL disabled or no scans |
-| `*-stale.csv` | Repos modified >90 days after last scan |
+| `*-stale.csv` | Repos modified after last scan (configurable with `--stale-days`, default: 90) |
 | `*-missing-languages.csv` | Repos scanning but missing some CodeQL languages |
 | `*-open-alerts.csv` | Repos with open code scanning alerts |
 | `*-analysis-issues.csv` | Repos with analysis errors or warnings |
@@ -190,10 +199,10 @@ The script recognizes these CodeQL-supported languages:
 ## Example Output
 
 ```csv
-Repository,Default Branch,Last Updated,Languages,CodeQL Enabled,Last Default Branch Scan Date,Scanned Languages,Unscanned CodeQL Languages,Open Alerts,Critical Alerts,Analysis Errors,Analysis Warnings
-my-app,main,2025-12-01,JavaScript;TypeScript;Python,Yes,2025-12-15,javascript-typescript;python,None,5,1,"None","None"
-legacy-service,master,2024-06-15,Java,Yes,2024-01-10,java-kotlin,None,0,0,"None","None"
-new-project,main,2025-12-20,Go;Python,No Scans,Never,,go;python,N/A,N/A,"",""
+Organization,Repository,Default Branch,Last Updated,Archived,Languages,CodeQL Enabled,Last Default Branch Scan Date,Scanned Languages,Unscanned CodeQL Languages,Open Alerts,Critical Alerts,Analysis Errors,Analysis Warnings
+my-org,my-app,main,2025-12-01,No,JavaScript;TypeScript;Python,Yes,2025-12-15,javascript-typescript;python,None,5,1,None,None
+my-org,legacy-service,master,2024-06-15,No,Java,Yes,2024-01-10,java-kotlin,None,0,0,None,None
+my-org,new-project,main,2025-12-20,No,Go;Python,No Scans,Never,,go;python,N/A,N/A,,
 ```
 
 <!-- Remove this section when the bash script is deleted
