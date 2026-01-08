@@ -1086,5 +1086,12 @@ export {
   generateCSV,
   generateSubReports,
   CODEQL_LANGUAGES,
-  LANGUAGE_NORMALIZE
+  LANGUAGE_NORMALIZE,
+  // Auth functions
+  isGitHubAppAuth,
+  getInstallationIdForOrg,
+  createOctokitForOrg,
+  createTokenOctokit,
+  createAppOctokit,
+  createInstallationOctokit
 };

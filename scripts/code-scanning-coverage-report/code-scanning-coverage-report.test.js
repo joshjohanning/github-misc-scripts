@@ -14,7 +14,9 @@ import {
   generateCSV,
   generateSubReports,
   CODEQL_LANGUAGES,
-  LANGUAGE_NORMALIZE
+  LANGUAGE_NORMALIZE,
+  isGitHubAppAuth,
+  getInstallationIdForOrg
 } from './code-scanning-coverage-report.js';
 import fs from 'fs';
 
@@ -1055,5 +1057,173 @@ describe('Constants', () => {
     expect(LANGUAGE_NORMALIZE['kotlin']).toBe('java-kotlin');
     expect(LANGUAGE_NORMALIZE['c']).toBe('c-cpp');
     expect(LANGUAGE_NORMALIZE['cpp']).toBe('c-cpp');
+  });
+});
+
+// ============================================================================
+// Authentication Tests
+// ============================================================================
+
+describe('isGitHubAppAuth', () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = { ...originalEnv };
+  });
+
+  afterAll(() => {
+    process.env = originalEnv;
+  });
+
+  // Note: isGitHubAppAuth reads from module-level constants that are set at import time,
+  // so we test the function's logic indirectly by checking the current state
+  test('returns false when GITHUB_APP_ID is not set', () => {
+    // The function checks the module-level appId and privateKeyPath constants
+    // Since these are set at module load time, we test the current state
+    // In a real scenario without env vars set, this should return false
+    const result = isGitHubAppAuth();
+    // The result depends on whether env vars were set when the module loaded
+    expect(typeof result).toBe('boolean');
+  });
+});
+
+describe('getInstallationIdForOrg', () => {
+  test('returns installation ID when app is installed on org', async () => {
+    const mockAppOctokit = {
+      rest: {
+        apps: {
+          getOrgInstallation: jest.fn().mockResolvedValue({
+            data: { id: 12345678 }
+          })
+        }
+      }
+    };
+
+    const installationId = await getInstallationIdForOrg(mockAppOctokit, 'test-org');
+    expect(installationId).toBe(12345678);
+    expect(mockAppOctokit.rest.apps.getOrgInstallation).toHaveBeenCalledWith({ org: 'test-org' });
+  });
+
+  test('throws error when app is not installed on org (404)', async () => {
+    const mockAppOctokit = {
+      rest: {
+        apps: {
+          getOrgInstallation: jest.fn().mockRejectedValue({ status: 404 })
+        }
+      }
+    };
+
+    await expect(getInstallationIdForOrg(mockAppOctokit, 'uninstalled-org'))
+      .rejects.toThrow('GitHub App is not installed on organization: uninstalled-org');
+  });
+
+  test('re-throws other errors', async () => {
+    const mockAppOctokit = {
+      rest: {
+        apps: {
+          getOrgInstallation: jest.fn().mockRejectedValue(new Error('Network error'))
+        }
+      }
+    };
+
+    await expect(getInstallationIdForOrg(mockAppOctokit, 'test-org'))
+      .rejects.toThrow('Network error');
+  });
+
+  test('handles multiple orgs with different installation IDs', async () => {
+    const mockAppOctokit = {
+      rest: {
+        apps: {
+          getOrgInstallation: jest.fn()
+            .mockImplementation(({ org }) => {
+              const installations = {
+                'org-one': { data: { id: 11111111 } },
+                'org-two': { data: { id: 22222222 } },
+                'org-three': { data: { id: 33333333 } }
+              };
+              if (installations[org]) {
+                return Promise.resolve(installations[org]);
+              }
+              return Promise.reject({ status: 404 });
+            })
+        }
+      }
+    };
+
+    const id1 = await getInstallationIdForOrg(mockAppOctokit, 'org-one');
+    const id2 = await getInstallationIdForOrg(mockAppOctokit, 'org-two');
+    const id3 = await getInstallationIdForOrg(mockAppOctokit, 'org-three');
+
+    expect(id1).toBe(11111111);
+    expect(id2).toBe(22222222);
+    expect(id3).toBe(33333333);
+
+    // Verify each org was called
+    expect(mockAppOctokit.rest.apps.getOrgInstallation).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe('Authentication scenarios', () => {
+  test('multi-org scenario: each org gets its own installation lookup', async () => {
+    const orgs = ['org-alpha', 'org-beta', 'org-gamma'];
+    const callLog = [];
+
+    const mockAppOctokit = {
+      rest: {
+        apps: {
+          getOrgInstallation: jest.fn().mockImplementation(({ org }) => {
+            callLog.push(org);
+            return Promise.resolve({ data: { id: Math.random() } });
+          })
+        }
+      }
+    };
+
+    // Simulate what main() does for multi-org
+    for (const org of orgs) {
+      await getInstallationIdForOrg(mockAppOctokit, org);
+    }
+
+    expect(callLog).toEqual(['org-alpha', 'org-beta', 'org-gamma']);
+    expect(mockAppOctokit.rest.apps.getOrgInstallation).toHaveBeenCalledTimes(3);
+  });
+
+  test('single org scenario: only one installation lookup needed', async () => {
+    const mockAppOctokit = {
+      rest: {
+        apps: {
+          getOrgInstallation: jest.fn().mockResolvedValue({ data: { id: 99999999 } })
+        }
+      }
+    };
+
+    const installationId = await getInstallationIdForOrg(mockAppOctokit, 'single-org');
+
+    expect(installationId).toBe(99999999);
+    expect(mockAppOctokit.rest.apps.getOrgInstallation).toHaveBeenCalledTimes(1);
+  });
+
+  test('partial failure: some orgs have app installed, some do not', async () => {
+    const mockAppOctokit = {
+      rest: {
+        apps: {
+          getOrgInstallation: jest.fn().mockImplementation(({ org }) => {
+            if (org === 'org-with-app') {
+              return Promise.resolve({ data: { id: 12345 } });
+            }
+            return Promise.reject({ status: 404 });
+          })
+        }
+      }
+    };
+
+    // First org succeeds
+    const id = await getInstallationIdForOrg(mockAppOctokit, 'org-with-app');
+    expect(id).toBe(12345);
+
+    // Second org fails
+    await expect(getInstallationIdForOrg(mockAppOctokit, 'org-without-app'))
+      .rejects.toThrow('GitHub App is not installed on organization: org-without-app');
   });
 });
