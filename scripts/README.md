@@ -70,6 +70,10 @@ The script generates a JWT that is valid for 10 minutes, which can be used to au
 
 Delete branch protection rules programmatically based on a pattern.
 
+## dismiss-code-scanning-alerts
+
+See: [dismiss-code-scanning-alerts](./dismiss-code-scanning-alerts/README.md)
+
 ## gei-clean-up-azure-storage-account.sh
 
 Clean up Azure Storage Account Containers from GEI migrations.

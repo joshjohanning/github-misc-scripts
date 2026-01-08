@@ -1,0 +1,26 @@
+{
+  "name": "dismiss-code-scanning-alerts",
+  "version": "1.0.0",
+  "description": "Dismiss code scanning alerts by rule ID across GitHub repositories",
+  "main": "dismiss-code-scanning-alerts.js",
+  "type": "module",
+  "scripts": {
+    "start": "node dismiss-code-scanning-alerts.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
+  "keywords": [
+    "github",
+    "code-scanning",
+    "codeql",
+    "security"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "octokit": "^5.0.0",
+    "@octokit/auth-app": "7.1.5"
+  },
+  "devDependencies": {
+    "jest": "^30.0.0"
+  }
+}
