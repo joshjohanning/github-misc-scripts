@@ -1,0 +1,40 @@
+{
+  "name": "code-scanning-coverage-report",
+  "version": "1.0.0",
+  "description": "Generate a comprehensive code scanning coverage report for all repositories in a GitHub organization",
+  "main": "code-scanning-coverage-report.js",
+  "type": "module",
+  "scripts": {
+    "start": "node code-scanning-coverage-report.js",
+    "help": "node code-scanning-coverage-report.js --help",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch"
+  },
+  "keywords": [
+    "github",
+    "code-scanning",
+    "codeql",
+    "security",
+    "coverage",
+    "report",
+    "github-api",
+    "octokit"
+  ],
+  "author": "Josh Johanning",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "octokit": "^5.0.0",
+    "@octokit/auth-app": "7.1.5"
+  },
+  "devDependencies": {
+    "jest": "^30.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joshjohanning/github-misc-scripts.git",
+    "directory": "scripts/code-scanning-coverage-report"
+  }
+}

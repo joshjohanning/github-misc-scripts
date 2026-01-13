@@ -36,6 +36,10 @@ Configuration values to change in the script:
 
 Migrate work items from Azure DevOps to GitHub issues - this just links out to a [separate repo](https://github.com/joshjohanning/ado_workitems_to_github_issues)
 
+## code-scanning-coverage-report
+
+See: [code-scanning-coverage-report](./code-scanning-coverage-report/README.md)
+
 ## create-app-jwt.py
 
 This script will generate a JWT for a GitHub App. It will use the private key and app ID from the GitHub App's settings page.
@@ -65,6 +69,10 @@ The script generates a JWT that is valid for 10 minutes, which can be used to au
 ## delete-branch-protection-rules.ps1
 
 Delete branch protection rules programmatically based on a pattern.
+
+## dismiss-code-scanning-alerts
+
+See: [dismiss-code-scanning-alerts](./dismiss-code-scanning-alerts/README.md)
 
 ## gei-clean-up-azure-storage-account.sh
 
