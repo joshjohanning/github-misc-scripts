@@ -923,21 +923,13 @@ async function main() {
 
   // Initialize authentication
   let appOctokit = null;
-  let rateLimitOctokit = null;
 
   if (isGitHubAppAuth()) {
     console.error('Using GitHub App authentication...');
     appOctokit = createAppOctokit();
-    // For rate limit check, we need an installation-authenticated Octokit
-    // Use the first org to get an installation token
-    try {
-      rateLimitOctokit = await createOctokitForOrg(orgs[0], appOctokit);
-    } catch (error) {
-      console.error(`ERROR: Failed to authenticate for ${orgs[0]}: ${error.message}`);
-      process.exit(1);
-    }
   } else {
-    rateLimitOctokit = createTokenOctokit();
+    // Validate token auth early
+    createTokenOctokit();
   }
 
   // Process each organization
@@ -947,7 +939,7 @@ async function main() {
     const isMultiOrg = orgs.length > 1;
 
     if (isMultiOrg) {
-      console.error(`\n[${ orgIndex + 1}/${orgs.length}] Processing organization: ${org}`);
+      console.error(`\n[${orgIndex + 1}/${orgs.length}] Processing organization: ${org}`);
     } else {
       console.error(`Generating code scanning coverage report for: ${org}`);
     }

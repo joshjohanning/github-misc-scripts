@@ -1,7 +1,5 @@
 import { jest } from '@jest/globals';
 import {
-  parseArgs,
-  fetchRepositories,
   fetchMatchingAlerts,
   fetchMatchingAlertsForOrg,
   dismissAlert,
@@ -13,7 +11,6 @@ import {
   VALID_REASONS,
   isGitHubAppAuth
 } from './dismiss-code-scanning-alerts.js';
-import fs from 'fs';
 
 // ============================================================================
 // Mock Data

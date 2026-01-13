@@ -155,10 +155,6 @@ node code-scanning-coverage-report.js my-org --output report.csv
 node code-scanning-coverage-report.js --orgs-file orgs.txt --output report.csv
 ```
 
-# Run the report
-node code-scanning-coverage-report.js my-org --output report.csv
-```
-
 ## Output Columns
 
 | Column | Description |
@@ -187,7 +183,7 @@ When using `--output`, the script generates actionable sub-reports:
 | `*-disabled.csv` | Repos with CodeQL disabled or no scans |
 | `*-stale.csv` | Repos modified after last scan (configurable with `--stale-days`, default: 90) |
 | `*-missing-languages.csv` | Repos scanning but missing some CodeQL languages |
-| `*-open-alerts.csv` | Repos with open code scanning alerts |
+| `*-critical-alerts.csv` | Repos with critical severity code scanning alerts |
 | `*-analysis-issues.csv` | Repos with analysis errors or warnings |
 
 ## CodeQL Supported Languages
