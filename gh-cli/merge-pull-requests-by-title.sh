@@ -153,9 +153,13 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
     # Build the merge command
     merge_args=("--$merge_method")
 
-    # Apply custom commit title if provided
-    if [ -n "$commit_title" ] && [ "$merge_method" != "rebase" ]; then
-      merge_args+=("--subject" "$commit_title")
+    # Always include PR number in commit subject (e.g., "commit message (#123)")
+    if [ "$merge_method" != "rebase" ]; then
+      if [ -n "$commit_title" ]; then
+        merge_args+=("--subject" "$commit_title (#$pr_number)")
+      else
+        merge_args+=("--subject" "$pr_title (#$pr_number)")
+      fi
     fi
 
     # Attempt to merge

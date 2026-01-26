@@ -151,11 +151,15 @@ while IFS= read -r pr_url || [ -n "$pr_url" ]; do
   # Build the merge command
   merge_args=("--$merge_method")
 
-  # Apply custom commit title with template substitution
-  if [ -n "$commit_title" ] && [ "$merge_method" != "rebase" ]; then
-    final_title="${commit_title//\{title\}/$pr_title}"
-    final_title="${final_title//\{number\}/$pr_number}"
-    merge_args+=("--subject" "$final_title")
+  # Always include PR number in commit subject (e.g., "commit message (#123)")
+  if [ "$merge_method" != "rebase" ]; then
+    if [ -n "$commit_title" ]; then
+      final_title="${commit_title//\{title\}/$pr_title}"
+      final_title="${final_title//\{number\}/$pr_number}"
+    else
+      final_title="$pr_title"
+    fi
+    merge_args+=("--subject" "$final_title (#$pr_number)")
   fi
 
   # Apply custom commit body with template substitution
