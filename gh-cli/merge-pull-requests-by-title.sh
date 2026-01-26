@@ -9,7 +9,7 @@
 #   repo_list_file    - File with repository URLs (one per line)
 #   pr_title_pattern  - Title pattern to match (exact match or use * for wildcard)
 #   merge_method      - Optional: merge method (merge, squash, rebase) - defaults to squash
-#   commit_title      - Optional: custom commit title for all merged PRs
+#   commit_title      - Optional: custom commit title for all merged PRs (PR number is auto-appended)
 #   --dry-run         - Optional: preview what would be merged without actually merging
 #
 # Examples:
@@ -54,7 +54,7 @@ if [ $# -lt 2 ]; then
   echo "  repo_list_file    - File with repository URLs (one per line)"
   echo "  pr_title_pattern  - Title pattern to match (use * for wildcard)"
   echo "  merge_method      - Optional: merge, squash, or rebase (default: squash)"
-  echo "  commit_title      - Optional: custom commit title for merged PRs"
+  echo "  commit_title      - Optional: custom commit title for merged PRs (PR number is auto-appended)"
   echo "  --dry-run         - Preview what would be merged without actually merging"
   exit 1
 fi

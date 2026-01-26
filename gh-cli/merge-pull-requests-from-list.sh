@@ -8,8 +8,8 @@
 # Arguments:
 #   pr_list_file   - File with PR URLs (one per line)
 #   merge_method   - Optional: merge method (merge, squash, rebase) - defaults to squash
-#   commit_title   - Optional: custom commit title (use {title} for original PR title, {number} for PR number)
-#   commit_body    - Optional: custom commit body (use {body} for original PR body)
+#   commit_title   - Optional: custom commit title (use {title} for original PR title; PR number is auto-appended)
+#   commit_body    - Optional: custom commit body (use {body} for original PR body, {title} for PR title)
 #   --dry-run      - Optional: preview what would be merged without actually merging
 #
 # Examples:
@@ -61,7 +61,7 @@ if [ $# -lt 1 ]; then
   echo "Arguments:"
   echo "  pr_list_file   - File with PR URLs (one per line)"
   echo "  merge_method   - Optional: merge, squash, or rebase (default: squash)"
-  echo "  commit_title   - Optional: custom commit title (use {title} for PR title, {number} for PR number)"
+  echo "  commit_title   - Optional: custom commit title (use {title} for PR title; PR number is auto-appended)"
   echo "  commit_body    - Optional: custom commit body (use {body} for PR body)"
   echo "  --dry-run      - Preview what would be merged without actually merging"
   exit 1
@@ -155,7 +155,6 @@ while IFS= read -r pr_url || [ -n "$pr_url" ]; do
   if [ "$merge_method" != "rebase" ]; then
     if [ -n "$commit_title" ]; then
       final_title="${commit_title//\{title\}/$pr_title}"
-      final_title="${final_title//\{number\}/$pr_number}"
     else
       final_title="$pr_title"
     fi
