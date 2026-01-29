@@ -5,7 +5,7 @@
 #
 # Prerequisites:
 # - git must be installed
-# - For macOS: brew install coreutils (for numfmt/gnumfmt)
+# - Standard Unix tools: awk, sort, mktemp, basename
 #
 # Usage:
 #   ./find-large-files-in-repositories.sh <repos-file> [size-in-mb]
@@ -27,6 +27,13 @@ fi
 
 REPOS_FILE="$1"
 SIZE_MB="${2:-100}"
+
+# Validate SIZE_MB is a positive integer
+if ! [[ "$SIZE_MB" =~ ^[1-9][0-9]*$ ]]; then
+  echo "Error: size-in-mb must be a positive integer (received: '$SIZE_MB')"
+  exit 1
+fi
+
 SIZE_BYTES=$((SIZE_MB * 1048576))
 
 if [ ! -f "$REPOS_FILE" ]; then
@@ -36,7 +43,7 @@ fi
 
 # Create a temporary directory for clones
 TEMP_DIR=$(mktemp -d)
-trap "rm -rf $TEMP_DIR" EXIT
+trap 'if [ -n "${TEMP_DIR:-}" ]; then rm -rf -- "$TEMP_DIR"; fi' EXIT
 
 echo "Finding files >= ${SIZE_MB}MB in repositories listed in $REPOS_FILE"
 echo "============================================================"
@@ -52,8 +59,10 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
 
   clone_path="$TEMP_DIR/$repo_name.git"
 
-  if ! git clone --bare "$repo_url" "$clone_path" 2>/dev/null; then
+  if ! clone_output=$(git clone --bare "$repo_url" "$clone_path" 2>&1); then
     echo "    Error: Failed to clone repository"
+    echo "    git clone output:"
+    echo "$clone_output" | sed 's/^/      /'
     echo ""
     continue
   fi
@@ -61,16 +70,25 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
   cd "$clone_path" || continue
 
   # Find files over the specified size
-  large_files=$(git rev-list --objects --all 2>/dev/null | \
-    git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' 2>/dev/null | \
-    awk -v size="$SIZE_BYTES" '/^blob/ && $3 >= size {printf "    %.2fMB %s\n", $3/1048576, $4}' | \
-    sort -rn)
-
-  if [ -n "$large_files" ]; then
-    echo "$large_files"
-  else
-    echo "    No files >= ${SIZE_MB}MB found"
-  fi
+  # Use tab delimiter to preserve filenames with spaces
+  git rev-list --objects --all 2>/dev/null | \
+    git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize)	%(rest)' 2>/dev/null | \
+    awk -v size="$SIZE_BYTES" -F '\t' '{
+      split($1, meta, " ")
+      if (meta[1] == "blob" && meta[3] >= size) {
+        printf "    %.2fMB %s\n", meta[3]/1048576, $2
+      }
+    }' | \
+    sort -rn | {
+      found=0
+      while IFS= read -r line; do
+        found=1
+        echo "$line"
+      done
+      if [ "$found" -eq 0 ]; then
+        echo "    No files >= ${SIZE_MB}MB found"
+      fi
+    }
 
   cd - > /dev/null || exit
   rm -rf "$clone_path"
