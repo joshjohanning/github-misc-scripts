@@ -57,12 +57,15 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
   echo "=== Checking: $repo_name ==="
   echo "    URL: $repo_url"
 
-  clone_path="$TEMP_DIR/$repo_name.git"
+  # Use hash of URL to avoid collisions when repos have the same name
+  repo_hash=$(printf '%s' "$repo_url" | md5 -q 2>/dev/null || printf '%s' "$repo_url" | md5sum | awk '{print $1}')
+  clone_path="$TEMP_DIR/${repo_name}-${repo_hash}.git"
 
   if ! clone_output=$(git clone --bare "$repo_url" "$clone_path" 2>&1); then
     echo "    Error: Failed to clone repository"
     echo "    git clone output:"
     echo "$clone_output" | sed 's/^/      /'
+    rm -rf "$clone_path"
     echo ""
     continue
   fi
