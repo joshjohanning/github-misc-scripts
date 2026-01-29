@@ -54,6 +54,9 @@ trap "rm -rf $temp_dir" EXIT
 # Collect all unique repositories
 repos_file="$temp_dir/repos.txt"
 while IFS= read -r line || [ -n "$line" ]; do
+  # Trim leading and trailing whitespace
+  line="${line#"${line%%[![:space:]]*}"}"
+  line="${line%"${line##*[![:space:]]}"}"
   [[ -z "$line" || "$line" =~ ^# ]] && continue
   repo=$(extract_repo "$line")
   echo "$repo"
