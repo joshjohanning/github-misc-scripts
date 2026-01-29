@@ -32,9 +32,17 @@ Perform a diff (like in `git log -p`), but only for a single file
 
 Extracts the authors of all commits in a repo and the number of commits they made
 
-## find-large-files.sh
+## find-large-files-in-repositories.sh
 
-Find large files in a git repo
+Find files over a specified size (default: 100MB) across multiple git repositories from a list of URLs
+
+```bash
+./find-large-files-in-repositories.sh repos.txt 100
+```
+
+## find-large-files-in-repository.sh
+
+Find large files in a git repository
 
 ## force-push-tag.sh
 
