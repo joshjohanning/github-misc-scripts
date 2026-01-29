@@ -283,6 +283,26 @@ Usage:
 ./check-repository-admin.sh <OWNER> <REPOSITORY> <USERNAME>
 ```
 
+### compare-dev-dependencies-across-repositories.sh
+
+Compares `devDependencies` in `package.json` across multiple repositories to identify differences in dependencies and versions.
+
+Usage:
+
+```shell
+./compare-dev-dependencies-across-repositories.sh repos.txt
+```
+
+### compare-package-scripts-across-repositories.sh
+
+Compares `package.json` scripts across multiple repositories to identify differences in script names and values.
+
+Usage:
+
+```shell
+./compare-package-scripts-across-repositories.sh repos.txt
+```
+
 ### copy-organization-members.sh
 
 Copy organization members from one organization to the other, the member will **retain** the source role (owner or member), member cannot be demoted, if they already exist at the target with an owner role they cannot be demoted to member.
