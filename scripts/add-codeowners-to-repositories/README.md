@@ -13,13 +13,7 @@ Adds a CODEOWNERS file to the default branch in a list of repositories.
 npm install
 ```
 
-## Usage
-
-```bash
-node add-codeowners-to-repositories.js --repos-file <file> --codeowners <file> [options]
-```
-
-### Options
+## Options
 
 | Option | Description |
 |--------|-------------|
