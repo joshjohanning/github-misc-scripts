@@ -1,0 +1,25 @@
+{
+  "name": "add-codeowners-to-repositories",
+  "version": "1.0.0",
+  "description": "Add CODEOWNERS file to multiple GitHub repositories",
+  "main": "add-codeowners-to-repositories.js",
+  "type": "module",
+  "scripts": {
+    "start": "node add-codeowners-to-repositories.js",
+    "help": "node add-codeowners-to-repositories.js --help"
+  },
+  "keywords": [
+    "github",
+    "codeowners",
+    "github-api",
+    "octokit"
+  ],
+  "author": "Josh Johanning",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "octokit": "^5.0.0"
+  }
+}

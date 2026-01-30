@@ -1,5 +1,9 @@
 # scripts
 
+## add-codeowners-to-repositories
+
+See: [add-codeowners-to-repositories](./add-codeowners-to-repositories/README.md)
+
 ## add-dependabot-file-to-repositories.js
 
 Add `dependabot.yml` file to a list of repositories.
