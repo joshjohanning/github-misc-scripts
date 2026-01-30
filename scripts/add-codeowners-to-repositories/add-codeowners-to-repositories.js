@@ -10,6 +10,9 @@
 //   --repos-file <file>   File containing list of repositories (org/repo format, one per line)
 //   --codeowners <file>   Path to the CODEOWNERS file to add
 //   --overwrite           Overwrite existing CODEOWNERS file (default: append)
+//   --create-pr           Create a pull request instead of committing directly
+//   --branch <name>       Branch name for PR (default: add-codeowners)
+//   --pr-title <title>    PR title (default: Add CODEOWNERS file)
 //   --dry-run             Show what would be done without making changes
 //   --concurrency <n>     Number of concurrent API calls (default: 10)
 //   --help                Show help
@@ -21,6 +24,7 @@
 // Example:
 //   node add-codeowners-to-repositories.js --repos-file repos.txt --codeowners ./CODEOWNERS
 //   node add-codeowners-to-repositories.js --repos-file repos.txt --codeowners ./CODEOWNERS --overwrite
+//   node add-codeowners-to-repositories.js --repos-file repos.txt --codeowners ./CODEOWNERS --create-pr
 //
 
 import { Octokit } from "octokit";
@@ -31,6 +35,8 @@ import { fileURLToPath } from 'url';
 // Configuration
 // =============================================================================
 const DEFAULT_CONCURRENCY = 10;
+const DEFAULT_BRANCH_NAME = 'add-codeowners';
+const DEFAULT_PR_TITLE = 'Add CODEOWNERS file';
 
 // Possible CODEOWNERS file locations (in order of preference)
 const CODEOWNERS_PATHS = ['CODEOWNERS', '.github/CODEOWNERS', 'docs/CODEOWNERS'];
@@ -45,6 +51,9 @@ function parseArgs() {
     reposFile: null,
     codeownersFile: null,
     overwrite: false,
+    createPr: false,
+    branch: DEFAULT_BRANCH_NAME,
+    prTitle: DEFAULT_PR_TITLE,
     dryRun: false,
     concurrency: DEFAULT_CONCURRENCY,
     help: false
@@ -75,6 +84,15 @@ function parseArgs() {
         break;
       case '--overwrite':
         config.overwrite = true;
+        break;
+      case '--create-pr':
+        config.createPr = true;
+        break;
+      case '--branch':
+        config.branch = getRequiredValue('--branch', ++i);
+        break;
+      case '--pr-title':
+        config.prTitle = getRequiredValue('--pr-title', ++i);
         break;
       case '--dry-run':
         config.dryRun = true;
@@ -111,6 +129,9 @@ Options:
   --repos-file <file>   File containing list of repositories (org/repo format, one per line)
   --codeowners <file>   Path to the CODEOWNERS file to add
   --overwrite           Overwrite existing CODEOWNERS file (default: append)
+  --create-pr           Create a pull request instead of committing directly
+  --branch <name>       Branch name for PR (default: ${DEFAULT_BRANCH_NAME})
+  --pr-title <title>    PR title (default: ${DEFAULT_PR_TITLE})
   --dry-run             Show what would be done without making changes
   --concurrency <n>     Number of concurrent API calls (default: ${DEFAULT_CONCURRENCY})
   --help                Show this help message
@@ -133,10 +154,13 @@ Behavior:
   - By default, appends new content to existing CODEOWNERS file
   - With --overwrite, replaces the entire CODEOWNERS file
   - Creates CODEOWNERS in the root if it doesn't exist
+  - With --create-pr, creates a branch and pull request for review
 
 Examples:
   node add-codeowners-to-repositories.js --repos-file repos.txt --codeowners ./CODEOWNERS
   node add-codeowners-to-repositories.js --repos-file repos.txt --codeowners ./CODEOWNERS --overwrite
+  node add-codeowners-to-repositories.js --repos-file repos.txt --codeowners ./CODEOWNERS --create-pr
+  node add-codeowners-to-repositories.js --repos-file repos.txt --codeowners ./CODEOWNERS --create-pr --branch my-branch --pr-title "My PR Title"
   node add-codeowners-to-repositories.js --repos-file repos.txt --codeowners ./CODEOWNERS --dry-run
 `);
 }
@@ -227,6 +251,53 @@ function readCodeownersFile(filePath) {
   }
 }
 
+// Get repository default branch and its SHA
+async function getDefaultBranchInfo(octokit, org, repo) {
+  const { data } = await octokit.rest.repos.get({
+    owner: org,
+    repo
+  });
+  const defaultBranch = data.default_branch;
+
+  // Get the SHA of the default branch
+  const { data: refData } = await octokit.rest.git.getRef({
+    owner: org,
+    repo,
+    ref: `heads/${defaultBranch}`
+  });
+
+  return {
+    name: defaultBranch,
+    sha: refData.object.sha
+  };
+}
+
+// Create a new branch from the default branch
+async function createBranch(octokit, org, repo, branchName, baseSha) {
+  await octokit.rest.git.createRef({
+    owner: org,
+    repo,
+    ref: `refs/heads/${branchName}`,
+    sha: baseSha
+  });
+}
+
+// Create a pull request
+async function createPullRequest(octokit, org, repo, head, base, title, body) {
+  const { data } = await octokit.rest.pulls.create({
+    owner: org,
+    repo,
+    title,
+    body,
+    head,
+    base
+  });
+  return {
+    number: data.number,
+    url: data.html_url
+  };
+}
+
 // Check if CODEOWNERS file exists and return its info
 async function findExistingCodeowners(octokit, org, repo) {
   for (const path of CODEOWNERS_PATHS) {
@@ -262,7 +333,7 @@ async function findExistingCodeowners(octokit, org, repo) {
 }
 
 // Create or update CODEOWNERS file
-async function updateCodeowners(octokit, org, repo, path, content, sha, message) {
+async function updateCodeowners(octokit, org, repo, path, content, sha, message, branch = null) {
   const params = {
     owner: org,
     repo,
@@ -273,6 +344,10 @@ async function updateCodeowners(octokit, org, repo, path, content, sha, message)
 
   if (sha) {
     params.sha = sha;
+  }
+
+  if (branch) {
+    params.branch = branch;
   }
 
   const { data } = await octokit.rest.repos.createOrUpdateFileContents(params);
@@ -290,7 +365,8 @@ async function processRepository(octokit, org, repo, newCodeownersContent, confi
     status: 'unknown',
     message: '',
     path: null,
-    sha: null
+    sha: null,
+    prUrl: null
   };
 
   try {
@@ -322,24 +398,77 @@ async function processRepository(octokit, org, repo, newCodeownersContent, confi
     if (config.dryRun) {
       result.status = 'dry-run';
       result.path = existing.path;
-      result.message += ' (dry-run)';
+      result.message += config.createPr ? ' (dry-run, would create PR)' : ' (dry-run)';
       return result;
     }
 
-    // Commit the file
-    const commitResult = await updateCodeowners(
-      octokit,
-      org,
-      repo,
-      existing.path,
-      finalContent,
-      existing.sha,
-      commitMessage
-    );
+    if (config.createPr) {
+      // Get default branch info
+      const defaultBranchInfo = await getDefaultBranchInfo(octokit, org, repo);
 
-    result.status = 'success';
-    result.path = commitResult.path;
-    result.sha = commitResult.sha;
+      // Create a new branch
+      const branchName = config.branch;
+      try {
+        await createBranch(octokit, org, repo, branchName, defaultBranchInfo.sha);
+      } catch (error) {
+        if (error.status === 422 && error.message.includes('Reference already exists')) {
+          // Branch already exists - could be from a previous run
+          result.status = 'error';
+          result.message = `Branch '${branchName}' already exists. Delete it or use a different branch name.`;
+          return result;
+        }
+        throw error;
+      }
+
+      // Commit to the new branch
+      // Need to get the file info from the new branch (which is same as default at this point)
+      const commitResult = await updateCodeowners(
+        octokit,
+        org,
+        repo,
+        existing.path,
+        finalContent,
+        existing.sha,
+        commitMessage,
+        branchName
+      );
+
+      // Create the pull request
+      const prBody = existing.exists
+        ? `This PR ${config.overwrite ? 'replaces' : 'updates'} the CODEOWNERS file.`
+        : 'This PR adds a CODEOWNERS file to the repository.';
+
+      const pr = await createPullRequest(
+        octokit,
+        org,
+        repo,
+        branchName,
+        defaultBranchInfo.name,
+        config.prTitle,
+        prBody
+      );
+
+      result.status = 'success';
+      result.path = commitResult.path;
+      result.sha = commitResult.sha;
+      result.prUrl = pr.url;
+      result.message += ` (PR #${pr.number})`;
+    } else {
+      // Commit directly to default branch
+      const commitResult = await updateCodeowners(
+        octokit,
+        org,
+        repo,
+        existing.path,
+        finalContent,
+        existing.sha,
+        commitMessage
+      );
+
+      result.status = 'success';
+      result.path = commitResult.path;
+      result.sha = commitResult.sha;
+    }
 
   } catch (error) {
     result.status = 'error';
@@ -383,7 +512,11 @@ function printSummary(results) {
   for (const result of results) {
     const statusIcon = result.status === 'success' ? '✓' :
                        result.status === 'dry-run' ? '○' : '✗';
-    console.error(`${statusIcon} ${result.repository}: ${result.message}`);
+    let line = `${statusIcon} ${result.repository}: ${result.message}`;
+    if (result.prUrl) {
+      line += ` - ${result.prUrl}`;
+    }
+    console.error(line);
 
     if (result.status === 'success') summary.success++;
     else if (result.status === 'dry-run') summary.dryRun++;
@@ -428,7 +561,7 @@ async function main() {
   const codeownersContent = readCodeownersFile(config.codeownersFile);
 
   console.error(`Processing ${repositories.length} repositories...`);
-  console.error(`Mode: ${config.overwrite ? 'overwrite' : 'append'}`);
+  console.error(`Mode: ${config.overwrite ? 'overwrite' : 'append'}${config.createPr ? ' (create PR)' : ''}`);
   if (config.dryRun) {
     console.error('DRY RUN: No changes will be made');
   }
@@ -467,11 +600,16 @@ export {
   parseArgs,
   readRepositoriesFile,
   readCodeownersFile,
+  getDefaultBranchInfo,
+  createBranch,
+  createPullRequest,
   findExistingCodeowners,
   updateCodeowners,
   processRepository,
   processRepositories,
   createOctokit,
   CODEOWNERS_PATHS,
-  DEFAULT_CONCURRENCY
+  DEFAULT_CONCURRENCY,
+  DEFAULT_BRANCH_NAME,
+  DEFAULT_PR_TITLE
 };

@@ -26,6 +26,9 @@ node add-codeowners-to-repositories.js --repos-file <file> --codeowners <file> [
 | `--repos-file <file>` | File containing list of repositories (org/repo format, one per line) |
 | `--codeowners <file>` | Path to the CODEOWNERS file to add |
 | `--overwrite` | Overwrite existing CODEOWNERS file (default: append) |
+| `--create-pr` | Create a pull request instead of committing directly |
+| `--branch <name>` | Branch name for PR (default: `add-codeowners`) |
+| `--pr-title <title>` | PR title (default: `Add CODEOWNERS file`) |
 | `--dry-run` | Show what would be done without making changes |
 | `--concurrency <n>` | Number of concurrent API calls (default: 10) |
 | `--help` | Show help message |
@@ -55,6 +58,7 @@ Lines starting with `#` are treated as comments and ignored. Empty lines are als
 - By default, appends new content to existing CODEOWNERS file
 - With `--overwrite`, replaces the entire CODEOWNERS file
 - Creates CODEOWNERS in the root if it doesn't exist
+- With `--create-pr`, creates a branch and pull request for review
 
 ## Examples
 
@@ -68,6 +72,18 @@ Add CODEOWNERS (overwrite mode):
 
 ```bash
 node add-codeowners-to-repositories.js --repos-file repos.txt --codeowners ./CODEOWNERS --overwrite
+```
+
+Create PRs instead of committing directly:
+
+```bash
+node add-codeowners-to-repositories.js --repos-file repos.txt --codeowners ./CODEOWNERS --create-pr
+```
+
+Create PRs with custom branch name and title:
+
+```bash
+node add-codeowners-to-repositories.js --repos-file repos.txt --codeowners ./CODEOWNERS --create-pr --branch my-branch --pr-title "Add CODEOWNERS for compliance"
 ```
 
 Dry run to see what would happen:
