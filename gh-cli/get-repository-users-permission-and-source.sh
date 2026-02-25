@@ -3,10 +3,9 @@
 # Returns the permission for everyone who can access a repository and how they
 # access it (direct, team, organization)
 #
-# Note: The GraphQL permissionSources API only returns READ, WRITE, and ADMIN -
-# it does not support MAINTAIN or TRIAGE. A heuristic is applied to direct
-# sources to correct this, but team sources may still show WRITE instead of
-# MAINTAIN (or READ instead of TRIAGE) due to this API limitation.
+# Uses the REST API to get accurate team role names (maintain, triage) since the
+# GraphQL permissionSources API only returns READ, WRITE, and ADMIN. A heuristic
+# is also applied to direct sources to correct MAINTAIN/TRIAGE labels.
 #
 # gh cli's token needs to be able to admin the organization - run this first if needed:
 #   gh auth refresh -h github.com -s admin:org
@@ -26,7 +25,29 @@ org="$1"
 repo="$2"
 affiliation="${3:-ALL}"
 
-gh api graphql --paginate -f owner="$org" -f repo="$repo" -f affiliation="$affiliation" -f query='
+# Map REST permission names (pull/push) to GraphQL-style names (READ/WRITE)
+map_permission() {
+  case "$1" in
+    pull) echo "READ" ;;
+    triage) echo "TRIAGE" ;;
+    push) echo "WRITE" ;;
+    maintain) echo "MAINTAIN" ;;
+    admin) echo "ADMIN" ;;
+    *) echo "$1" | tr '[:lower:]' '[:upper:]' ;;
+  esac
+}
+
+# Get true team permissions via REST API and build a sed command to fix labels
+sed_cmd=""
+while IFS=$'\t' read -r slug perm; do
+  mapped=$(map_permission "$perm")
+  sed_cmd="${sed_cmd}s/team:${slug}\([^)]*\)/team:${slug}(${mapped})/g;"
+done <<EOF
+$(gh api --paginate "/repos/$org/$repo/teams?per_page=100" --jq '.[] | [.slug, .permission] | @tsv')
+EOF
+
+# Get source details via GraphQL
+raw_output=$(gh api graphql --paginate -f owner="$org" -f repo="$repo" -f affiliation="$affiliation" -f query='
 query ($owner: String!, $repo: String!, $affiliation: CollaboratorAffiliation!, $endCursor: String) {
   repository(owner:$owner, name:$repo) {
     name
@@ -81,4 +102,11 @@ query ($owner: String!, $repo: String!, $affiliation: CollaboratorAffiliation!, 
     end
   ] | unique | join(", ") |
   "\($user) | \($effective) | \(.)"
-' | (echo "USER | EFFECTIVE | SOURCES" && cat) | column -t -s '|'
+')
+
+# Fix team permission labels using REST data
+if [ -n "$sed_cmd" ]; then
+  raw_output=$(echo "$raw_output" | sed -E "$sed_cmd")
+fi
+
+(echo "USER | EFFECTIVE | SOURCES" && echo "$raw_output") | column -t -s '|'
