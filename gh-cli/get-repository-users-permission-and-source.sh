@@ -33,8 +33,18 @@ fi
 
 org="$1"
 repo="$2"
-affiliation="${3:-ALL}"
+affiliation_input="${3:-ALL}"
+affiliation="$(echo "$affiliation_input" | tr '[:lower:]' '[:upper:]')"
 hostname="${4:-github.com}"
+
+case "$affiliation" in
+  OUTSIDE|DIRECT|ALL)
+    ;;
+  *)
+    echo "Error: invalid affiliation '$affiliation_input'. Must be OUTSIDE, DIRECT, or ALL."
+    exit 1
+    ;;
+esac
 
 # Map REST permission names (pull/push) to GraphQL-style names (READ/WRITE)
 map_permission() {
