@@ -11,19 +11,30 @@
 #   gh auth refresh -h github.com -s admin:org
 #
 # Usage:
-#   ./get-repository-users-permission-and-source.sh <org> <repo> [affiliation]
+#   ./get-repository-users-permission-and-source.sh <org> <repo> [affiliation] [hostname]
 #
 # affiliation can be: OUTSIDE, DIRECT, ALL (default: ALL)
+# hostname: GitHub hostname (default: github.com), e.g. github.example.com
+
+# Example output:
+#
+# USER                  EFFECTIVE    SOURCES
+# joshjohanning         ADMIN        org-member(ADMIN), team:admin-team(WRITE), team:approver-team(WRITE)
+# FluffyCarlton         MAINTAIN     direct(MAINTAIN), org-member(READ)
+# joshgoldfishturtle    ADMIN        org-member(READ), team:compliance-team(ADMIN)
+
 
 if [ -z "$2" ]; then
-  echo "Usage: $0 <org> <repo> [affiliation]"
+  echo "Usage: $0 <org> <repo> [affiliation] [hostname]"
   echo "  affiliation: OUTSIDE, DIRECT, ALL (default: ALL)"
+  echo "  hostname: GitHub hostname (default: github.com)"
   exit 1
 fi
 
 org="$1"
 repo="$2"
 affiliation="${3:-ALL}"
+hostname="${4:-github.com}"
 
 # Map REST permission names (pull/push) to GraphQL-style names (READ/WRITE)
 map_permission() {
@@ -43,11 +54,11 @@ while IFS=$'\t' read -r slug perm; do
   mapped=$(map_permission "$perm")
   sed_cmd="${sed_cmd}s/team:${slug}\([^)]*\)/team:${slug}(${mapped})/g;"
 done <<EOF
-$(gh api --paginate "/repos/$org/$repo/teams?per_page=100" --jq '.[] | [.slug, .permission] | @tsv')
+$(gh api --hostname "$hostname" --paginate "/repos/$org/$repo/teams?per_page=100" --jq '.[] | [.slug, .permission] | @tsv')
 EOF
 
 # Get source details via GraphQL
-raw_output=$(gh api graphql --paginate -f owner="$org" -f repo="$repo" -f affiliation="$affiliation" -f query='
+raw_output=$(gh api graphql --hostname "$hostname" --paginate -f owner="$org" -f repo="$repo" -f affiliation="$affiliation" -f query='
 query ($owner: String!, $repo: String!, $affiliation: CollaboratorAffiliation!, $endCursor: String) {
   repository(owner:$owner, name:$repo) {
     name
