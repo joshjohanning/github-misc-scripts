@@ -3,6 +3,11 @@
 # Returns the permission for everyone who can access a repository and how they
 # access it (direct, team, organization)
 #
+# Note: The GraphQL permissionSources API only returns READ, WRITE, and ADMIN -
+# it does not support MAINTAIN or TRIAGE. A heuristic is applied to direct
+# sources to correct this, but team sources may still show WRITE instead of
+# MAINTAIN (or READ instead of TRIAGE) due to this API limitation.
+#
 # gh cli's token needs to be able to admin the organization - run this first if needed:
 #   gh auth refresh -h github.com -s admin:org
 #
