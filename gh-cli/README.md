@@ -1345,7 +1345,16 @@ joshjohanning,admin
 
 ### get-repository-users-permission-and-source.sh
 
-Returns the permission for everyone who can access the repo and how they access it (direct, team, org)
+Returns the permission for everyone who can access a repository and how they access it (direct, team, organization). Uses the REST API to get accurate team role names including maintain, triage, and custom roles.
+
+Example output:
+
+```text
+USER                  EFFECTIVE    SOURCES
+joshjohanning         ADMIN        org-member(ADMIN), team:admin-team(WRITE), team:approver-team(WRITE)
+FluffyCarlton         MAINTAIN     direct(MAINTAIN), org-member(READ)
+joshgoldfishturtle    ADMIN        org-member(READ), team:compliance-team(ADMIN)
+```
 
 ### get-repository.sh
 
