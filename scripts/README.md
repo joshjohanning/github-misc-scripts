@@ -70,6 +70,23 @@ The script generates a JWT that is valid for 10 minutes, which can be used to au
 > [!NOTE]
 > Requires `openssl` to be installed. The JWT can be used with the GitHub API to generate installation access tokens.
 
+## create-enterprise-team-tied-to-idp-group.sh
+
+Creates an enterprise team in GitHub and ties it to an Identity Provider (IdP) group via SCIM. The script paginates through all SCIM groups in the enterprise to find the target IdP group by display name, then creates an enterprise team linked to that group.
+
+Prerequisites:
+
+- `curl` and `jq` must be installed
+- Set the `GH_PAT` environment variable: `export GH_PAT=ghp_abc` (must have `admin:enterprise` scope)
+- SCIM/SSO must be configured for the enterprise with IdP groups provisioned
+
+Usage:
+
+```bash
+export GH_PAT=ghp_abc
+./create-enterprise-team-tied-to-idp-group.sh <enterprise> <team-name> <idp-group-name> [api-url]
+```
+
 ## delete-branch-protection-rules.ps1
 
 Delete branch protection rules programmatically based on a pattern.
