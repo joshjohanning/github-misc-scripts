@@ -38,13 +38,30 @@ IDP_GROUP=$3     # IdP group display name to search for
 API=${4:-"https://api.github.com"}  # GitHub API base URL (optional, defaults to github.com)
 
 # --- Input validation ---
-if [ -z "$3" ]; then
+if [ "$#" -lt 3 ]; then
   echo "Usage: $0 <enterprise> <team-name> <idp-group-name> [api-url]"
   echo ""
   echo "Example: $0 fabrikam MyTeam \"Engineering Team\""
   exit 1
 fi
 
+if [ -z "$ENTERPRISE" ]; then
+  echo "Error: enterprise slug (first argument) must not be empty."
+  echo "Usage: $0 <enterprise> <team-name> <idp-group-name> [api-url]"
+  exit 1
+fi
+
+if [ -z "$TEAM" ]; then
+  echo "Error: team name (second argument) must not be empty."
+  echo "Usage: $0 <enterprise> <team-name> <idp-group-name> [api-url]"
+  exit 1
+fi
+
+if [ -z "$IDP_GROUP" ]; then
+  echo "Error: IdP group name (third argument) must not be empty."
+  echo "Usage: $0 <enterprise> <team-name> <idp-group-name> [api-url]"
+  exit 1
+fi
 if [ -z "$GH_PAT" ]; then
   echo "Error: GH_PAT environment variable is not set."
   echo "Set it with: export GH_PAT=ghp_abc"
