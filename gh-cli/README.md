@@ -1234,6 +1234,17 @@ Generates a CSV with 4 columns:
 - url template - The autolink url template
 - autonumeric - If the autolink is autonumeric or not (true/false)
 
+### get-repositories-created-from-template.sh
+
+Gets all repositories in an organization or user account that were created from a specific repository template using GraphQL. Tries the organization endpoint first, then falls back to the user endpoint.
+
+```shell
+./get-repositories-created-from-template.sh joshjohanning-org joshjohanning/nodejs-actions-starter-template
+```
+
+> [!NOTE]
+> The `templateRepository` field is only populated if the template repository still exists and is accessible
+
 ### get-repositories-not-using-actions.sh
 
 Get repositories not using actions, by files committed in the `.github/workflows` directory
