@@ -469,6 +469,14 @@ Usage:
 
 The `repos.txt` file should contain one repository name per line. The script will automatically look up repository IDs.
 
+### create-team-and-link-idp-group.sh
+
+Creates an organization team and links it to an Identity Provider (IdP) external group.
+
+```shell
+./create-team-and-link-idp-group.sh <org> <team-name> <idp-group-name>
+```
+
 ### create-teams-from-list.sh
 
 Loops through a list of teams and creates them.
