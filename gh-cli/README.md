@@ -471,11 +471,15 @@ The `repos.txt` file should contain one repository name per line. The script wil
 
 ### create-team-and-link-idp-group.sh
 
-Creates an organization team and links it to an Identity Provider (IdP) external group.
+Creates an organization team and links it to an Identity Provider (IdP) external group. Requires SAML SSO / team synchronization to be enabled and IdP groups provisioned to the organization.
 
 ```shell
-./create-team-and-link-idp-group.sh <org> <team-name> <idp-group-name>
+./create-team-and-link-idp-group.sh [--secret] [--hostname <host>] <org> <team-name> <idp-group-name>
 ```
+
+Prerequisites:
+- Token must have the `admin:org` scope (`gh auth refresh -h github.com -s admin:org`)
+- Enterprise has to be EMU or Data Residency (untested with non-EMU/DR; should work with SAML SSO similarly)
 
 ### create-teams-from-list.sh
 
