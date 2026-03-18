@@ -1497,6 +1497,9 @@ Finds and merges pull requests matching a title pattern across multiple reposito
 
 # Dry run to preview
 ./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" squash "" --dry-run
+
+# Bump npm patch version on matching PR branches and push (run before merging so CI can pass)
+./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" squash "" --bump-patch-version
 ```
 
 Input file format (`repos.txt`):
