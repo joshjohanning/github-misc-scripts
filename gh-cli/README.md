@@ -1493,16 +1493,19 @@ Finds and merges pull requests matching a title pattern across multiple reposito
 ./merge-pull-requests-by-title.sh repos.txt "chore(deps-dev): bump eslint*"
 
 # Merge without confirmation prompt
-./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" squash "" --no-prompt
+./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" --no-prompt
 
 # With custom commit title, no confirmation prompt
 ./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" squash "chore(deps): update dependencies" --no-prompt
 
 # Dry run to preview
-./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" squash "" --dry-run
+./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" --dry-run
 
 # Bump npm patch version on matching PR branches and push (run before merging so CI can pass)
-./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" squash "" --bump-patch-version
+./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" --bump-patch-version
+
+# Bump patch version and enable auto-merge (bump, wait for CI, then auto-merge)
+./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" --bump-patch-version --enable-auto-merge
 ```
 
 Input file format (`repos.txt`):

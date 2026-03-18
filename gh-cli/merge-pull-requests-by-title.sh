@@ -11,7 +11,7 @@
 #   merge_method          - Optional: merge method (merge, squash, rebase) - defaults to squash
 #   commit_title          - Optional: custom commit title for all merged PRs (PR number is auto-appended)
 #   --dry-run             - Optional: preview what would be merged without actually merging
-#   --bump-patch-version  - Optional: clone each matching PR branch, run npm version patch, commit, and push (mutually exclusive with --dry-run and merge)
+#   --bump-patch-version  - Optional: clone each matching PR branch, run npm version patch, commit, and push (mutually exclusive with --dry-run; does not merge unless combined with --enable-auto-merge)
 #   --enable-auto-merge   - Optional: enable auto-merge on matching PRs (can combine with --bump-patch-version)
 #   --no-prompt           - Optional: merge without interactive confirmation (default is to prompt before each merge)
 #
@@ -26,10 +26,10 @@
 #   ./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" --dry-run
 #
 #   # Bump patch version on matching PR branches (run before merging so CI can pass)
-#   ./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" squash "" --bump-patch-version
+#   ./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" --bump-patch-version
 #
 #   # Bump patch version and enable auto-merge (bump, wait for CI, then auto-merge)
-#   ./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" squash "" --bump-patch-version --enable-auto-merge
+#   ./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" --bump-patch-version --enable-auto-merge
 #
 # Input file format (repos.txt):
 #   https://github.com/joshjohanning/repo1
@@ -41,7 +41,8 @@
 #   - Use * as a wildcard in the title pattern (e.g., "chore(deps)*" matches any title starting with "chore(deps)")
 #   - If multiple PRs match in a repo, all will be listed but only the first will be merged (use --dry-run to preview)
 #   - --bump-patch-version clones each matching PR branch to a temp dir, bumps the npm patch version, commits, and pushes
-#   - --bump-patch-version is mutually exclusive with --dry-run
+#   - --bump-patch-version is mutually exclusive with --dry-run (does not merge unless combined with --enable-auto-merge)
+#   - --bump-patch-version only works with same-repo PRs (fork-based PRs are skipped)
 #   - --enable-auto-merge queues PRs to merge once all required checks pass (does not bypass protections)
 #   - By default, merge mode prompts for confirmation before each PR merge; use --no-prompt to skip
 #
@@ -193,8 +194,20 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
   fi
 
   # Get open PRs and filter by title (paginate to get all PRs)
+  api_stderr=$(mktemp)
   matching_prs=$(gh api --paginate "/repos/$repo/pulls?state=open" \
-    --jq ".[] | $jq_filter | \"\(.number)|\(.title)|\(.user.login)|\(.head.ref)\"" 2>/dev/null)
+    --jq ".[] | $jq_filter | \"\(.number)|\(.title)|\(.user.login)|\(.head.ref)|\(.head.repo.full_name)\"" 2>"$api_stderr")
+  api_exit=$?
+
+  if [ $api_exit -ne 0 ]; then
+    api_error=$(cat "$api_stderr")
+    rm -f "$api_stderr"
+    echo "  ❌ API error for $repo: $api_error"
+    ((fail_count++))
+    echo ""
+    continue
+  fi
+  rm -f "$api_stderr"
 
   if [ -z "$matching_prs" ]; then
     echo "  📭 No matching PRs found"
@@ -204,10 +217,17 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
   fi
 
   # Process each matching PR
-  while IFS='|' read -r pr_number pr_title pr_author pr_branch; do
+  while IFS='|' read -r pr_number pr_title pr_author pr_branch pr_head_repo; do
     echo "  📋 Found PR #$pr_number: $pr_title (by $pr_author)"
 
     if [ "$bump_patch_version" = true ]; then
+      # Skip fork-based PRs since we can't push to the head repo
+      if [ "$pr_head_repo" != "$repo" ]; then
+        echo "  ⚠️  Skipping $repo#$pr_number - fork-based PR ($pr_head_repo), cannot push to branch"
+        ((skipped_count++))
+        continue
+      fi
+
       # Clone to temp dir, bump patch version, commit, and push
       tmp_dir=$(mktemp -d)
       clone_dir="$tmp_dir/$repo_name"
@@ -246,6 +266,7 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
               echo "  🔄 Auto-merge enabled for $repo#$pr_number"
             else
               echo "  ⚠️  Failed to enable auto-merge for $repo#$pr_number"
+              ((fail_count++))
             fi
           fi
         else
@@ -290,7 +311,7 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
       else
         # Prompt for confirmation unless --no-prompt was passed
         if [ "$no_prompt" = false ]; then
-          if ! [[ -r /dev/tty ]]; then
+          if ! [[ -t 0 ]]; then
             echo "Error: No TTY available for interactive prompt - use --no-prompt"
             exit 1
           fi
