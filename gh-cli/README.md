@@ -1483,17 +1483,20 @@ Creates a (mostly) empty migration for a given organization repository so that i
 
 ### merge-pull-requests-by-title.sh
 
-Finds and merges pull requests matching a title pattern across multiple repositories. Useful for batch merging Dependabot PRs or other automated PRs with similar titles.
+Finds and merges pull requests matching a title pattern across multiple repositories. Useful for batch merging Dependabot PRs or other automated PRs with similar titles. By default, prompts for confirmation before each merge; use `--no-prompt` to skip.
 
 ```bash
-# Find and merge PRs with exact title match
+# Find and merge PRs with exact title match (prompts for confirmation per PR)
 ./merge-pull-requests-by-title.sh repos.txt "chore(deps-dev): bump eslint from 8.0.0 to 9.0.0"
 
 # Use wildcard to match partial titles
 ./merge-pull-requests-by-title.sh repos.txt "chore(deps-dev): bump eslint*"
 
-# With custom commit title
-./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" squash "chore(deps): update dependencies"
+# Merge without confirmation prompt
+./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" squash "" --no-prompt
+
+# With custom commit title, no confirmation prompt
+./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" squash "chore(deps): update dependencies" --no-prompt
 
 # Dry run to preview
 ./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" squash "" --dry-run

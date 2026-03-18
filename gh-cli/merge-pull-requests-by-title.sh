@@ -3,7 +3,7 @@
 # Finds and merges pull requests matching a title pattern across multiple repositories
 #
 # Usage:
-#   ./merge-pull-requests-by-title.sh <repo_list_file> <pr_title_pattern> [merge_method] [commit_title] [--dry-run] [--bump-patch-version]
+#   ./merge-pull-requests-by-title.sh <repo_list_file> <pr_title_pattern> [merge_method] [commit_title] [--dry-run] [--bump-patch-version] [--no-prompt]
 #
 # Arguments:
 #   repo_list_file       - File with repository URLs (one per line)
@@ -12,13 +12,14 @@
 #   commit_title         - Optional: custom commit title for all merged PRs (PR number is auto-appended)
 #   --dry-run            - Optional: preview what would be merged without actually merging
 #   --bump-patch-version - Optional: clone each matching PR branch, run npm version patch, commit, and push (mutually exclusive with --dry-run and merge)
+#   --no-prompt          - Optional: merge without interactive confirmation (default is to prompt before each merge)
 #
 # Examples:
-#   # Find and merge PRs with exact title match
+#   # Find and merge PRs with exact title match (will prompt for confirmation)
 #   ./merge-pull-requests-by-title.sh repos.txt "chore(deps-dev): bump eslint-plugin-jest from 29.5.0 to 29.9.0 in the eslint group"
 #
-#   # With custom commit title
-#   ./merge-pull-requests-by-title.sh repos.txt "chore(deps-dev): bump eslint*" squash "chore(deps): update eslint dependencies"
+#   # With custom commit title, no confirmation prompt
+#   ./merge-pull-requests-by-title.sh repos.txt "chore(deps-dev): bump eslint*" squash "chore(deps): update eslint dependencies" --no-prompt
 #
 #   # Dry run to preview
 #   ./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" squash "" --dry-run
@@ -37,6 +38,7 @@
 #   - If multiple PRs match in a repo, all will be listed but only the first will be merged (use --dry-run to preview)
 #   - --bump-patch-version clones each matching PR branch to a temp dir, bumps the npm patch version, commits, and pushes
 #   - --bump-patch-version is mutually exclusive with --dry-run
+#   - By default, merge mode prompts for confirmation before each PR merge; use --no-prompt to skip
 #
 # TODO:
 #   - Add --delete-branch flag to delete remote branch after merge
@@ -44,19 +46,22 @@
 
 merge_methods=("merge" "squash" "rebase")
 
-# Check for --dry-run and --bump-patch-version flags anywhere in arguments
+# Check for --dry-run, --bump-patch-version, and --no-prompt flags anywhere in arguments
 dry_run=false
 bump_patch_version=false
+no_prompt=false
 for arg in "$@"; do
   if [ "$arg" = "--dry-run" ]; then
     dry_run=true
   elif [ "$arg" = "--bump-patch-version" ]; then
     bump_patch_version=true
+  elif [ "$arg" = "--no-prompt" ]; then
+    no_prompt=true
   fi
 done
 
 if [ $# -lt 2 ]; then
-  echo "Usage: $0 <repo_list_file> <pr_title_pattern> [merge_method] [commit_title] [--dry-run] [--bump-patch-version]"
+  echo "Usage: $0 <repo_list_file> <pr_title_pattern> [merge_method] [commit_title] [--dry-run] [--bump-patch-version] [--no-prompt]"
   echo ""
   echo "Arguments:"
   echo "  repo_list_file       - File with repository URLs (one per line)"
@@ -65,6 +70,7 @@ if [ $# -lt 2 ]; then
   echo "  commit_title         - Optional: custom commit title for merged PRs (PR number is auto-appended)"
   echo "  --dry-run            - Preview what would be merged without actually merging"
   echo "  --bump-patch-version - Bump npm patch version on each matching PR branch and push (mutually exclusive with --dry-run)"
+  echo "  --no-prompt          - Merge without interactive confirmation (default is to prompt before each merge)"
   exit 1
 fi
 
@@ -219,12 +225,23 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
       if [ "$dry_run" = true ]; then
         echo "  🔍 Would merge $repo#$pr_number with: gh pr merge $pr_number --repo $repo ${merge_args[*]}"
         ((success_count++))
-      elif gh pr merge "$pr_number" --repo "$repo" "${merge_args[@]}"; then
-        echo "  ✅ Successfully merged $repo#$pr_number"
-        ((success_count++))
       else
-        echo "  ❌ Failed to merge $repo#$pr_number"
-        ((fail_count++))
+        # Prompt for confirmation unless --no-prompt was passed
+        if [ "$no_prompt" = false ]; then
+          read -r -p "  ❓ Merge $repo#$pr_number? [y/N] " confirm < /dev/tty
+          if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+            echo "  ⏭️  Skipped $repo#$pr_number"
+            ((skipped_count++))
+            continue
+          fi
+        fi
+        if gh pr merge "$pr_number" --repo "$repo" "${merge_args[@]}"; then
+          echo "  ✅ Successfully merged $repo#$pr_number"
+          ((success_count++))
+        else
+          echo "  ❌ Failed to merge $repo#$pr_number"
+          ((fail_count++))
+        fi
       fi
     fi
   done <<< "$matching_prs"
