@@ -185,8 +185,10 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
     jq_pattern="${jq_pattern//\?/\\?}"
     jq_pattern="${jq_pattern//^/\\^}"
     jq_pattern="${jq_pattern//$/\\$}"
-    jq_pattern="${jq_pattern//|/\\|}"    jq_pattern="${jq_pattern//\{/\\{}"
-    jq_pattern="${jq_pattern//\}/\\}}"    jq_pattern="${jq_pattern//\*/.*}"
+    jq_pattern="${jq_pattern//|/\\|}"
+    jq_pattern="${jq_pattern//\{/\\{}"
+    jq_pattern="${jq_pattern//\}/\\}}"
+    jq_pattern="${jq_pattern//\*/.*}"
     # Escape backslashes and double quotes for embedding in jq string literal
     jq_pattern_escaped="${jq_pattern//\\/\\\\}"
     jq_pattern_escaped="${jq_pattern_escaped//\"/\\\"}"
