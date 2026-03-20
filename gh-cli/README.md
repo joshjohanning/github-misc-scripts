@@ -1290,6 +1290,26 @@ Get repositories that have a CircleCI configuration file `.circleci/config.yml`
 
 (not perfect, doesn't search for `codeql*.yml`)
 
+### get-repositories-with-copilot-instructions.sh
+
+Get repositories that have Copilot custom instruction files, checking for both repository-wide (`.github/copilot-instructions.md`) and path-specific (`.github/instructions/`) instructions
+
+Usage:
+
+```shell
+./get-repositories-with-copilot-instructions.sh my-org
+```
+
+### get-repositories-without-copilot-instructions.sh
+
+Get repositories that do not have any Copilot custom instruction files (neither `.github/copilot-instructions.md` nor `.github/instructions/`)
+
+Usage:
+
+```shell
+./get-repositories-without-copilot-instructions.sh my-org
+```
+
 ### get-repositories-using-codeql.sh
 
 Get repositories that have a CodeQL configuration file `.github/workflows/codeql.yml`
