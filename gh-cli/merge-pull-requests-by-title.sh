@@ -39,7 +39,7 @@
 # Notes:
 #   - PRs must be open and in a mergeable state
 #   - Use * as a wildcard in the title pattern (e.g., "chore(deps)*" matches any title starting with "chore(deps)")
-#   - If multiple PRs match in a repo, all will be listed but only the first will be merged (use --dry-run to preview)
+#   - If multiple PRs match in a repo, all will be processed
 #   - --bump-patch-version clones each matching PR branch to a temp dir, bumps the npm patch version, commits, and pushes
 #   - --bump-patch-version is mutually exclusive with --dry-run (does not merge unless combined with --enable-auto-merge)
 #   - --bump-patch-version only works with same-repo PRs (fork-based PRs are skipped)
@@ -112,6 +112,12 @@ pr_title_pattern=${positional_args[1]}
 merge_method=${positional_args[2]:-squash}
 commit_title=${positional_args[3]:-}
 
+if [ -z "$repo_list_file" ] || [ -z "$pr_title_pattern" ]; then
+  echo "Error: repo_list_file and pr_title_pattern are required"
+  echo "Usage: $0 <repo_list_file> <pr_title_pattern> [merge_method] [commit_title] [flags...]"
+  exit 1
+fi
+
 if [ "$dry_run" = true ]; then
   echo "🔍 DRY RUN MODE - No PRs will be merged"
   echo ""
@@ -179,8 +185,8 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
     jq_pattern="${jq_pattern//\?/\\?}"
     jq_pattern="${jq_pattern//^/\\^}"
     jq_pattern="${jq_pattern//$/\\$}"
-    jq_pattern="${jq_pattern//|/\\|}"
-    jq_pattern="${jq_pattern//\*/.*}"
+    jq_pattern="${jq_pattern//|/\\|}"    jq_pattern="${jq_pattern//\{/\\{}"
+    jq_pattern="${jq_pattern//\}/\\}}"    jq_pattern="${jq_pattern//\*/.*}"
     # Escape backslashes and double quotes for embedding in jq string literal
     jq_pattern_escaped="${jq_pattern//\\/\\\\}"
     jq_pattern_escaped="${jq_pattern_escaped//\"/\\\"}"
@@ -311,7 +317,7 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
       else
         # Prompt for confirmation unless --no-prompt was passed
         if [ "$no_prompt" = false ]; then
-          if ! [[ -t 0 ]]; then
+          if ! [[ -t 1 ]] || ! [[ -r /dev/tty ]]; then
             echo "Error: No TTY available for interactive prompt - use --no-prompt"
             exit 1
           fi
