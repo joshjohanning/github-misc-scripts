@@ -5,9 +5,14 @@
 #   - .github/copilot-instructions.md (repository-wide custom instructions)
 #   - .github/instructions/ directory (path-specific custom instructions)
 #
+#
+# Authentication:
+#   Requires a GitHub CLI token with at least read:org and repo scopes
+#   Example: gh auth refresh -h github.com -s read:org,repo
+#
 # Usage:
 #   ./get-repositories-with-copilot-instructions.sh <org>
-# # If you want to in a nicely formatted table, you can pipe the output to `column`:
+#   If you want to see the results in a nicely formatted table, you can pipe the output to `column`:
 #   ./get-repositories-with-copilot-instructions.sh <org> | column -ts $'\t'
 
 if [ -z "$1" ]; then

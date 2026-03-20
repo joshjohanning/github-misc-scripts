@@ -1290,26 +1290,6 @@ Get repositories that have a CircleCI configuration file `.circleci/config.yml`
 
 (not perfect, doesn't search for `codeql*.yml`)
 
-### get-repositories-with-copilot-instructions.sh
-
-Get repositories that have Copilot custom instruction files, checking for both repository-wide (`.github/copilot-instructions.md`) and path-specific (`.github/instructions/`) instructions
-
-Usage:
-
-```shell
-./get-repositories-with-copilot-instructions.sh my-org
-```
-
-### get-repositories-without-copilot-instructions.sh
-
-Get repositories that do not have any Copilot custom instruction files (neither `.github/copilot-instructions.md` nor `.github/instructions/`)
-
-Usage:
-
-```shell
-./get-repositories-without-copilot-instructions.sh my-org
-```
-
 ### get-repositories-using-codeql.sh
 
 Get repositories that have a CodeQL configuration file `.github/workflows/codeql.yml`
@@ -1338,6 +1318,26 @@ Generates a CSV with 4 columns:
 - secret - Webhook secret, it will be masked since the API doesn't return the actual secret.
 
 This script is useful when doing migrations, to determine the kind of actions that might be needed based on the webhooks inventory.
+
+### get-repositories-with-copilot-instructions.sh
+
+Get repositories that have Copilot custom instruction files, checking for both repository-wide (`.github/copilot-instructions.md`) and path-specific (`.github/instructions/`) instructions
+
+Usage:
+
+```shell
+./get-repositories-with-copilot-instructions.sh my-org
+```
+
+### get-repositories-without-copilot-instructions.sh
+
+Get repositories that do not have any Copilot custom instruction files (neither `.github/copilot-instructions.md` nor `.github/instructions/`)
+
+Usage:
+
+```shell
+./get-repositories-without-copilot-instructions.sh my-org
+```
 
 ### get-repository-languages-for-organization.sh
 

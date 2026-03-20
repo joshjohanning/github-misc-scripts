@@ -5,6 +5,10 @@
 #   - .github/copilot-instructions.md (repository-wide custom instructions)
 #   - .github/instructions/ directory (path-specific custom instructions)
 #
+# Authentication:
+#   Requires a GitHub CLI token with at least read:org and repo scopes
+#   Example: gh auth refresh -h github.com -s read:org,repo
+#
 # Usage:
 #   ./get-repositories-without-copilot-instructions.sh <org>
 
