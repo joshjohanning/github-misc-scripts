@@ -1319,6 +1319,26 @@ Generates a CSV with 4 columns:
 
 This script is useful when doing migrations, to determine the kind of actions that might be needed based on the webhooks inventory.
 
+### get-repositories-with-copilot-instructions.sh
+
+Get repositories that have Copilot custom instruction files, checking for both repository-wide (`.github/copilot-instructions.md`) and path-specific (`.github/instructions/`) instructions
+
+Usage:
+
+```shell
+./get-repositories-with-copilot-instructions.sh my-org
+```
+
+### get-repositories-without-copilot-instructions.sh
+
+Get repositories that do not have any Copilot custom instruction files (neither `.github/copilot-instructions.md` nor `.github/instructions/`)
+
+Usage:
+
+```shell
+./get-repositories-without-copilot-instructions.sh my-org
+```
+
 ### get-repository-languages-for-organization.sh
 
 Get the repository language information (ie: JavaScript, Python, etc) for all repositories in an organization. Can specify how many language results to return (top X).
