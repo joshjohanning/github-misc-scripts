@@ -73,7 +73,7 @@ dry_run=false
 bump_patch_version=false
 enable_auto_merge=false
 no_prompt=false
-owner=""
+search_owner=""
 topics=()
 valid_flags=("--dry-run" "--bump-patch-version" "--enable-auto-merge" "--no-prompt" "--owner" "--topic")
 args=("$@")
@@ -90,8 +90,8 @@ while [ $i -lt ${#args[@]} ]; do
     no_prompt=true
   elif [ "$arg" = "--owner" ]; then
     ((i++))
-    owner="${args[$i]}"
-    if [ -z "$owner" ] || [[ "$owner" == --* ]]; then
+    search_owner="${args[$i]}"
+    if [ -z "$search_owner" ] || [[ "$search_owner" == --* ]]; then
       echo "Error: --owner requires a value"
       exit 1
     fi
@@ -157,7 +157,16 @@ while [ $i -lt ${#args[@]} ]; do
 done
 
 # When --owner is used, positional args shift (no repo_list_file needed)
-if [ -n "$owner" ]; then
+if [ -n "$search_owner" ]; then
+  if [ ${#positional_args[@]} -gt 3 ]; then
+    echo "Error: Too many positional arguments for --owner mode (expected: pr_title_pattern [merge_method] [commit_title])"
+    exit 1
+  fi
+  # Catch common mistake: passing a file when using --owner
+  if [ -f "${positional_args[0]}" ]; then
+    echo "Error: Cannot use both repo_list_file and --owner (first positional arg '${positional_args[0]}' is a file)"
+    exit 1
+  fi
   pr_title_pattern=${positional_args[0]}
   merge_method=${positional_args[1]:-squash}
   commit_title=${positional_args[2]:-}
@@ -175,12 +184,12 @@ if [ -z "$pr_title_pattern" ]; then
   exit 1
 fi
 
-if [ -z "$owner" ] && [ -z "$repo_list_file" ]; then
+if [ -z "$search_owner" ] && [ -z "$repo_list_file" ]; then
   echo "Error: Either repo_list_file or --owner is required"
   exit 1
 fi
 
-if [ ${#topics[@]} -gt 0 ] && [ -z "$owner" ]; then
+if [ ${#topics[@]} -gt 0 ] && [ -z "$search_owner" ]; then
   echo "Error: --topic requires --owner"
   exit 1
 fi
@@ -202,14 +211,14 @@ if [[ ! " ${merge_methods[*]} " =~ ${merge_method} ]]; then
 fi
 
 # Check if file exists (when using file mode)
-if [ -z "$owner" ] && [ ! -f "$repo_list_file" ]; then
+if [ -z "$search_owner" ] && [ ! -f "$repo_list_file" ]; then
   echo "Error: File $repo_list_file does not exist"
   exit 1
 fi
 
 # Build repo list from --owner/--topic or from file
-if [ -n "$owner" ]; then
-  echo "Fetching repositories for owner: $owner"
+if [ -n "$search_owner" ]; then
+  echo "Fetching repositories for owner: $search_owner"
   if [ ${#topics[@]} -gt 0 ]; then
     echo "Filtering by topics: ${topics[*]}"
   fi
@@ -231,30 +240,35 @@ if [ -n "$owner" ]; then
       if [ -n "$topic_conditions" ]; then
         topic_conditions="$topic_conditions and "
       fi
-      topic_conditions="${topic_conditions}(.topics | index(\"$t\"))"
+      topic_conditions="${topic_conditions}((.topics? // []) | index(\"$t\"))"
     done
-    jq_topic_filter="select(.archived == false) | select($topic_conditions) | .html_url"
+    jq_topic_filter="select(.archived == false) | select($topic_conditions) | .full_name"
   else
-    jq_topic_filter="select(.archived == false) | .html_url"
+    jq_topic_filter="select(.archived == false) | .full_name"
   fi
 
-  repo_urls=$(gh api --paginate "/orgs/$owner/repos?per_page=100" \
+  repo_urls=$(gh api --paginate "/orgs/$search_owner/repos?per_page=100" \
     --jq ".[] | $jq_topic_filter" 2>/dev/null)
   owner_exit=$?
   repo_fetch_exit=$owner_exit
 
   if [ $owner_exit -ne 0 ] || [ -z "$repo_urls" ]; then
-    repo_urls=$(gh api --paginate "/users/$owner/repos?per_page=100" \
+    repo_urls=$(gh api --paginate "/users/$search_owner/repos?per_page=100" \
       --jq ".[] | $jq_topic_filter" 2>/dev/null)
     repo_fetch_exit=$?
   fi
 
-  if [ $repo_fetch_exit -ne 0 ] || [ -z "$repo_urls" ]; then
-    echo "Error: Failed to fetch repositories for '$owner'"
-    if [ -n "$repo_urls" ]; then
-      echo "  $repo_urls"
-    fi
+  if [ $repo_fetch_exit -ne 0 ]; then
+    echo "Error: Failed to fetch repositories for '$search_owner'"
     exit 1
+  fi
+
+  if [ -z "$repo_urls" ]; then
+    echo "No repositories found for '$search_owner'"
+    if [ ${#topics[@]} -gt 0 ]; then
+      echo "  (filtered by topics: ${topics[*]})"
+    fi
+    exit 0
   fi
 
   repo_count=$(echo "$repo_urls" | wc -l | xargs)
@@ -469,7 +483,14 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
 
   echo ""
 
-done < <(if [ -n "$owner" ]; then echo "$repo_urls"; else cat "$repo_list_file"; fi)
+done < <(if [ -n "$search_owner" ]; then
+  # --owner mode: repo_urls contains owner/repo format, convert to URLs
+  echo "$repo_urls" | while IFS= read -r repo_name; do
+    echo "https://github.com/$repo_name"
+  done
+else
+  cat "$repo_list_file"
+fi)
 
 echo "========================================"
 echo "Summary:"
