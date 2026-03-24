@@ -3,17 +3,24 @@
 # Finds and merges pull requests matching a title pattern across multiple repositories
 #
 # Usage:
-#   ./merge-pull-requests-by-title.sh <repo_list_file> <pr_title_pattern> [merge_method] [commit_title] [--dry-run] [--bump-patch-version] [--enable-auto-merge] [--no-prompt]
+#   ./merge-pull-requests-by-title.sh <repo_list_file> <pr_title_pattern> [merge_method] [commit_title] [flags...]
+#   ./merge-pull-requests-by-title.sh --owner <owner> <pr_title_pattern> [--topic <topic>]... [merge_method] [commit_title] [flags...]
 #
-# Arguments:
+# Required (one of):
 #   repo_list_file        - File with repository URLs (one per line)
+#   --owner <owner>       - Search repositories for this user or organization
+#
+# Required:
 #   pr_title_pattern      - Title pattern to match (exact match or use * for wildcard)
-#   merge_method          - Optional: merge method (merge, squash, rebase) - defaults to squash
-#   commit_title          - Optional: custom commit title for all merged PRs (PR number is auto-appended)
-#   --dry-run             - Optional: preview what would be merged without actually merging
-#   --bump-patch-version  - Optional: clone each matching PR branch, run npm version patch, commit, and push (mutually exclusive with --dry-run; does not merge unless combined with --enable-auto-merge)
-#   --enable-auto-merge   - Optional: enable auto-merge on matching PRs (can combine with --bump-patch-version)
-#   --no-prompt           - Optional: merge without interactive confirmation (default is to prompt before each merge)
+#
+# Optional:
+#   merge_method          - Merge method: merge, squash, or rebase (default: squash)
+#   commit_title          - Custom commit title for merged PRs (PR number is auto-appended; defaults to PR title)
+#   --topic <topic>       - Filter --owner repositories by topic (can be specified multiple times)
+#   --dry-run             - Preview what would be merged without actually merging
+#   --bump-patch-version  - Clone each matching PR branch, run npm version patch, commit, and push (mutually exclusive with --dry-run; does not merge unless combined with --enable-auto-merge)
+#   --enable-auto-merge   - Enable auto-merge on matching PRs (can combine with --bump-patch-version)
+#   --no-prompt           - Merge without interactive confirmation (default is to prompt before each merge)
 #
 # Examples:
 #   # Find and merge PRs with exact title match (will prompt for confirmation)
@@ -30,6 +37,15 @@
 #
 #   # Bump patch version and enable auto-merge (bump, wait for CI, then auto-merge)
 #   ./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" --bump-patch-version --enable-auto-merge
+#
+#   # Search by owner instead of file list
+#   ./merge-pull-requests-by-title.sh --owner joshjohanning-org "chore(deps): bump undici*" --no-prompt
+#
+#   # Search by owner and topic
+#   ./merge-pull-requests-by-title.sh --owner joshjohanning --topic node-action "chore(deps)*" --bump-patch-version
+#
+#   # Search by owner and multiple topics
+#   ./merge-pull-requests-by-title.sh --owner joshjohanning --topic node-action --topic github-action "chore(deps)*" --dry-run
 #
 # Input file format (repos.txt):
 #   https://github.com/joshjohanning/repo1
@@ -52,13 +68,18 @@
 
 merge_methods=("merge" "squash" "rebase")
 
-# Check for --dry-run, --bump-patch-version, and --no-prompt flags anywhere in arguments
+# Check for flags and valued options
 dry_run=false
 bump_patch_version=false
 enable_auto_merge=false
 no_prompt=false
-valid_flags=("--dry-run" "--bump-patch-version" "--enable-auto-merge" "--no-prompt")
-for arg in "$@"; do
+search_owner=""
+topics=()
+valid_flags=("--dry-run" "--bump-patch-version" "--enable-auto-merge" "--no-prompt" "--owner" "--topic")
+args=("$@")
+i=0
+while [ $i -lt ${#args[@]} ]; do
+  arg="${args[$i]}"
   if [ "$arg" = "--dry-run" ]; then
     dry_run=true
   elif [ "$arg" = "--bump-patch-version" ]; then
@@ -67,25 +88,52 @@ for arg in "$@"; do
     enable_auto_merge=true
   elif [ "$arg" = "--no-prompt" ]; then
     no_prompt=true
+  elif [ "$arg" = "--owner" ]; then
+    ((i++))
+    search_owner="${args[$i]}"
+    if [ -z "$search_owner" ] || [[ "$search_owner" == --* ]]; then
+      echo "Error: --owner requires a value"
+      exit 1
+    fi
+    if ! [[ "$search_owner" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+      echo "Error: Invalid owner '$search_owner' - must be a valid GitHub username or organization"
+      exit 1
+    fi
+  elif [ "$arg" = "--topic" ]; then
+    ((i++))
+    topic_val="${args[$i]}"
+    if [ -z "$topic_val" ] || [[ "$topic_val" == --* ]]; then
+      echo "Error: --topic requires a value"
+      exit 1
+    fi
+    topics+=("$topic_val")
   elif [[ "$arg" == --* ]]; then
     echo "Error: Unknown flag '$arg'"
     echo "Valid flags: ${valid_flags[*]}"
     exit 1
   fi
+  ((i++))
 done
 
 if [ $# -lt 2 ]; then
-  echo "Usage: $0 <repo_list_file> <pr_title_pattern> [merge_method] [commit_title] [--dry-run] [--bump-patch-version] [--enable-auto-merge] [--no-prompt]"
+  echo "Usage: $0 <repo_list_file> <pr_title_pattern> [merge_method] [commit_title] [flags...]"
+  echo "       $0 --owner <owner> <pr_title_pattern> [--topic <topic>]... [merge_method] [commit_title] [flags...]"
   echo ""
-  echo "Arguments:"
+  echo "Required (one of):"
   echo "  repo_list_file        - File with repository URLs (one per line)"
+  echo "  --owner <owner>       - Search repositories for this user or organization"
+  echo ""
+  echo "Required:"
   echo "  pr_title_pattern      - Title pattern to match (use * for wildcard)"
-  echo "  merge_method          - Optional: merge, squash, or rebase (default: squash)"
-  echo "  commit_title          - Optional: custom commit title for merged PRs (PR number is auto-appended)"
-  echo "  --dry-run             - Preview what would be merged without actually merging"
-  echo "  --bump-patch-version  - Bump npm patch version on each matching PR branch and push (mutually exclusive with --dry-run)"
-  echo "  --enable-auto-merge   - Enable auto-merge on matching PRs (can combine with --bump-patch-version)"
-  echo "  --no-prompt           - Merge without interactive confirmation (default is to prompt before each merge)"
+  echo ""
+  echo "Optional:"
+  echo "  merge_method          - merge, squash, or rebase (default: squash)"
+  echo "  commit_title          - Custom commit title for merged PRs (defaults to PR title)"
+  echo "  --topic <topic>       - Filter --owner repositories by topic (repeatable)"
+  echo "  --dry-run             - Preview what would be merged (cannot combine with --bump-patch-version or --enable-auto-merge)"
+  echo "  --bump-patch-version  - Bump npm patch version on each matching PR branch and push (cannot combine with --dry-run)"
+  echo "  --enable-auto-merge   - Enable auto-merge on matching PRs (can combine with --bump-patch-version, cannot combine with --dry-run)"
+  echo "  --no-prompt           - Merge without interactive confirmation"
   exit 1
 fi
 
@@ -99,22 +147,49 @@ if [ "$dry_run" = true ] && [ "$enable_auto_merge" = true ]; then
   exit 1
 fi
 
-# Parse positional args, skipping flags
+# Parse positional args, skipping flags and their values
 positional_args=()
-for arg in "$@"; do
-  if [[ "$arg" != --* ]]; then
+i=0
+while [ $i -lt ${#args[@]} ]; do
+  arg="${args[$i]}"
+  if [ "$arg" = "--owner" ] || [ "$arg" = "--topic" ]; then
+    ((i++)) # skip the value too
+  elif [[ "$arg" != --* ]]; then
     positional_args+=("$arg")
   fi
+  ((i++))
 done
 
-repo_list_file=${positional_args[0]}
-pr_title_pattern=${positional_args[1]}
-merge_method=${positional_args[2]:-squash}
-commit_title=${positional_args[3]:-}
+# When --owner is used, positional args shift (no repo_list_file needed)
+if [ -n "$search_owner" ]; then
+  if [ ${#positional_args[@]} -gt 3 ]; then
+    echo "Error: Too many positional arguments for --owner mode (expected: pr_title_pattern [merge_method] [commit_title])"
+    exit 1
+  fi
+  pr_title_pattern=${positional_args[0]}
+  merge_method=${positional_args[1]:-squash}
+  commit_title=${positional_args[2]:-}
+else
+  repo_list_file=${positional_args[0]}
+  pr_title_pattern=${positional_args[1]}
+  merge_method=${positional_args[2]:-squash}
+  commit_title=${positional_args[3]:-}
+fi
 
-if [ -z "$repo_list_file" ] || [ -z "$pr_title_pattern" ]; then
-  echo "Error: repo_list_file and pr_title_pattern are required"
+if [ -z "$pr_title_pattern" ]; then
+  echo "Error: pr_title_pattern is required"
   echo "Usage: $0 <repo_list_file> <pr_title_pattern> [merge_method] [commit_title] [flags...]"
+  echo "       $0 --owner <owner> <pr_title_pattern> [--topic <topic>]... [merge_method] [commit_title] [flags...]"
+  exit 1
+fi
+
+if [ -z "$search_owner" ] && [ -z "$repo_list_file" ]; then
+  echo "Error: Either repo_list_file or --owner is required"
+  exit 1
+fi
+
+if [ ${#topics[@]} -gt 0 ] && [ -z "$search_owner" ]; then
+  echo "Error: --topic requires --owner"
   exit 1
 fi
 
@@ -134,10 +209,77 @@ if [[ ! " ${merge_methods[*]} " =~ ${merge_method} ]]; then
   exit 1
 fi
 
-# Check if file exists
-if [ ! -f "$repo_list_file" ]; then
+# Check if file exists (when using file mode)
+if [ -z "$search_owner" ] && [ ! -f "$repo_list_file" ]; then
   echo "Error: File $repo_list_file does not exist"
   exit 1
+fi
+
+# Build repo list from --owner/--topic or from file
+if [ -n "$search_owner" ]; then
+  echo "Fetching repositories for owner: $search_owner"
+  if [ ${#topics[@]} -gt 0 ]; then
+    echo "Filtering by topics: ${topics[*]}"
+  fi
+  echo ""
+
+  # Fetch repos from org (or user), optionally filtered by topics
+  # Try org endpoint first, fall back to user endpoint
+  # Build jq filter: repos must have ALL specified topics
+  if [ ${#topics[@]} -gt 0 ]; then
+    # Validate and lowercase topic names
+    for i in "${!topics[@]}"; do
+      topics[$i]=$(echo "${topics[$i]}" | tr '[:upper:]' '[:lower:]')
+      t="${topics[$i]}"
+      if ! [[ "$t" =~ ^[a-z0-9][a-z0-9-]*$ ]]; then
+        echo "Error: Invalid topic '$t' - topics must be alphanumeric with hyphens"
+        exit 1
+      fi
+    done
+    topic_conditions=""
+    for t in "${topics[@]}"; do
+      if [ -n "$topic_conditions" ]; then
+        topic_conditions="$topic_conditions and "
+      fi
+      topic_conditions="${topic_conditions}((.topics? // []) | index(\"$t\"))"
+    done
+    jq_topic_filter="select(.archived == false) | select($topic_conditions) | .full_name"
+  else
+    jq_topic_filter="select(.archived == false) | .full_name"
+  fi
+
+  api_err=$(mktemp)
+  repo_names=$(gh api --paginate "/orgs/$search_owner/repos?per_page=100" \
+    --jq ".[] | $jq_topic_filter" 2>"$api_err")
+  owner_exit=$?
+  repo_fetch_exit=$owner_exit
+
+  # Only fall back to /users/ endpoint if the org endpoint failed (not just empty results)
+  if [ $owner_exit -ne 0 ]; then
+    repo_names=$(gh api --paginate "/users/$search_owner/repos?per_page=100" \
+      --jq ".[] | $jq_topic_filter" 2>"$api_err")
+    repo_fetch_exit=$?
+  fi
+
+  if [ $repo_fetch_exit -ne 0 ]; then
+    echo "Error: Failed to fetch repositories for '$search_owner'"
+    cat "$api_err" 2>/dev/null
+    rm -f "$api_err"
+    exit 1
+  fi
+  rm -f "$api_err"
+
+  if [ -z "$repo_names" ]; then
+    echo "No repositories found for '$search_owner'"
+    if [ ${#topics[@]} -gt 0 ]; then
+      echo "  (filtered by topics: ${topics[*]})"
+    fi
+    exit 0
+  fi
+
+  repo_count=$(echo "$repo_names" | wc -l | xargs)
+  echo "Found $repo_count repositories"
+  echo ""
 fi
 
 echo "Searching for PRs matching: \"$pr_title_pattern\""
@@ -187,7 +329,6 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
     jq_pattern="${jq_pattern//$/\\$}"
     jq_pattern="${jq_pattern//|/\\|}"
     jq_pattern="${jq_pattern//\{/\\{}"
-    jq_pattern="${jq_pattern//\}/\\}}"
     jq_pattern="${jq_pattern//\*/.*}"
     # Escape backslashes and double quotes for embedding in jq string literal
     jq_pattern_escaped="${jq_pattern//\\/\\\\}"
@@ -347,7 +488,14 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
 
   echo ""
 
-done < "$repo_list_file"
+done < <(if [ -n "$search_owner" ]; then
+  # --owner mode: repo_names contains owner/repo format, convert to URLs
+  echo "$repo_names" | while IFS= read -r name; do
+    echo "https://github.com/$name"
+  done
+else
+  cat "$repo_list_file"
+fi)
 
 echo "========================================"
 echo "Summary:"

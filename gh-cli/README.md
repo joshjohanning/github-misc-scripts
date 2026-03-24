@@ -1503,29 +1503,20 @@ Creates a (mostly) empty migration for a given organization repository so that i
 
 ### merge-pull-requests-by-title.sh
 
-Finds and merges pull requests matching a title pattern across multiple repositories. Useful for batch merging Dependabot PRs or other automated PRs with similar titles. By default, prompts for confirmation before each merge; use `--no-prompt` to skip.
+Finds and merges pull requests matching a title pattern across multiple repositories. Supports batch merging Dependabot PRs, bumping npm patch versions, and enabling auto-merge. Repositories can be specified via a file list or dynamically via `--owner` with optional `--topic` filtering.
 
 ```bash
-# Find and merge PRs with exact title match (prompts for confirmation per PR)
-./merge-pull-requests-by-title.sh repos.txt "chore(deps-dev): bump eslint from 8.0.0 to 9.0.0"
-
-# Use wildcard to match partial titles
-./merge-pull-requests-by-title.sh repos.txt "chore(deps-dev): bump eslint*"
-
-# Merge without confirmation prompt
+# Merge PRs matching a wildcard title pattern
 ./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" --no-prompt
-
-# With custom commit title, no confirmation prompt
-./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" squash "chore(deps): update dependencies" --no-prompt
 
 # Dry run to preview
 ./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" --dry-run
 
-# Bump npm patch version on matching PR branches and push (run before merging so CI can pass)
-./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" --bump-patch-version
-
-# Bump patch version and enable auto-merge (bump, wait for CI, then auto-merge)
+# Bump patch version and enable auto-merge
 ./merge-pull-requests-by-title.sh repos.txt "chore(deps)*" --bump-patch-version --enable-auto-merge
+
+# Search by owner and topic instead of file list
+./merge-pull-requests-by-title.sh --owner joshjohanning --topic node-action "chore(deps)*" --dry-run
 ```
 
 Input file format (`repos.txt`):
