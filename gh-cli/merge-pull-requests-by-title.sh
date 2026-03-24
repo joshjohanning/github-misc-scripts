@@ -91,14 +91,14 @@ while [ $i -lt ${#args[@]} ]; do
   elif [ "$arg" = "--owner" ]; then
     ((i++))
     owner="${args[$i]}"
-    if [ -z "$owner" ]; then
+    if [ -z "$owner" ] || [[ "$owner" == --* ]]; then
       echo "Error: --owner requires a value"
       exit 1
     fi
   elif [ "$arg" = "--topic" ]; then
     ((i++))
     topic_val="${args[$i]}"
-    if [ -z "$topic_val" ]; then
+    if [ -z "$topic_val" ] || [[ "$topic_val" == --* ]]; then
       echo "Error: --topic requires a value"
       exit 1
     fi
@@ -126,9 +126,9 @@ if [ $# -lt 2 ]; then
   echo "  merge_method          - merge, squash, or rebase (default: squash)"
   echo "  commit_title          - Custom commit title for merged PRs (defaults to PR title)"
   echo "  --topic <topic>       - Filter --owner repositories by topic (repeatable)"
-  echo "  --dry-run             - Preview what would be merged without actually merging"
-  echo "  --bump-patch-version  - Bump npm patch version on each matching PR branch and push"
-  echo "  --enable-auto-merge   - Enable auto-merge on matching PRs (can combine with --bump-patch-version)"
+  echo "  --dry-run             - Preview what would be merged (cannot combine with --bump-patch-version or --enable-auto-merge)"
+  echo "  --bump-patch-version  - Bump npm patch version on each matching PR branch and push (cannot combine with --dry-run)"
+  echo "  --enable-auto-merge   - Enable auto-merge on matching PRs (can combine with --bump-patch-version, cannot combine with --dry-run)"
   echo "  --no-prompt           - Merge without interactive confirmation"
   exit 1
 fi
@@ -219,6 +219,13 @@ if [ -n "$owner" ]; then
   # Try org endpoint first, fall back to user endpoint
   # Build jq filter: repos must have ALL specified topics
   if [ ${#topics[@]} -gt 0 ]; then
+    # Validate topic names (alphanumeric and hyphens only)
+    for t in "${topics[@]}"; do
+      if ! [[ "$t" =~ ^[a-z0-9][a-z0-9-]*$ ]]; then
+        echo "Error: Invalid topic '$t' - topics must be lowercase alphanumeric with hyphens"
+        exit 1
+      fi
+    done
     topic_conditions=""
     for t in "${topics[@]}"; do
       if [ -n "$topic_conditions" ]; then
@@ -234,14 +241,15 @@ if [ -n "$owner" ]; then
   repo_urls=$(gh api --paginate "/orgs/$owner/repos?per_page=100" \
     --jq ".[] | $jq_topic_filter" 2>/dev/null)
   owner_exit=$?
+  repo_fetch_exit=$owner_exit
 
   if [ $owner_exit -ne 0 ] || [ -z "$repo_urls" ]; then
     repo_urls=$(gh api --paginate "/users/$owner/repos?per_page=100" \
       --jq ".[] | $jq_topic_filter" 2>/dev/null)
-    user_exit=$?
+    repo_fetch_exit=$?
   fi
 
-  if [ $? -ne 0 ] || [ -z "$repo_urls" ]; then
+  if [ $repo_fetch_exit -ne 0 ] || [ -z "$repo_urls" ]; then
     echo "Error: Failed to fetch repositories for '$owner'"
     if [ -n "$repo_urls" ]; then
       echo "  $repo_urls"
@@ -261,13 +269,6 @@ success_count=0
 fail_count=0
 skipped_count=0
 not_found_count=0
-
-# Determine input source for repo URLs
-if [ -n "$owner" ]; then
-  input_source="$repo_urls"
-else
-  input_source=$(cat "$repo_list_file")
-fi
 
 while IFS= read -r repo_url || [ -n "$repo_url" ]; do
   # Skip empty lines and comments
@@ -307,6 +308,8 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
     jq_pattern="${jq_pattern//^/\\^}"
     jq_pattern="${jq_pattern//$/\\$}"
     jq_pattern="${jq_pattern//|/\\|}"
+    jq_pattern="${jq_pattern//\{/\\\{}"
+    jq_pattern="${jq_pattern//\}/\\\}}"
     jq_pattern="${jq_pattern//\*/.*}"
     # Escape backslashes and double quotes for embedding in jq string literal
     jq_pattern_escaped="${jq_pattern//\\/\\\\}"
@@ -466,7 +469,7 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
 
   echo ""
 
-done <<< "$input_source"
+done < <(if [ -n "$owner" ]; then echo "$repo_urls"; else cat "$repo_list_file"; fi)
 
 echo "========================================"
 echo "Summary:"
