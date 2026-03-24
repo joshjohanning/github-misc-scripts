@@ -162,11 +162,6 @@ if [ -n "$search_owner" ]; then
     echo "Error: Too many positional arguments for --owner mode (expected: pr_title_pattern [merge_method] [commit_title])"
     exit 1
   fi
-  # Catch common mistake: passing a file when using --owner
-  if [ -f "${positional_args[0]}" ]; then
-    echo "Error: Cannot use both repo_list_file and --owner (first positional arg '${positional_args[0]}' is a file)"
-    exit 1
-  fi
   pr_title_pattern=${positional_args[0]}
   merge_method=${positional_args[1]:-squash}
   commit_title=${positional_args[2]:-}
@@ -228,10 +223,12 @@ if [ -n "$search_owner" ]; then
   # Try org endpoint first, fall back to user endpoint
   # Build jq filter: repos must have ALL specified topics
   if [ ${#topics[@]} -gt 0 ]; then
-    # Validate topic names (alphanumeric and hyphens only)
-    for t in "${topics[@]}"; do
+    # Validate and lowercase topic names
+    for i in "${!topics[@]}"; do
+      topics[$i]=$(echo "${topics[$i]}" | tr '[:upper:]' '[:lower:]')
+      t="${topics[$i]}"
       if ! [[ "$t" =~ ^[a-z0-9][a-z0-9-]*$ ]]; then
-        echo "Error: Invalid topic '$t' - topics must be lowercase alphanumeric with hyphens"
+        echo "Error: Invalid topic '$t' - topics must be alphanumeric with hyphens"
         exit 1
       fi
     done
@@ -327,8 +324,6 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
     jq_pattern="${jq_pattern//^/\\^}"
     jq_pattern="${jq_pattern//$/\\$}"
     jq_pattern="${jq_pattern//|/\\|}"
-    jq_pattern="${jq_pattern//\{/\\\{}"
-    jq_pattern="${jq_pattern//\}/\\\}}"
     jq_pattern="${jq_pattern//\*/.*}"
     # Escape backslashes and double quotes for embedding in jq string literal
     jq_pattern_escaped="${jq_pattern//\\/\\\\}"
