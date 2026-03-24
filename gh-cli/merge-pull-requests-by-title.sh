@@ -247,23 +247,28 @@ if [ -n "$search_owner" ]; then
     jq_topic_filter="select(.archived == false) | .full_name"
   fi
 
-  repo_urls=$(gh api --paginate "/orgs/$search_owner/repos?per_page=100" \
-    --jq ".[] | $jq_topic_filter" 2>/dev/null)
+  api_err=$(mktemp)
+  repo_names=$(gh api --paginate "/orgs/$search_owner/repos?per_page=100" \
+    --jq ".[] | $jq_topic_filter" 2>"$api_err")
   owner_exit=$?
   repo_fetch_exit=$owner_exit
 
-  if [ $owner_exit -ne 0 ] || [ -z "$repo_urls" ]; then
-    repo_urls=$(gh api --paginate "/users/$search_owner/repos?per_page=100" \
-      --jq ".[] | $jq_topic_filter" 2>/dev/null)
+  # Only fall back to /users/ endpoint if the org endpoint failed (not just empty results)
+  if [ $owner_exit -ne 0 ]; then
+    repo_names=$(gh api --paginate "/users/$search_owner/repos?per_page=100" \
+      --jq ".[] | $jq_topic_filter" 2>"$api_err")
     repo_fetch_exit=$?
   fi
 
   if [ $repo_fetch_exit -ne 0 ]; then
     echo "Error: Failed to fetch repositories for '$search_owner'"
+    cat "$api_err" 2>/dev/null
+    rm -f "$api_err"
     exit 1
   fi
+  rm -f "$api_err"
 
-  if [ -z "$repo_urls" ]; then
+  if [ -z "$repo_names" ]; then
     echo "No repositories found for '$search_owner'"
     if [ ${#topics[@]} -gt 0 ]; then
       echo "  (filtered by topics: ${topics[*]})"
@@ -271,7 +276,7 @@ if [ -n "$search_owner" ]; then
     exit 0
   fi
 
-  repo_count=$(echo "$repo_urls" | wc -l | xargs)
+  repo_count=$(echo "$repo_names" | wc -l | xargs)
   echo "Found $repo_count repositories"
   echo ""
 fi
@@ -484,9 +489,9 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
   echo ""
 
 done < <(if [ -n "$search_owner" ]; then
-  # --owner mode: repo_urls contains owner/repo format, convert to URLs
-  echo "$repo_urls" | while IFS= read -r repo_name; do
-    echo "https://github.com/$repo_name"
+  # --owner mode: repo_names contains owner/repo format, convert to URLs
+  echo "$repo_names" | while IFS= read -r name; do
+    echo "https://github.com/$name"
   done
 else
   cat "$repo_list_file"
