@@ -95,6 +95,10 @@ while [ $i -lt ${#args[@]} ]; do
       echo "Error: --owner requires a value"
       exit 1
     fi
+    if ! [[ "$search_owner" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+      echo "Error: Invalid owner '$search_owner' - must be a valid GitHub username or organization"
+      exit 1
+    fi
   elif [ "$arg" = "--topic" ]; then
     ((i++))
     topic_val="${args[$i]}"
@@ -324,6 +328,7 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
     jq_pattern="${jq_pattern//^/\\^}"
     jq_pattern="${jq_pattern//$/\\$}"
     jq_pattern="${jq_pattern//|/\\|}"
+    jq_pattern="${jq_pattern//\{/\\{}"
     jq_pattern="${jq_pattern//\*/.*}"
     # Escape backslashes and double quotes for embedding in jq string literal
     jq_pattern_escaped="${jq_pattern//\\/\\\\}"
