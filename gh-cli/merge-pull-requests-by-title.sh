@@ -68,6 +68,43 @@
 
 merge_methods=("merge" "squash" "rebase")
 
+print_help() {
+  echo "Find and merge pull requests matching a title pattern across multiple repositories"
+  echo ""
+  echo "Usage:"
+  echo "  $0 <repo_list_file> <pr_title_pattern> [merge_method] [commit_title] [flags...]"
+  echo "  $0 --owner <owner> <pr_title_pattern> [--topic <topic>]... [merge_method] [commit_title] [flags...]"
+  echo ""
+  echo "Required (one of):"
+  echo "  repo_list_file        - File with repository URLs (one per line)"
+  echo "  --owner <owner>       - Search repositories for this user or organization"
+  echo ""
+  echo "Required:"
+  echo "  pr_title_pattern      - Title pattern to match (exact match or use * for wildcard)"
+  echo ""
+  echo "Optional positional arguments:"
+  echo "  merge_method          - Merge method: merge, squash, or rebase (default: squash)"
+  echo "  commit_title          - Custom commit title for merged PRs (PR number is auto-appended; defaults to PR title)"
+  echo ""
+  echo "Flags:"
+  echo "  -h, --help            - Show this help message and exit"
+  echo "  --topic <topic>       - Filter --owner repositories by topic (can be specified multiple times)"
+  echo "  --dry-run             - Preview what would be merged without actually merging"
+  echo "  --bump-patch-version  - Clone each matching PR branch, run npm version patch, commit, and push"
+  echo "  --enable-auto-merge   - Enable auto-merge on matching PRs"
+  echo "  --no-prompt           - Merge without interactive confirmation"
+  echo ""
+  echo "Flag compatibility:"
+  echo "  --dry-run and --bump-patch-version are mutually exclusive"
+  echo "  --dry-run and --enable-auto-merge are mutually exclusive"
+  echo "  --topic requires --owner"
+  echo ""
+  echo "Examples:"
+  echo "  $0 repos.txt \"chore(deps)*\" --dry-run"
+  echo "  $0 repos.txt \"chore(deps)*\" --bump-patch-version --enable-auto-merge"
+  echo "  $0 --owner joshjohanning --topic github-action \"chore(deps)*\" --no-prompt"
+}
+
 # Check for flags and valued options
 dry_run=false
 bump_patch_version=false
@@ -75,12 +112,15 @@ enable_auto_merge=false
 no_prompt=false
 search_owner=""
 topics=()
-valid_flags=("--dry-run" "--bump-patch-version" "--enable-auto-merge" "--no-prompt" "--owner" "--topic")
+valid_flags=("-h" "--help" "--dry-run" "--bump-patch-version" "--enable-auto-merge" "--no-prompt" "--owner" "--topic")
 args=("$@")
 i=0
 while [ $i -lt ${#args[@]} ]; do
   arg="${args[$i]}"
-  if [ "$arg" = "--dry-run" ]; then
+  if [ "$arg" = "--help" ] || [ "$arg" = "-h" ]; then
+    print_help
+    exit 0
+  elif [ "$arg" = "--dry-run" ]; then
     dry_run=true
   elif [ "$arg" = "--bump-patch-version" ]; then
     bump_patch_version=true
@@ -116,24 +156,7 @@ while [ $i -lt ${#args[@]} ]; do
 done
 
 if [ $# -lt 2 ]; then
-  echo "Usage: $0 <repo_list_file> <pr_title_pattern> [merge_method] [commit_title] [flags...]"
-  echo "       $0 --owner <owner> <pr_title_pattern> [--topic <topic>]... [merge_method] [commit_title] [flags...]"
-  echo ""
-  echo "Required (one of):"
-  echo "  repo_list_file        - File with repository URLs (one per line)"
-  echo "  --owner <owner>       - Search repositories for this user or organization"
-  echo ""
-  echo "Required:"
-  echo "  pr_title_pattern      - Title pattern to match (use * for wildcard)"
-  echo ""
-  echo "Optional:"
-  echo "  merge_method          - merge, squash, or rebase (default: squash)"
-  echo "  commit_title          - Custom commit title for merged PRs (defaults to PR title)"
-  echo "  --topic <topic>       - Filter --owner repositories by topic (repeatable)"
-  echo "  --dry-run             - Preview what would be merged (cannot combine with --bump-patch-version or --enable-auto-merge)"
-  echo "  --bump-patch-version  - Bump npm patch version on each matching PR branch and push (cannot combine with --dry-run)"
-  echo "  --enable-auto-merge   - Enable auto-merge on matching PRs (can combine with --bump-patch-version, cannot combine with --dry-run)"
-  echo "  --no-prompt           - Merge without interactive confirmation"
+  print_help
   exit 1
 fi
 
