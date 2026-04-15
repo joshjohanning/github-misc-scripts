@@ -90,7 +90,7 @@ print_help() {
   echo "  -h, --help            - Show this help message and exit"
   echo "  --topic <topic>       - Filter --owner repositories by topic (can be specified multiple times)"
   echo "  --dry-run             - Preview what would be merged without actually merging"
-  echo "  --bump-patch-version  - Clone each matching PR branch, run npm version patch, commit, and push"
+  echo "  --bump-patch-version  - Clone each matching PR branch, run npm version patch, commit, and push (does not merge; use with --enable-auto-merge to also merge)"
   echo "  --enable-auto-merge   - Enable auto-merge on matching PRs"
   echo "  --no-prompt           - Merge without interactive confirmation"
   echo ""
