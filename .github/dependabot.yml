@@ -14,6 +14,8 @@ updates:
       timezone: 'America/Chicago'
     commit-message:
       prefix: 'ci(deps)'
+    cooldown:
+      default-days: 3
     groups:
       github-actions:
         patterns:
@@ -25,6 +27,8 @@ updates:
     schedule:
       interval: 'weekly'
     open-pull-requests-limit: 0
+    cooldown:
+      default-days: 3
     groups:
       npm-security:
         applies-to: security-updates
