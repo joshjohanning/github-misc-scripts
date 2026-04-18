@@ -14,8 +14,6 @@ updates:
       timezone: 'America/Chicago'
     commit-message:
       prefix: 'ci(deps)'
-    cooldown:
-      default-days: 3
     groups:
       github-actions:
         patterns:
