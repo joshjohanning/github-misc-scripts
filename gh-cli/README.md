@@ -625,7 +625,7 @@ The generated Markdown includes:
 - Raw Markdown formatting for bodies and comments (preserving headings, lists, code fences, blockquotes)
 
 > [!NOTE]
-> Works with Projects V2 (newer project boards). Find the project number in the URL: `github.com/orgs/ORG/projects/NUMBER`. If no output file is specified, defaults to `<project-title>.md`
+> Works with Projects V2 (newer project boards). Find the project number in the URL: `github.com/orgs/ORG/projects/NUMBER`. If no output file is specified, defaults to a slugified project title such as `<project-title-slug>.md` (lowercase with non-alphanumeric characters replaced by `-`)
 
 ### find-attachments-in-repositories.sh
 
