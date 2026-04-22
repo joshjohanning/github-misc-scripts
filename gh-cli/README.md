@@ -606,6 +606,27 @@ Features:
 > [!NOTE]
 > This requires admin access to the repositories. For private repositories, the organization must have GitHub Advanced Security enabled.
 
+### export-project-board-to-markdown.sh
+
+Exports a GitHub Projects V2 board to a clean Markdown file suitable for sharing (e.g., customer-facing deliverables).
+
+Usage:
+
+```shell
+./export-project-board-to-markdown.sh my-org 123
+./export-project-board-to-markdown.sh my-org 123 custom-output.md
+```
+
+The generated Markdown includes:
+
+- Clickable Table of Contents
+- Issue/PR details with links and metadata
+- Custom field values (Status, Priority, etc.)
+- Raw Markdown formatting for bodies and comments (preserving headings, lists, code fences, blockquotes)
+
+> [!NOTE]
+> Works with Projects V2 (newer project boards). Find the project number in the URL: `github.com/orgs/ORG/projects/NUMBER`. If no output file is specified, defaults to a slugified project title such as `<project-title-slug>.md` (lowercase with non-alphanumeric characters replaced by `-`)
+
 ### find-attachments-in-repositories.sh
 
 Finds attachments in issues, pull requests, and optionally, issue/pull request comments. This finds both screenshots and file attachments.
