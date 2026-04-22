@@ -8,7 +8,7 @@
 # - Issue / PR bodies and comments are emitted as raw Markdown so embedded
 #   headings, lists, task lists, code fences, and blockquotes render correctly
 # - Generates a clickable Table of Contents
-# - Writes to a file (default: <project-title>.md) instead of stdout
+# - Writes to a file (default: slugified project title, e.g. <project-title-slug>.md) instead of stdout
 #
 # Usage: ./export-project-board-to-markdown.sh <org> <project-number> [output-file]
 # Example: ./export-project-board-to-markdown.sh my-org 123
