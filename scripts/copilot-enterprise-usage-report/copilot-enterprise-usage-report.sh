@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Generate monthly enterprise Copilot usage as a weekly CSV and standalone HTML report.
+# Usage: copilot-enterprise-usage-report.sh <enterprise> [year] [month] [output-prefix]
+# Requires authenticated gh access to enterprise Copilot metrics plus jq, curl, and base64.
 set -euo pipefail
 
 usage() {
@@ -111,18 +114,6 @@ for ((day = 1; day <= LAST_DAY; day++)); do
               }
           ),
           (
-            $r.totals_by_feature[]?
-            | {
-                day: $r.day, surface: .feature, kind: "feature",
-                interactions: (.user_initiated_interaction_count // 0),
-                generations: (.code_generation_activity_count // 0),
-                acceptances: (.code_acceptance_activity_count // 0),
-                requests: 0, outcomes: 0, outcome_label: "",
-                loc_suggested: (.loc_suggested_to_add_sum // 0),
-                loc_added: (.loc_added_sum // 0)
-              }
-          ),
-          (
             select(($r.totals_by_cli? | type) == "object")
             | {
                 day: $r.day, surface: "copilot_cli", kind: "surface",
@@ -169,7 +160,7 @@ jq -rs '
     (.day + "T00:00:00Z" | fromdateiso8601) as $ts
     | ($ts | strftime("%w") | tonumber) as $weekday
     | ($ts - ($weekday * 86400) | strftime("%Y-%m-%d"));
-  map(select(.kind != "feature") + {week_start: week_start})
+  map(. + {week_start: week_start})
   | sort_by(.week_start, .surface)
   | group_by([.week_start, .surface])
   | map({

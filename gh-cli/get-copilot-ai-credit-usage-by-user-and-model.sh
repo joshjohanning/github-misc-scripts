@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Export monthly enterprise AI credit usage grouped by user and model.
+# Usage: get-copilot-ai-credit-usage-by-user-and-model.sh <enterprise> [year] [month] [output.csv] [max-users]
+# Requires authenticated gh access to Copilot metrics and billing plus jq and curl.
 set -euo pipefail
 
 usage() {

@@ -10,10 +10,10 @@ Generate monthly GitHub Copilot enterprise usage reports from the current
 
 The report distinguishes unlike metrics instead of treating them as equivalent:
 
-- IDEs expose user-initiated interactions and generation activity.
-- Copilot CLI and Copilot App expose prompt and request counts.
-- Copilot Coding Agent exposes Copilot-created pull requests.
-- Copilot Code Review exposes Copilot-reviewed pull requests.
+- IDEs expose user-initiated interactions and generation activity
+- Copilot CLI and Copilot App expose prompt and request counts
+- Copilot Coding Agent exposes Copilot-created pull requests
+- Copilot Code Review exposes Copilot-reviewed pull requests
 
 ## Prerequisites
 
