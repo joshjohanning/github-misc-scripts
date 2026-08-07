@@ -44,6 +44,10 @@ Migrate work items from Azure DevOps to GitHub issues - this just links out to a
 
 See: [code-scanning-coverage-report](./code-scanning-coverage-report/README.md)
 
+## copilot-enterprise-usage-report
+
+See: [copilot-enterprise-usage-report](./copilot-enterprise-usage-report/README.md)
+
 ## create-app-jwt.py
 
 This script will generate a JWT for a GitHub App. It will use the private key and app ID from the GitHub App's settings page.
