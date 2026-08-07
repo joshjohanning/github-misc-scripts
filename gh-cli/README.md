@@ -833,6 +833,24 @@ joshjohanning-org/.github, no code scanning results
 
 Gets the commits of since a certain date - date should be in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format, ie: `since=2022-03-28T16:00:49Z`
 
+### get-copilot-ai-credit-usage-by-user-and-model.sh
+
+Exports monthly Copilot AI-credit usage by user and model for an enterprise.
+The script first uses daily per-user metrics to identify users with AI-credit
+usage, then makes one billing API call per identified user.
+
+```shell
+./get-copilot-ai-credit-usage-by-user-and-model.sh <enterprise> [year] [month] [output.csv] [max-users]
+```
+
+The script uses the current `gh auth` credential. Classic PAT authentication
+may require `read:enterprise` and `manage_billing:copilot`.
+
+> [!WARNING]
+> The model breakdown endpoint only accepts one user filter at a time. Large
+> enterprises can require thousands of API calls and may approach the API rate
+> limit. Use the optional `max-users` argument for testing.
+
 ### get-dependencies-in-repository.sh
 
 Gets dependencies used in the repository, including the ecosystem and version number.
