@@ -411,7 +411,7 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
     if [ "$bump_patch_version" = true ]; then
       # Skip fork-based PRs since we can't push to the head repo
       if [ "$pr_head_repo" != "$repo" ]; then
-        echo "  ⚠️  Skipping $repo#$pr_number - fork-based PR ($pr_head_repo), cannot push to branch"
+        echo "  ⚠️  Skipping $pr_url - fork-based PR ($pr_head_repo), cannot push to branch"
         ((skipped_count++))
         continue
       fi
