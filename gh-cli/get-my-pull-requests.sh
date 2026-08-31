@@ -102,11 +102,11 @@ if [[ $# -gt 1 ]]; then
 fi
 command -v gh >/dev/null 2>&1 ||
   fail "Required command not found: gh"
-gh auth status >/dev/null 2>&1 ||
-  fail "GitHub CLI is not authenticated. Run: gh auth login"
 
 exclude_orgs="${1:-}"
-user=$(gh api user --jq '.login')
+if ! user=$(gh api user --jq '.login'); then
+  fail "Unable to authenticate with GitHub. Run: gh auth login"
+fi
 
 organizations=()
 if [ -n "$exclude_orgs" ]; then
