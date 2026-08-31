@@ -992,7 +992,7 @@ Returns the most recent migration ID for a given organization repository.
 
 ### get-my-pull-requests.sh
 
-Gets open pull requests grouped by your involvement: created by you, assigned to you, awaiting your review, and other involvement. Groups are mutually exclusive. Optionally excludes one or more organizations.
+Gets open pull requests grouped by your involvement: created by you, assigned to you, awaiting your review, and other involvement. Groups are mutually exclusive using the precedence shown below. Optionally excludes one or more organizations.
 
 Usage:
 

@@ -60,11 +60,11 @@ search_pull_requests "author:$user is:pr is:open$exclusion"
 
 echo "" >&2
 echo "## Assigned to me"
-search_pull_requests "assignee:$user is:pr is:open$exclusion"
+search_pull_requests "assignee:$user -author:$user is:pr is:open$exclusion"
 
 echo "" >&2
 echo "## Awaiting my review (requested reviewer)"
-search_pull_requests "review-requested:$user is:pr is:open$exclusion"
+search_pull_requests "review-requested:$user -author:$user -assignee:$user is:pr is:open$exclusion"
 
 echo "" >&2
 echo "## Other involvement"
