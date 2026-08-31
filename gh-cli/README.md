@@ -1547,10 +1547,10 @@ Deletes intermediate draft releases associated with the latest merge manifest. I
 Requires `gh` authentication with Contents write permission and `jq`.
 
 ```bash
-./delete-draft-releases.sh
+./delete-draft-releases.sh --max-age-minutes 15 --no-prompt
 ```
 
-Run this after an intermediate dependency merge has created its draft, then run the merge script for the next dependency. Do not run it after the final merge.
+Run this after an intermediate dependency merge has created its draft, then run the merge script for the next dependency. `--max-age-minutes` skips older drafts as an additional safety guard. Do not run it after the final merge.
 
 ### merge-pull-requests-by-title.sh
 

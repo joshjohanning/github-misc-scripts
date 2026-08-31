@@ -3,11 +3,12 @@
 # Deletes intermediate draft releases created for PRs recorded by merge-pull-requests-by-title.sh
 #
 # Usage:
-#   ./delete-draft-releases.sh [manifest_file] [--no-prompt]
+#   ./delete-draft-releases.sh [manifest_file] [--max-age-minutes <minutes>] [--no-prompt]
 #
 # Examples:
 #   ./delete-draft-releases.sh
-#   ./delete-draft-releases.sh .release-manifests/previous.json --no-prompt
+#   ./delete-draft-releases.sh --max-age-minutes 15 --no-prompt
+#   ./delete-draft-releases.sh .release-manifests/previous.json --max-age-minutes 15
 #
 # Requirements:
 #   - gh authenticated with Contents: write permission for each repository
@@ -22,16 +23,20 @@
 print_help() {
   echo "Delete intermediate draft releases associated with a merge manifest"
   echo ""
-  echo "Usage: $0 [manifest_file] [--no-prompt]"
+  echo "Usage: $0 [manifest_file] [--max-age-minutes <minutes>] [--no-prompt]"
   echo ""
   echo "Defaults to .release-manifests/latest.json"
 }
 
 no_prompt=false
+max_age_minutes=""
 manifest_file=".release-manifests/latest.json"
 manifest_provided=false
 
-for arg in "$@"; do
+args=("$@")
+i=0
+while [ $i -lt ${#args[@]} ]; do
+  arg="${args[$i]}"
   case "$arg" in
     -h|--help)
       print_help
@@ -39,6 +44,14 @@ for arg in "$@"; do
       ;;
     --no-prompt)
       no_prompt=true
+      ;;
+    --max-age-minutes)
+      ((i++))
+      max_age_minutes="${args[$i]}"
+      if ! [[ "$max_age_minutes" =~ ^[1-9][0-9]*$ ]]; then
+        echo "Error: --max-age-minutes requires a positive integer"
+        exit 1
+      fi
       ;;
     --*)
       echo "Error: Unknown flag '$arg'"
@@ -53,6 +66,7 @@ for arg in "$@"; do
       manifest_provided=true
       ;;
   esac
+  ((i++))
 done
 
 if [ ! -f "$manifest_file" ]; then
@@ -140,6 +154,27 @@ while IFS=$'\t' read -r repo pr_url merged_at merge_sha; do
   fi
 
   IFS=$'\t' read -r release_id tag_name created_at release_url <<< "$matching_drafts"
+  if [ -n "$max_age_minutes" ]; then
+    created_epoch=$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$created_at" "+%s" 2>/dev/null)
+    if [ -z "$created_epoch" ]; then
+      created_epoch=$(date -u -d "$created_at" "+%s" 2>/dev/null)
+    fi
+    if [ -z "$created_epoch" ]; then
+      echo "  ❌ Could not parse draft creation time: $created_at"
+      ((failed_count++))
+      continue
+    fi
+
+    current_epoch=$(date -u "+%s")
+    age_seconds=$((current_epoch - created_epoch))
+    max_age_seconds=$((max_age_minutes * 60))
+    if [ "$age_seconds" -gt "$max_age_seconds" ]; then
+      echo "  ⏭️  Draft is older than $max_age_minutes minutes; skipping $release_url"
+      ((skipped_count++))
+      continue
+    fi
+  fi
+
   current_release=$(gh api "/repos/$repo/releases/$release_id" --jq '[.draft, .tag_name] | @tsv' 2>/dev/null)
   if [ "$current_release" != $'true\t'"$tag_name" ]; then
     echo "  ❌ Release changed during verification; refusing to delete $release_url"
