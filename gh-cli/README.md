@@ -500,13 +500,6 @@ test11-team/test11111-team/textxxx-team
 
 ```
 
-### delete-packages-in-organization.sh
-
-Deletes all packages in an organization for a given package type.
-
-> [!WARNING]
-> This is a destructive operation and cannot be undone.
-
 ### delete-draft-releases.sh
 
 Deletes intermediate draft releases and their exact tags using the latest merge manifest. It deletes only a unique draft created after the recorded merge whose target contains that merge commit, then deletes the tag named by that verified draft.
@@ -518,6 +511,13 @@ Requires `gh` authentication with Contents write permission and `jq`.
 ```
 
 Run this after an intermediate dependency merge has created its draft, then run the merge script for the next dependency. `--max-age-minutes` skips older drafts as an additional safety guard. Do not run it after the final merge.
+
+### delete-packages-in-organization.sh
+
+Deletes all packages in an organization for a given package type.
+
+> [!WARNING]
+> This is a destructive operation and cannot be undone.
 
 ### delete-release.sh
 
