@@ -33,7 +33,11 @@ search_pull_requests() {
   fi
 }
 
-[[ $# -le 1 ]] || { usage; exit 1; }
+if [[ $# -gt 1 ]]; then
+  echo "Error: Expected at most one argument, but received $#." >&2
+  usage
+  exit 1
+fi
 command -v gh >/dev/null 2>&1 ||
   fail "Required command not found: gh"
 gh auth status >/dev/null 2>&1 ||
