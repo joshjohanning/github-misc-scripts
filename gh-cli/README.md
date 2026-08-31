@@ -1540,6 +1540,18 @@ Adds users to an organization team from a CSV input list.
 
 Creates a (mostly) empty migration for a given organization repository so that it can create a lock.
 
+### delete-draft-releases.sh
+
+Deletes intermediate draft releases associated with the latest merge manifest. It deletes only a unique draft created after the recorded merge whose target contains that merge commit, and refuses to delete when the release tag already exists.
+
+Requires `gh` authentication with Contents write permission and `jq`.
+
+```bash
+./delete-draft-releases.sh
+```
+
+Run this after an intermediate dependency merge has created its draft, then run the merge script for the next dependency. Do not run it after the final merge.
+
 ### merge-pull-requests-by-title.sh
 
 Finds and merges pull requests matching a title pattern across multiple repositories. Supports batch merging Dependabot PRs, bumping npm patch versions, and enabling auto-merge. Successful immediate merges are automatically recorded in the ignored `.release-manifests/latest.json` file for safely publishing generated drafts. Repositories can be specified via a file list or dynamically via `--owner` with optional `--topic` filtering.
