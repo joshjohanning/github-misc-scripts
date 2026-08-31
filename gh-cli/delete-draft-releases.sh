@@ -99,6 +99,9 @@ skipped_count=0
 failed_count=0
 
 while IFS=$'\t' read -r repo pr_url merged_at merge_sha; do
+  if [ "$deleted_count" -gt 0 ] || [ "$skipped_count" -gt 0 ] || [ "$failed_count" -gt 0 ]; then
+    echo ""
+  fi
   echo "Checking $pr_url"
 
   default_branch=$(gh api "/repos/$repo" --jq '.default_branch' 2>/dev/null)
