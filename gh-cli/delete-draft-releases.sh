@@ -17,7 +17,7 @@
 # Safety:
 #   - Only draft releases created after the recorded PR merge are considered
 #   - The draft target must contain the recorded merge commit
-#   - Git tag references are never deleted
+#   - Only the exact tag named by the verified draft is deleted
 #   - Exactly one draft must match each manifest entry
 
 print_help() {
@@ -185,9 +185,17 @@ while IFS=$'\t' read -r repo pr_url merged_at merge_sha; do
     continue
   fi
 
+  encoded_tag=$(jq -rn --arg value "$tag_name" '$value | @uri')
+  tag_ref=$(gh api "/repos/$repo/git/ref/tags/$encoded_tag" --jq '.ref' 2>/dev/null)
+  if [ "$tag_ref" != "refs/tags/$tag_name" ]; then
+    echo "  ❌ Exact tag $tag_name was not found; refusing partial cleanup"
+    ((failed_count++))
+    continue
+  fi
+
   echo "  📦 Matching draft: $tag_name ($created_at) - $release_url"
   if [ "$no_prompt" = false ]; then
-    read -r -p "  ❓ Delete this intermediate draft release? [y/N] " confirm < /dev/tty
+    read -r -p "  ❓ Delete this intermediate draft release and tag $tag_name? [y/N] " confirm < /dev/tty
     if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
       echo "  ⏭️  Skipped $release_url"
       ((skipped_count++))
@@ -196,8 +204,13 @@ while IFS=$'\t' read -r repo pr_url merged_at merge_sha; do
   fi
 
   if gh api --method DELETE "/repos/$repo/releases/$release_id" > /dev/null; then
-    echo "  ✅ Deleted intermediate draft $release_url"
-    ((deleted_count++))
+    if gh api --method DELETE "/repos/$repo/git/refs/tags/$encoded_tag" > /dev/null; then
+      echo "  ✅ Deleted intermediate draft $release_url and tag $tag_name"
+      ((deleted_count++))
+    else
+      echo "  ❌ Deleted the draft but failed to delete tag $tag_name"
+      ((failed_count++))
+    fi
   else
     echo "  ❌ Failed to delete $release_url"
     ((failed_count++))
