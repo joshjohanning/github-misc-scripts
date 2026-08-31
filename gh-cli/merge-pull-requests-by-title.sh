@@ -390,12 +390,13 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
 
   # Process each matching PR
   while IFS='|' read -r pr_number pr_title pr_author pr_branch pr_head_repo; do
-    echo "  📋 Found PR #$pr_number: $pr_title (by $pr_author)"
+    pr_url="https://github.com/$repo/pull/$pr_number"
+    echo "  📋 Found PR #$pr_number: $pr_title (by $pr_author) - $pr_url"
 
     if [ "$bump_patch_version" = true ]; then
       # Skip fork-based PRs since we can't push to the head repo
       if [ "$pr_head_repo" != "$repo" ]; then
-        echo "  ⚠️  Skipping $repo#$pr_number - fork-based PR ($pr_head_repo), cannot push to branch"
+        echo "  ⚠️  Skipping $pr_url - fork-based PR ($pr_head_repo), cannot push to branch"
         ((skipped_count++))
         continue
       fi
@@ -435,9 +436,9 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
               fi
             fi
             if gh pr merge "$pr_number" --repo "$repo" "${auto_merge_args[@]}"; then
-              echo "  🔄 Auto-merge enabled for $repo#$pr_number"
+              echo "  🔄 Auto-merge enabled for $pr_url"
             else
-              echo "  ⚠️  Failed to enable auto-merge for $repo#$pr_number"
+              echo "  ⚠️  Failed to enable auto-merge for $pr_url"
               ((fail_count++))
             fi
           fi
@@ -478,7 +479,7 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
         merge_args+=("--auto")
       fi
       if [ "$dry_run" = true ]; then
-        echo "  🔍 Would merge $repo#$pr_number with: gh pr merge $pr_number --repo $repo ${merge_args[*]}"
+        echo "  🔍 Would merge $pr_url with: gh pr merge $pr_number --repo $repo ${merge_args[*]}"
         ((success_count++))
       else
         # Prompt for confirmation unless --no-prompt was passed
@@ -489,20 +490,20 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
           fi
           read -r -p "  ❓ Merge $repo#$pr_number? [y/N] " confirm < /dev/tty
           if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
-            echo "  ⏭️  Skipped $repo#$pr_number"
+            echo "  ⏭️  Skipped $pr_url"
             ((skipped_count++))
             continue
           fi
         fi
         if gh pr merge "$pr_number" --repo "$repo" "${merge_args[@]}"; then
           if [ "$enable_auto_merge" = true ]; then
-            echo "  🔄 Auto-merge enabled for $repo#$pr_number"
+            echo "  🔄 Auto-merge enabled for $pr_url"
           else
-            echo "  ✅ Successfully merged $repo#$pr_number"
+            echo "  ✅ Successfully merged $pr_url"
           fi
           ((success_count++))
         else
-          echo "  ❌ Failed to merge $repo#$pr_number"
+          echo "  ❌ Failed to merge $pr_url"
           ((fail_count++))
         fi
       fi
