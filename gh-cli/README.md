@@ -1542,7 +1542,7 @@ Creates a (mostly) empty migration for a given organization repository so that i
 
 ### delete-draft-releases.sh
 
-Deletes intermediate draft releases associated with the latest merge manifest. It deletes only a unique draft created after the recorded merge whose target contains that merge commit, and refuses to delete when the release tag already exists.
+Deletes intermediate draft releases associated with the latest merge manifest. It deletes only a unique draft created after the recorded merge whose target contains that merge commit. Existing Git tags are left untouched.
 
 Requires `gh` authentication with Contents write permission and `jq`.
 

@@ -16,7 +16,7 @@
 # Safety:
 #   - Only draft releases created after the recorded PR merge are considered
 #   - The draft target must contain the recorded merge commit
-#   - The draft tag must not already exist as a Git reference
+#   - Git tag references are never deleted
 #   - Exactly one draft must match each manifest entry
 
 print_help() {
@@ -140,13 +140,6 @@ while IFS=$'\t' read -r repo pr_url merged_at merge_sha; do
   fi
 
   IFS=$'\t' read -r release_id tag_name created_at release_url <<< "$matching_drafts"
-  encoded_tag=$(jq -rn --arg value "$tag_name" '$value | @uri')
-  if gh api "/repos/$repo/git/ref/tags/$encoded_tag" > /dev/null 2>&1; then
-    echo "  ❌ Tag $tag_name already exists; refusing to delete $release_url"
-    ((failed_count++))
-    continue
-  fi
-
   current_release=$(gh api "/repos/$repo/releases/$release_id" --jq '[.draft, .tag_name] | @tsv' 2>/dev/null)
   if [ "$current_release" != $'true\t'"$tag_name" ]; then
     echo "  ❌ Release changed during verification; refusing to delete $release_url"
