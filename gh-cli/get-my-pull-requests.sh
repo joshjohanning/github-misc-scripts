@@ -23,7 +23,7 @@ fail() {
 }
 
 search_pull_requests() {
-  local incomplete_results key number owner repository results search_metadata search_query title total_count
+  local incomplete_results key number owner repository results retrieval_count search_metadata search_query title total_count
   search_query="$1"
 
   if ! search_metadata=$(gh api --method GET /search/issues \
@@ -47,16 +47,21 @@ search_pull_requests() {
       -F per_page=100 \
       -f sort=created \
       -f order=desc \
-      --jq '(["__SEARCH_STATUS__", (.incomplete_results | tostring), ""] | @tsv),
+      --jq '(["__SEARCH_STATUS__", (.incomplete_results | tostring), (.total_count | tostring)] | @tsv),
         (.items[] | [(.repository_url | sub("^.*/repos/"; "")), .number, .title] | @tsv)'); then
     fail "Pull request search failed. Check repository access and API rate limits with: gh api rate_limit"
   fi
 
   [[ -n "$results" ]] || return
 
-  while IFS=$'\t' read -r repository incomplete_results title; do
-    if [[ "$repository" == "__SEARCH_STATUS__" && "$incomplete_results" == "true" ]]; then
-      fail "GitHub Search timed out while retrieving pull requests. Run the report again."
+  while IFS=$'\t' read -r repository incomplete_results retrieval_count; do
+    if [[ "$repository" == "__SEARCH_STATUS__" ]]; then
+      if [[ "$incomplete_results" == "true" ]]; then
+        fail "GitHub Search timed out while retrieving pull requests. Run the report again."
+      fi
+      if [[ "$retrieval_count" -gt 1000 ]]; then
+        fail "Search grew to $retrieval_count pull requests during retrieval, but GitHub Search only exposes 1,000 results. The report stopped before completion."
+      fi
     fi
   done <<< "$results"
 
