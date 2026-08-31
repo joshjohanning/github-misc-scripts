@@ -992,7 +992,7 @@ Returns the most recent migration ID for a given organization repository.
 
 ### get-my-pull-requests.sh
 
-Gets open pull requests grouped by your involvement: created by you, assigned to you, awaiting your review, and otherwise involving you. Optionally excludes one or more organizations.
+Gets open pull requests grouped by your involvement: created by you, assigned to you, awaiting your review, and other involvement. Groups are mutually exclusive. Optionally excludes one or more organizations.
 
 Usage:
 
@@ -1007,7 +1007,7 @@ Output groups include:
 - Created by me - PRs you authored
 - Assigned to me - PRs assigned to you
 - Awaiting my review - PRs requesting your review
-- Involved - PRs you authored, were assigned, mentioned, or commented on
+- Other involvement - remaining PRs you were mentioned in or commented on
 
 > [!NOTE]
 > Requires GitHub CLI authentication with access to the repositories being searched. Uses the search API.

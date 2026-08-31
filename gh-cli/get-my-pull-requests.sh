@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Get open pull requests grouped by involvement:
 # - Created by me
 # - Assigned to me
 # - Awaiting my review (requested reviewer)
-# - Involved (mentioned, assigned, authored, or commented)
+# - Other involvement (mentioned or commented)
 #
 # Usage: ./get-my-pull-requests.sh [<exclude-organizations>]
 # Example: ./get-my-pull-requests.sh
@@ -25,10 +25,12 @@ fail() {
 search_pull_requests() {
   local search_query="$1"
 
-  gh api --method GET --paginate /search/issues \
-    -f q="$search_query" \
-    -F per_page=100 \
-    --jq '.items[] | [.number, .title, (.repository_url | sub("^.*/repos/"; ""))] | @tsv'
+  if ! gh api --method GET --paginate /search/issues \
+      -f q="$search_query" \
+      -F per_page=100 \
+      --jq '.items[] | [.number, .title, (.repository_url | sub("^.*/repos/"; ""))] | @tsv'; then
+    fail "Pull request search failed. Check repository access and API rate limits with: gh api rate_limit"
+  fi
 }
 
 [[ $# -le 1 ]] || { usage; exit 1; }
@@ -65,8 +67,8 @@ echo "## Awaiting my review (requested reviewer)"
 search_pull_requests "review-requested:$user is:pr is:open$exclusion"
 
 echo "" >&2
-echo "## Involved"
-search_pull_requests "involves:$user is:pr is:open$exclusion"
+echo "## Other involvement"
+search_pull_requests "involves:$user -author:$user -assignee:$user -review-requested:$user is:pr is:open$exclusion"
 
 echo "" >&2
 echo "Done!" >&2
