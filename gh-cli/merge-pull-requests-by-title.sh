@@ -517,11 +517,14 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
             echo "  ✅ Successfully merged $pr_url"
             if [ "$write_manifest" = true ]; then
               merged_pr=$(gh api "/repos/$repo/pulls/$pr_number" \
-                --jq '[.base.repo.full_name, (.number | tostring), .html_url, .title, .merged_at, .merge_commit_sha] | @tsv')
-              if [ -z "$merged_pr" ]; then
+                --jq '[.base.repo.full_name, (.number | tostring), .html_url, .title, .merged_at, .merge_commit_sha] | @tsv' 2>&1)
+              metadata_exit=$?
+              if [ $metadata_exit -ne 0 ] || [ -z "$merged_pr" ]; then
                 echo "  ❌ Merged PR but failed to retrieve metadata for the manifest"
-                ((fail_count++))
-                continue
+                if [ -n "$merged_pr" ]; then
+                  echo "     $merged_pr"
+                fi
+                exit 1
               fi
               if [ -n "$manifest_entries" ]; then
                 manifest_entries+=$'\n'

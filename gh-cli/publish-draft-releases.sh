@@ -95,6 +95,18 @@ while IFS=$'\t' read -r repo pr_number pr_url merged_at merge_sha; do
   IFS=$'\t' read -r default_branch repo_url <<< "$repo_info"
 
   matching_drafts=""
+  release_query_error=$(mktemp)
+  releases=$(gh api --paginate "/repos/$repo/releases?per_page=100" \
+    --jq ".[] | select(.draft == true and .created_at >= \"$merged_at\") | [.id, .tag_name, (.target_commitish // \"\"), .created_at, .html_url] | @tsv" 2>"$release_query_error")
+  release_query_status=$?
+  if [ $release_query_status -ne 0 ]; then
+    echo "  ❌ Failed to list releases: $(cat "$release_query_error")"
+    rm -f "$release_query_error"
+    ((failed_count++))
+    continue
+  fi
+  rm -f "$release_query_error"
+
   while IFS=$'\t' read -r release_id tag_name target created_at release_url; do
     [ -z "$release_id" ] && continue
     target="${target:-$default_branch}"
@@ -110,8 +122,7 @@ while IFS=$'\t' read -r repo pr_number pr_url merged_at merge_sha; do
       fi
       matching_drafts+="$release_id"$'\t'"$tag_name"$'\t'"$created_at"$'\t'"$release_url"
     fi
-  done < <(gh api --paginate "/repos/$repo/releases?per_page=100" \
-    --jq ".[] | select(.draft == true and .created_at >= \"$merged_at\") | [.id, .tag_name, (.target_commitish // \"\"), .created_at, .html_url] | @tsv" 2>/dev/null)
+  done <<< "$releases"
 
   match_count=$(printf '%s\n' "$matching_drafts" | awk 'NF { count++ } END { print count+0 }')
   if [ "$match_count" -eq 0 ]; then
@@ -138,6 +149,13 @@ while IFS=$'\t' read -r repo pr_number pr_url merged_at merge_sha; do
       ((skipped_count++))
       continue
     fi
+  fi
+
+  current_release=$(gh api "/repos/$repo/releases/$release_id" --jq '[.draft, .tag_name] | @tsv' 2>/dev/null)
+  if [ "$current_release" != $'true\t'"$tag_name" ]; then
+    echo "  ❌ Release changed during verification; refusing to publish $release_url"
+    ((failed_count++))
+    continue
   fi
 
   if gh api --method PATCH "/repos/$repo/releases/$release_id" -F draft=false > /dev/null; then
