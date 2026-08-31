@@ -1542,7 +1542,7 @@ Creates a (mostly) empty migration for a given organization repository so that i
 
 ### merge-pull-requests-by-title.sh
 
-Finds and merges pull requests matching a title pattern across multiple repositories. Supports batch merging Dependabot PRs, bumping npm patch versions, and enabling auto-merge. Repositories can be specified via a file list or dynamically via `--owner` with optional `--topic` filtering.
+Finds and merges pull requests matching a title pattern across multiple repositories. Supports batch merging Dependabot PRs, bumping npm patch versions, and enabling auto-merge. Successful immediate merges are automatically recorded in the ignored `.release-manifests/latest.json` file for safely publishing generated drafts. Repositories can be specified via a file list or dynamically via `--owner` with optional `--topic` filtering.
 
 ```bash
 # Merge PRs matching a wildcard title pattern
@@ -1556,6 +1556,7 @@ Finds and merges pull requests matching a title pattern across multiple reposito
 
 # Search by owner and topic instead of file list
 ./merge-pull-requests-by-title.sh --owner joshjohanning --topic node-action "chore(deps)*" --dry-run
+
 ```
 
 Input file format (`repos.txt`):
@@ -1565,6 +1566,8 @@ https://github.com/joshjohanning/repo1
 https://github.com/joshjohanning/repo2
 https://github.com/joshjohanning/repo3
 ```
+
+Automatic manifest output requires `jq` and applies only to immediate merges, not dry runs, version bumps, or auto-merge.
 
 ### merge-pull-requests-from-list.sh
 
@@ -1593,6 +1596,18 @@ https://github.com/joshjohanning/repo3/pull/43
 ```
 
 Template variables: `{title}` (PR title), `{number}` (PR number), `{body}` (PR body)
+
+### publish-draft-releases.sh
+
+Publishes only draft releases associated with PRs in a manifest written by `merge-pull-requests-by-title.sh`. A draft must be newer than its PR merge, its target must contain the merge commit, and it must be the only matching draft for that repository.
+
+Requires `gh` authentication with Contents write permission and `jq`.
+
+```bash
+./publish-draft-releases.sh
+```
+
+The script defaults to `.release-manifests/latest.json`; pass a different manifest path only when publishing from a saved prior run.
 
 ### parent-organization-teams.sh
 
