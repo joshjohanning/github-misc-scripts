@@ -219,9 +219,9 @@ done < <(jq -r '.pullRequests[] | [.repository, .pullRequestUrl, .mergedAt, .mer
 
 echo "========================================"
 echo "Summary:"
-echo "  ✅ Deleted:  $deleted_count"
-echo "  ❌ Failed:   $failed_count"
-echo "  ⏭️  Skipped: $skipped_count"
+printf "  ✅ %-10s %d\n" "Deleted:" "$deleted_count"
+printf "  ❌ %-10s %d\n" "Failed:" "$failed_count"
+printf "  ⏭️  %-10s %d\n" "Skipped:" "$skipped_count"
 echo "========================================"
 
 if [ "$failed_count" -gt 0 ]; then

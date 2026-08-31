@@ -151,9 +151,9 @@ done < <(jq -r '.pullRequests[] | [.repository, .pullRequestNumber, .pullRequest
 
 echo "========================================"
 echo "Summary:"
-echo "  ✅ Published: $published_count"
-echo "  ❌ Failed:    $failed_count"
-echo "  ⏭️  Skipped:   $skipped_count"
+printf "  ✅ %-10s %d\n" "Published:" "$published_count"
+printf "  ❌ %-10s %d\n" "Failed:" "$failed_count"
+printf "  ⏭️  %-10s %d\n" "Skipped:" "$skipped_count"
 echo "========================================"
 
 if [ "$failed_count" -gt 0 ]; then
