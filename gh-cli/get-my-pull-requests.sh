@@ -23,14 +23,57 @@ fail() {
 }
 
 search_pull_requests() {
-  local search_query="$1"
+  local key number owner repository results search_query title total_count
+  search_query="$1"
 
-  if ! gh api --method GET --paginate /search/issues \
+  if ! total_count=$(gh api --method GET /search/issues \
       -f q="$search_query" \
-      -F per_page=100 \
-      --jq '.items[] | [.number, .title, (.repository_url | sub("^.*/repos/"; ""))] | @tsv'; then
+      -F per_page=1 \
+      --jq '.total_count'); then
     fail "Pull request search failed. Check repository access and API rate limits with: gh api rate_limit"
   fi
+
+  if [[ "$total_count" -gt 1000 ]]; then
+    fail "Search matched $total_count pull requests, but GitHub Search only exposes 1,000 results. The report stopped before completion."
+  fi
+
+  if ! results=$(gh api --method GET --paginate /search/issues \
+      -f q="$search_query" \
+      -F per_page=100 \
+      -f sort=created \
+      -f order=desc \
+      --jq '.items[] | [(.repository_url | sub("^.*/repos/"; "")), .number, .title] | @tsv'); then
+    fail "Pull request search failed. Check repository access and API rate limits with: gh api rate_limit"
+  fi
+
+  [[ -n "$results" ]] || return
+
+  while IFS=$'\t' read -r repository number title; do
+    key="$repository#$number"
+    if [[ "$seen_pull_requests" == *$'\n'"$key"$'\n'* ]]; then
+      continue
+    fi
+    seen_pull_requests+="$key"$'\n'
+
+    owner="${repository%%/*}"
+    if ! is_excluded_organization "$owner"; then
+      printf '%s\t%s\t%s\n' "$number" "$title" "$repository"
+    fi
+  done <<< "$results"
+}
+
+is_excluded_organization() {
+  local organization owner="$1"
+
+  [[ -n "$exclude_orgs" ]] || return 1
+
+  for organization in "${organizations[@]}"; do
+    if [[ "$owner" == "$organization" ]]; then
+      return 0
+    fi
+  done
+
+  return 1
 }
 
 if [[ $# -gt 1 ]]; then
@@ -46,33 +89,37 @@ gh auth status >/dev/null 2>&1 ||
 exclude_orgs="${1:-}"
 user=$(gh api user --jq '.login')
 
-exclusion=""
+organizations=()
 if [ -n "$exclude_orgs" ]; then
-  IFS=',' read -ra orgs <<< "$exclude_orgs"
-  for org in "${orgs[@]}"; do
-    [[ "$org" =~ ^[A-Za-z0-9]([A-Za-z0-9-]{0,37}[A-Za-z0-9])?$ ]] ||
-      fail "Invalid organization name: $org"
-    exclusion="$exclusion -org:$org"
+  [[ "$exclude_orgs" != ,* && "$exclude_orgs" != *, && "$exclude_orgs" != *,,* ]] ||
+    fail "Excluded organizations must be a comma-separated list without empty values."
+  IFS=',' read -ra organizations <<< "$exclude_orgs"
+  for organization in "${organizations[@]}"; do
+    [[ "$organization" =~ ^[A-Za-z0-9]([A-Za-z0-9-]{0,37}[A-Za-z0-9])?$ ]] ||
+      fail "Invalid organization name: $organization"
   done
 fi
+
+shopt -s nocasematch
+seen_pull_requests=$'\n'
 
 echo "Fetching open pull requests for @$user..." >&2
 echo "" >&2
 
 echo "## Created by me"
-search_pull_requests "author:$user is:pr is:open$exclusion"
+search_pull_requests "author:$user is:pr is:open"
 
 echo "" >&2
 echo "## Assigned to me"
-search_pull_requests "assignee:$user -author:$user is:pr is:open$exclusion"
+search_pull_requests "assignee:$user -author:$user is:pr is:open"
 
 echo "" >&2
 echo "## Awaiting my review (requested reviewer)"
-search_pull_requests "review-requested:$user -author:$user -assignee:$user is:pr is:open$exclusion"
+search_pull_requests "review-requested:$user -author:$user -assignee:$user is:pr is:open"
 
 echo "" >&2
 echo "## Other involvement"
-search_pull_requests "involves:$user -author:$user -assignee:$user -review-requested:$user is:pr is:open$exclusion"
+search_pull_requests "involves:$user -author:$user -assignee:$user -review-requested:$user is:pr is:open"
 
 echo "" >&2
 echo "Done!" >&2

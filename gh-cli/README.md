@@ -1010,7 +1010,7 @@ Output groups include:
 - Other involvement - remaining PRs you were mentioned in or commented on
 
 > [!NOTE]
-> Requires GitHub CLI authentication with access to the repositories being searched. Uses the search API.
+> Requires GitHub CLI authentication with access to the repositories being searched. Uses the search API and exits with an error if any group exceeds the API's 1,000-result limit.
 
 ### get-organization-active-repositories.sh
 
