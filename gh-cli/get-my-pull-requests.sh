@@ -23,14 +23,19 @@ fail() {
 }
 
 search_pull_requests() {
-  local key number owner repository results search_query title total_count
+  local incomplete_results key number owner repository results search_metadata search_query title total_count
   search_query="$1"
 
-  if ! total_count=$(gh api --method GET /search/issues \
+  if ! search_metadata=$(gh api --method GET /search/issues \
       -f q="$search_query" \
       -F per_page=1 \
-      --jq '.total_count'); then
+      --jq '[.total_count, .incomplete_results] | @tsv'); then
     fail "Pull request search failed. Check repository access and API rate limits with: gh api rate_limit"
+  fi
+  IFS=$'\t' read -r total_count incomplete_results <<< "$search_metadata"
+
+  if [[ "$incomplete_results" == "true" ]]; then
+    fail "GitHub Search timed out while counting pull requests. Run the report again."
   fi
 
   if [[ "$total_count" -gt 1000 ]]; then
@@ -42,13 +47,22 @@ search_pull_requests() {
       -F per_page=100 \
       -f sort=created \
       -f order=desc \
-      --jq '.items[] | [(.repository_url | sub("^.*/repos/"; "")), .number, .title] | @tsv'); then
+      --jq '(["__SEARCH_STATUS__", (.incomplete_results | tostring), ""] | @tsv),
+        (.items[] | [(.repository_url | sub("^.*/repos/"; "")), .number, .title] | @tsv)'); then
     fail "Pull request search failed. Check repository access and API rate limits with: gh api rate_limit"
   fi
 
   [[ -n "$results" ]] || return
 
+  while IFS=$'\t' read -r repository incomplete_results title; do
+    if [[ "$repository" == "__SEARCH_STATUS__" && "$incomplete_results" == "true" ]]; then
+      fail "GitHub Search timed out while retrieving pull requests. Run the report again."
+    fi
+  done <<< "$results"
+
   while IFS=$'\t' read -r repository number title; do
+    [[ "$repository" != "__SEARCH_STATUS__" ]] || continue
+
     key="$repository#$number"
     if [[ "$seen_pull_requests" == *$'\n'"$key"$'\n'* ]]; then
       continue
