@@ -990,6 +990,28 @@ Returns the most recent migration ID for a given organization.
 
 Returns the most recent migration ID for a given organization repository.
 
+### get-my-pull-requests.sh
+
+Gets open pull requests grouped by your involvement: created by you, assigned to you, awaiting your review, and otherwise involving you. Optionally excludes one or more organizations.
+
+Usage:
+
+```shell
+./get-my-pull-requests.sh
+./get-my-pull-requests.sh joshjohanning-org
+./get-my-pull-requests.sh joshjohanning-org,another-org
+```
+
+Output groups include:
+
+- Created by me - PRs you authored
+- Assigned to me - PRs assigned to you
+- Awaiting my review - PRs requesting your review
+- Involved - PRs you authored, were assigned, mentioned, or commented on
+
+> [!NOTE]
+> Requires GitHub CLI authentication with access to the repositories being searched. Uses the search API.
+
 ### get-organization-active-repositories.sh
 
 Gets a list of repositories in an organization that have had code pushed to it in the last X days.
