@@ -500,6 +500,18 @@ test11-team/test11111-team/textxxx-team
 
 ```
 
+### delete-draft-releases.sh
+
+Deletes intermediate draft releases and their exact tags using the latest merge manifest. It deletes only a unique draft created after the recorded merge whose target contains that merge commit, then deletes the tag named by that verified draft.
+
+Requires `gh` authentication with Contents write permission and `jq`.
+
+```bash
+./delete-draft-releases.sh --max-age-minutes 15 --no-prompt
+```
+
+Run this after an intermediate dependency merge has created its draft, then run the merge script for the next dependency. `--max-age-minutes` skips older drafts as an additional safety guard. Do not run it after the final merge.
+
 ### delete-packages-in-organization.sh
 
 Deletes all packages in an organization for a given package type.
@@ -1564,7 +1576,7 @@ Creates a (mostly) empty migration for a given organization repository so that i
 
 ### merge-pull-requests-by-title.sh
 
-Finds and merges pull requests matching a title pattern across multiple repositories. Supports batch merging Dependabot PRs, bumping npm patch versions, and enabling auto-merge. Repositories can be specified via a file list or dynamically via `--owner` with optional `--topic` filtering.
+Finds and merges pull requests matching a title pattern across multiple repositories. Supports batch merging Dependabot PRs, bumping npm patch versions, and enabling auto-merge. Successful immediate merges are automatically recorded in the ignored `.release-manifests/latest.json` file for safely publishing generated drafts. Repositories can be specified via a file list or dynamically via `--owner` with optional `--topic` filtering.
 
 ```bash
 # Merge PRs matching a wildcard title pattern
@@ -1578,6 +1590,7 @@ Finds and merges pull requests matching a title pattern across multiple reposito
 
 # Search by owner and topic instead of file list
 ./merge-pull-requests-by-title.sh --owner joshjohanning --topic node-action "chore(deps)*" --dry-run
+
 ```
 
 Input file format (`repos.txt`):
@@ -1587,6 +1600,8 @@ https://github.com/joshjohanning/repo1
 https://github.com/joshjohanning/repo2
 https://github.com/joshjohanning/repo3
 ```
+
+Automatic manifest output requires `jq` and applies only to immediate merges, not dry runs, version bumps, or auto-merge.
 
 ### merge-pull-requests-from-list.sh
 
@@ -1632,6 +1647,18 @@ The script has three parameters:
 - `source-org` - The source organization name from which team hierarchy will be read
 - `target-org` - The target organization name to which teams will be updated OR created
 - `create parent(s) if not exist` - OPTIONAL (default `false`) if set to true, the teams which have parents that do not exist in the target org, they will be created. (also creates parents of parents) otherwise it will print a message parent doesn't exist and it will skipped.
+
+### publish-draft-releases.sh
+
+Publishes only draft releases associated with PRs in a manifest written by `merge-pull-requests-by-title.sh`. A draft must be newer than its PR merge, its target must contain the merge commit, and it must be the only matching draft for that repository.
+
+Requires `gh` authentication with Contents write permission and `jq`.
+
+```bash
+./publish-draft-releases.sh
+```
+
+The script defaults to `.release-manifests/latest.json`; pass a different manifest path only when publishing from a saved prior run.
 
 ### remove-branch-protection-status-check-contexts.sh
 

@@ -53,6 +53,7 @@
 #   https://github.com/joshjohanning/repo3
 #
 # Notes:
+#   - Requires jq for immediate merges because release metadata is recorded automatically
 #   - PRs must be open and in a mergeable state
 #   - Use * as a wildcard in the title pattern (e.g., "chore(deps)*" matches any title starting with "chore(deps)")
 #   - If multiple PRs match in a repo, all will be processed
@@ -61,6 +62,7 @@
 #   - --bump-patch-version only works with same-repo PRs (fork-based PRs are skipped)
 #   - --enable-auto-merge queues PRs to merge once all required checks pass (does not bypass protections)
 #   - By default, merge mode prompts for confirmation before each PR merge; use --no-prompt to skip
+#   - Immediate merges are recorded in .release-manifests/latest.json for safe release publishing
 #
 # TODO:
 #   - Add --delete-branch flag to delete remote branch after merge
@@ -111,6 +113,7 @@ bump_patch_version=false
 enable_auto_merge=false
 no_prompt=false
 search_owner=""
+manifest_file=".release-manifests/latest.json"
 topics=()
 valid_flags=("-h" "--help" "--dry-run" "--bump-patch-version" "--enable-auto-merge" "--no-prompt" "--owner" "--topic")
 args=("$@")
@@ -135,6 +138,7 @@ while [ $i -lt ${#args[@]} ]; do
       echo "Error: --owner requires a value"
       exit 1
     fi
+
     if ! [[ "$search_owner" =~ ^[a-zA-Z0-9._-]+$ ]]; then
       echo "Error: Invalid owner '$search_owner' - must be a valid GitHub username or organization"
       exit 1
@@ -167,6 +171,16 @@ fi
 
 if [ "$dry_run" = true ] && [ "$enable_auto_merge" = true ]; then
   echo "Error: --dry-run and --enable-auto-merge are mutually exclusive"
+  exit 1
+fi
+
+write_manifest=true
+if [ "$dry_run" = true ] || [ "$enable_auto_merge" = true ] || [ "$bump_patch_version" = true ]; then
+  write_manifest=false
+fi
+
+if [ "$write_manifest" = true ] && ! command -v jq > /dev/null 2>&1; then
+  echo "Error: jq is required to record immediate merges for release publishing"
   exit 1
 fi
 
@@ -312,6 +326,7 @@ success_count=0
 fail_count=0
 skipped_count=0
 not_found_count=0
+manifest_entries=""
 
 while IFS= read -r repo_url || [ -n "$repo_url" ]; do
   # Skip empty lines and comments
@@ -468,7 +483,7 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
       if [ "$enable_auto_merge" = false ]; then
         failed_checks=$(gh pr checks "$pr_number" --repo "$repo" --json "name,state" --jq '[.[] | select(.state == "FAILURE")] | length' 2>/dev/null)
         if [ -n "$failed_checks" ] && [ "$failed_checks" -gt 0 ] 2>/dev/null; then
-          echo "  ⚠️  Skipping $repo#$pr_number - $failed_checks status check(s) failed"
+          echo "  ⚠️  Skipping $pr_url - $failed_checks status check(s) failed"
           ((skipped_count++))
           continue
         fi
@@ -488,7 +503,7 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
             echo "Error: No TTY available for interactive prompt - use --no-prompt"
             exit 1
           fi
-          read -r -p "  ❓ Merge $repo#$pr_number? [y/N] " confirm < /dev/tty
+          read -r -p "  ❓ Merge $pr_url? [y/N] " confirm < /dev/tty
           if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
             echo "  ⏭️  Skipped $pr_url"
             ((skipped_count++))
@@ -500,6 +515,22 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
             echo "  🔄 Auto-merge enabled for $pr_url"
           else
             echo "  ✅ Successfully merged $pr_url"
+            if [ "$write_manifest" = true ]; then
+              merged_pr=$(gh api "/repos/$repo/pulls/$pr_number" \
+                --jq '[.base.repo.full_name, (.number | tostring), .html_url, .title, .merged_at, .merge_commit_sha] | @tsv' 2>&1)
+              metadata_exit=$?
+              if [ $metadata_exit -ne 0 ] || [ -z "$merged_pr" ]; then
+                echo "  ❌ Merged PR but failed to retrieve metadata for the manifest"
+                if [ -n "$merged_pr" ]; then
+                  echo "     $merged_pr"
+                fi
+                exit 1
+              fi
+              if [ -n "$manifest_entries" ]; then
+                manifest_entries+=$'\n'
+              fi
+              manifest_entries+="$merged_pr"
+            fi
           fi
           ((success_count++))
         else
@@ -520,6 +551,37 @@ done < <(if [ -n "$search_owner" ]; then
 else
   cat "$repo_list_file"
 fi)
+
+if [ "$write_manifest" = true ]; then
+  manifest_dir=$(dirname "$manifest_file")
+  if ! mkdir -p "$manifest_dir"; then
+    echo "Error: Could not create manifest directory: $manifest_dir"
+    exit 1
+  fi
+
+  {
+    printf '{\n  "schemaVersion": 1,\n  "createdAt": "%s",\n  "pullRequests": [' "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+    first_entry=true
+    while IFS=$'\t' read -r manifest_repo manifest_number manifest_url manifest_title manifest_merged_at manifest_sha; do
+      [ -z "$manifest_repo" ] && continue
+      if [ "$first_entry" = false ]; then
+        printf ','
+      fi
+      printf '\n    {'
+      printf '"repository":%s,' "$(printf '%s' "$manifest_repo" | jq -Rs .)"
+      printf '"pullRequestNumber":%s,' "$manifest_number"
+      printf '"pullRequestUrl":%s,' "$(printf '%s' "$manifest_url" | jq -Rs .)"
+      printf '"title":%s,' "$(printf '%s' "$manifest_title" | jq -Rs .)"
+      printf '"mergedAt":%s,' "$(printf '%s' "$manifest_merged_at" | jq -Rs .)"
+      printf '"mergeCommitSha":%s' "$(printf '%s' "$manifest_sha" | jq -Rs .)"
+      printf '}'
+      first_entry=false
+    done <<< "$manifest_entries"
+    printf '\n  ]\n}\n'
+  } > "$manifest_file"
+  echo ""
+  echo "Release manifest: $manifest_file"
+fi
 
 echo "========================================"
 echo "Summary:"

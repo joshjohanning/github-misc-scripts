@@ -10,3 +10,4 @@ test*.sh
 temp
 tool
 .env
+.release-manifests/
