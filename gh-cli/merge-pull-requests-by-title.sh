@@ -453,7 +453,7 @@ while IFS= read -r repo_url || [ -n "$repo_url" ]; do
             if gh pr merge "$pr_number" --repo "$repo" "${auto_merge_args[@]}"; then
               echo "  🔄 Auto-merge enabled for $pr_url"
             else
-              echo "  ⚠️  Failed to enable auto-merge for $repo#$pr_number"
+              echo "  ⚠️  Failed to enable auto-merge for $pr_url"
               ((fail_count++))
             fi
           fi
