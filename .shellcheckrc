@@ -1,0 +1,2 @@
+# Tell ShellCheck to use bash when checking scripts
+shell=bash
